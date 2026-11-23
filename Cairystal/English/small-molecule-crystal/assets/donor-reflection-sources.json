@@ -1,0 +1,38 @@
+{
+  "release": "sop_tools_20261106_02",
+  "sources": [
+    {
+      "file": "单晶解析相关知识.pptx",
+      "sha256": "10185b9a7f6af3a2a276fa66a4a2cec13f85f918f52a85575bce03b7db967dbe",
+      "pages": [
+        229,
+        230,
+        258,
+        260,
+        261,
+        262,
+        264,
+        265,
+        305,
+        306,
+        307,
+        310,
+        317,
+        332
+      ]
+    },
+    {
+      "file": "Checkcif所有检测内容汇总及解释案例.pdf",
+      "sha256": "e2ed6f37781d0d059e7a1f5fa8289a4b2f626d24b11f89a3f92c129bb340620f",
+      "pages": [
+        132,
+        261,
+        314,
+        409,
+        418,
+        423
+      ]
+    }
+  ],
+  "scope": "Paraphrased general rules only; no original slides, illustrations or solved case data included"
+}

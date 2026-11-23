@@ -1,0 +1,25 @@
+{
+  "release": "usage_optimization_20261123_01",
+  "distribution": "public-academic-preview",
+  "verified_source_manifests": {
+    "zh-CN": {
+      "files": 392,
+      "upstream_manifest_sha256": "2d9477e0db644458d3d9afb02992ff25b534da7f00066b77bd058dfb40220baf",
+      "all_python_files_unchanged": true
+    },
+    "en": {
+      "files": 392,
+      "upstream_manifest_sha256": "108aa96b6a8be13ec5e6d1480f91313aa117c8cfbec328cd2d92c0ea8bccb3c3",
+      "all_python_files_unchanged": true
+    }
+  },
+  "tool_count": 62,
+  "languages": [
+    "zh-CN",
+    "en"
+  ],
+  "distribution_revision": "public-1",
+  "distribution_changes": "Clean public repository; reference privacy cleanup and documented Selawik logo; Python source unchanged.",
+  "github_release": "0.3.2-preview",
+  "public_repository": "https://github.com/crystalidiot/Cairystal-public"
+}

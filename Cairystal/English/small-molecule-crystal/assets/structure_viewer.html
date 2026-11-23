@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'">
+<title>__CAIRYSTAL_TITLE__</title>
+<style>
+:root{color-scheme:light;--ink:#183248;--muted:#63788a;--line:#dce6ed;--accent:#087bb1}*{box-sizing:border-box}body{margin:0;background:#edf3f7;color:var(--ink);font:15px/1.6 system-ui,'Microsoft YaHei',sans-serif}header{background:white;padding:22px max(24px,calc((100vw - 1400px)/2));border-bottom:1px solid var(--line)}.brand{letter-spacing:2px;font-size:12px;color:#087bb1;font-weight:750}h1{margin:4px 0;font-size:26px;overflow-wrap:anywhere}.subtitle{margin:4px 0;color:var(--muted)}main{max-width:1448px;margin:auto;padding:22px 24px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px}.scene,.panel{background:white;border:1px solid var(--line);border-radius:15px;overflow:hidden}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px;border-bottom:1px solid var(--line)}button,select{font:inherit;border:1px solid #ccdce6;border-radius:7px;background:#fff;color:var(--ink);padding:7px 11px;cursor:pointer}button:hover{background:#e9f4fb}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #44a8d4}label{cursor:pointer}#stage{position:relative;background:radial-gradient(ellipse at 50% 40%,#fff 0,#f4f8fb 70%);height:min(70vh,690px);min-height:390px}canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}canvas:active{cursor:grabbing}.hint{position:absolute;top:14px;left:16px;color:#6c8294;font-size:13px;pointer-events:none}.counter{position:absolute;bottom:12px;right:16px;color:#627b8d;font-size:12px;pointer-events:none}.selection{padding:13px 16px;background:#f8fbfd;min-height:58px;border-top:1px solid var(--line);overflow-wrap:anywhere}.panel{padding:18px;margin-bottom:16px}h2{font-size:16px;margin:0 0 12px}p{margin:8px 0}.legend{display:flex;flex-wrap:wrap;gap:8px}.chip{display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border:1px solid var(--line);border-radius:16px;background:white}.swatch{width:13px;height:13px;border-radius:50%;display:inline-block;border:1px solid #63788a60}.part{display:flex;gap:8px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #edf2f5}.part span{display:block}.part small{color:var(--muted)}input{accent-color:var(--accent)}.buttons{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}.note{font-size:13px;color:var(--muted)}.warning{margin:10px 0;background:#fff7e8;border-left:3px solid #d59329;padding:9px 12px;color:#775225;font-size:13px}details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px;grid-column:1/-1}summary{cursor:pointer;font-weight:650}#provenance{overflow-wrap:anywhere;font:12px/1.7 ui-monospace,monospace;color:#567}footer{max-width:1400px;margin:0 auto;padding:0 24px 24px;font-size:12px;color:#6b8091}.mobileParts{display:none}@media(max-width:900px){main{grid-template-columns:1fr;padding:14px}header{padding:18px}h1{font-size:22px}aside{display:grid;grid-template-columns:1fr 1fr;gap:12px}.panel{margin-bottom:0}#stage{height:58vh;min-height:330px}}@media(max-width:560px){aside{display:block}.panel{margin-bottom:12px}.toolbar{gap:5px;font-size:13px}button,select{padding:6px 8px}}
+</style></head><body>
+<header><div class="brand">CAIRYSTAL · STRUCTURE VIEWER</div><h1 id="title"></h1><p class="subtitle" id="status"></p></header>
+<main><section class="scene" aria-label="交互式结构模型">
+<div class="toolbar"><button id="reset">重置视角</button><button id="zoomIn" aria-label="放大">＋</button><button id="zoomOut" aria-label="缩小">−</button><label><input type="checkbox" id="hydrogen"> 显示氢</label><label><input type="checkbox" id="labels"> 原子标签</label><select id="colourMode" aria-label="着色模式"><option value="element">按元素着色</option><option value="part">按 PART / 无序组着色</option></select></div>
+<div id="stage"><canvas id="view" tabindex="0" aria-label="拖动旋转结构，滚轮缩放，点击原子查看元素、PART 和占有率"></canvas><div class="hint">拖动旋转 · 滚轮缩放 · 点击原子查看信息</div><div class="counter" id="counter"></div></div>
+<div class="selection" id="selection" role="status">点击一个原子，可查看标签、元素、PART 和 CIF 占有率。</div>
+</section><aside><section class="panel"><h2>元素图例</h2><div class="legend" id="legend"></div><p class="note" id="formula"></p><p class="note">球体为元素示意，不是热椭球。</p></section>
+<section class="panel"><h2>PART / 无序组</h2><div id="parts"></div><div class="buttons"><button id="allParts">全部显示</button><button id="commonOnly">仅共同位点</button></div><p class="note" id="partNote"></p></section>
+<section class="panel"><h2>模型与验证</h2><p id="counts"></p><p class="note" id="modelSize"></p><div id="warnings"></div><p class="note">连线由元素共价半径与距离推定，不代表键级。旋转、缩放和隐藏位点不会修改结构文件。</p></section></aside>
+<details><summary>数据来源与显示范围</summary><div id="notes"></div><p id="provenance"></p></details></main>
+<footer>由 Cairystal 协助展示 · 网页离线运行，交互过程不调用 AI · 正式结构以配套 CIF/RES 与验证报告为准</footer>
+<script id="modelData" type="application/json">__CAIRYSTAL_DATA__</script>
+<script>
+'use strict';
+const model=JSON.parse(document.getElementById('modelData').textContent), $=id=>document.getElementById(id);
+const canvas=$('view'),ctx=canvas.getContext('2d'),enabled=new Set(model.groups.map(g=>g.key));
+const palette=['#53819e','#ef9945','#9e6ace','#20a593','#d65986','#638acb','#a4a136','#b1744e'];
+let ax=.35,ay=.5,zoom=1,projected=[],selected=null,drag=null,W=1,H=1;
+const centre=[0,1,2].map(k=>model.atoms.reduce((s,a)=>s+a.xyz[k],0)/model.atoms.length);
+const extent=Math.max(1,...model.atoms.map(a=>Math.hypot(...a.xyz.map((v,k)=>v-centre[k]))));
+const groupColour=new Map(model.groups.map((g,i)=>[g.key,palette[i%palette.length]]));
+function text(id,value){$(id).textContent=value}
+function swatch(colour){const s=document.createElement('span');s.className='swatch';s.style.background=colour;return s}
+text('title',model.title);text('status',model.status);text('formula',model.formula?'CIF 记录的组成：'+model.formula:'CIF 未提供分子式');
+text('modelSize','输入不对称单元 '+model.input_asu_sites+' 个位点；本图 '+model.atoms.length+' 个显示位点，'+model.assembly.components+' 个连通片段。对称副本不是新增独立原子。');
+text('counts',model.official_counts?'官网警告：'+Object.entries(model.official_counts).map(([k,v])=>k+' '+v).join(' · '):'本查看器没有附带官网警告计数；请查看配套 checkCIF。');
+text('partNote',model.groups.some(g=>g.key!=='part:0'&&g.key!=='unassigned')?'互斥位置的叠加用于比较，不表示同时存在。选择各组开关可以单独观察；共同位点保持勾选。':'本文件没有可区分的多个 PART。未标注分组不会被猜成某个无序组。');
+text('provenance','CIF：'+model.source.cif_name+'\nSHA256：'+model.source.sha256.cif+'\nRES：'+(model.source.res_name||'未提供')+'\n显示模式：'+model.assembly.mode);
+$('provenance').style.whiteSpace='pre-wrap';
+for(const w of model.warnings){const p=document.createElement('p');p.className='warning';p.textContent=w;$('warnings').append(p)}
+for(const n of model.notes){const p=document.createElement('p');p.className='note';p.textContent=n;$('notes').append(p)}
+function updateLegend(){
+ $('legend').replaceChildren();
+ const byPart=$('colourMode').value==='part';
+ const entries=byPart?model.groups.map(g=>({name:g.title,colour:groupColour.get(g.key)})):
+ [...new Map(model.atoms.map(a=>[a.element,{name:a.element,colour:a.colour,z:a.atomic_number}])).values()].sort((a,b)=>a.z-b.z);
+ for(const item of entries){const chip=document.createElement('span');chip.className='chip';chip.append(swatch(item.colour),document.createTextNode(item.name));$('legend').append(chip)}
+}
+for(const group of model.groups){
+ const row=document.createElement('label');row.className='part';const input=document.createElement('input');input.type='checkbox';input.checked=true;input.dataset.group=group.key;
+ const description=document.createElement('span'),name=document.createElement('span'),small=document.createElement('small');name.textContent=group.title;
+ const range=group.occupancy_range.map(x=>Number(x.toFixed(4))).join('–');small.textContent=group.count+' 个显示位点 · 占有率 '+range;
+ description.append(name,small);row.append(input,description);$('parts').append(row);
+ input.onchange=()=>{if(input.checked)enabled.add(group.key);else enabled.delete(group.key);draw()};
+}
+function colour(a){return $('colourMode').value==='part'?groupColour.get(a.group_key):a.colour}
+function visible(a){return enabled.has(a.group_key)&&($('hydrogen').checked||!['H','D'].includes(a.element))}
+function project(a){
+ const p=a.xyz.map((x,k)=>(x-centre[k])/extent),cy=Math.cos(ay),sy=Math.sin(ay),cx=Math.cos(ax),sx=Math.sin(ax);
+ const x=p[0]*cy+p[2]*sy,z0=-p[0]*sy+p[2]*cy,y=p[1]*cx-z0*sx,z=p[1]*sx+z0*cx;
+ const perspective=5/(5-z),scale=Math.min(W,H)*.37*zoom;
+ return {x:W/2+x*scale*perspective,y:H/2-y*scale*perspective,z,scale:perspective};
+}
+function draw(){
+ ctx.clearRect(0,0,W,H);projected=model.atoms.map((a,i)=>({...project(a),i,shown:visible(a)}));
+ const items=[];
+ for(const b of model.bonds){if(projected[b.i].shown&&projected[b.j].shown)items.push({z:(projected[b.i].z+projected[b.j].z)/2,type:'bond',b})}
+ for(const p of projected)if(p.shown)items.push({z:p.z,type:'atom',p});
+ items.sort((a,b)=>a.z-b.z);
+ for(const item of items){
+  if(item.type==='bond'){
+   const b=item.b,p=projected[b.i],q=projected[b.j],mid=[(p.x+q.x)/2,(p.y+q.y)/2];
+   ctx.lineWidth=Math.max(1.4,2.1*Math.sqrt(zoom));ctx.lineCap='round';ctx.globalAlpha=.8;
+   for(const [point,atom] of [[p,model.atoms[b.i]],[q,model.atoms[b.j]]]){ctx.strokeStyle=colour(atom);ctx.beginPath();ctx.moveTo(point.x,point.y);ctx.lineTo(...mid);ctx.stroke()}
+  }else{
+   const p=item.p,a=model.atoms[p.i],r=Math.max(3,Math.min(13,(a.element==='H'?4:6.4)*p.scale*Math.sqrt(zoom)));p.radius=r;
+   ctx.globalAlpha=a.part===0||a.group_key==='unassigned'?1:.82;
+   const gradient=ctx.createRadialGradient(p.x-r*.35,p.y-r*.4,r*.1,p.x,p.y,r);gradient.addColorStop(0,'#ffffff');gradient.addColorStop(.45,colour(a));gradient.addColorStop(1,colour(a));
+   ctx.fillStyle=gradient;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle=p.i===selected?'#e7a019':'#29445770';ctx.lineWidth=p.i===selected?3:1;ctx.stroke();
+   if($('labels').checked){ctx.globalAlpha=1;ctx.font='12px system-ui';ctx.lineWidth=3;ctx.strokeStyle='#fff';ctx.strokeText(a.label,p.x+r+3,p.y-3);ctx.fillStyle='#233b4e';ctx.fillText(a.label,p.x+r+3,p.y-3)}
+  }
+ }
+ ctx.globalAlpha=1;text('counter',projected.filter(p=>p.shown).length+' / '+model.atoms.length+' 位点可见');
+ if(selected!==null&&!projected[selected].shown){selected=null;text('selection','所选位点当前已隐藏；点击可见原子查看信息。')}
+}
+function resize(){const r=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);W=r.width;H=r.height;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
+function pick(x,y){
+ const hit=projected.filter(p=>p.shown&&Math.hypot(p.x-x,p.y-y)<(p.radius||6)+6).sort((a,b)=>b.z-a.z)[0];
+ if(!hit)return;selected=hit.i;const a=model.atoms[selected];
+ text('selection',a.label+' · '+a.element+' · '+a.group_title+' · CIF 占有率 '+a.occupancy+' · 对称操作 '+a.symmetry+' · 晶格位移 ['+a.lattice_shift.join(', ')+']');draw();
+}
+canvas.addEventListener('pointerdown',e=>{drag={id:e.pointerId,x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY};canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener('pointermove',e=>{if(drag&&drag.id===e.pointerId){ay+=(e.clientX-drag.x)*.009;ax+=(e.clientY-drag.y)*.009;drag.x=e.clientX;drag.y=e.clientY;draw()}});
+canvas.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId){if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)<4){const r=canvas.getBoundingClientRect();pick(e.clientX-r.left,e.clientY-r.top)}drag=null}});
+canvas.addEventListener('pointercancel',()=>drag=null);canvas.addEventListener('lostpointercapture',()=>drag=null);
+canvas.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.min(4,Math.max(.3,zoom*Math.exp(-e.deltaY*.001)));draw()},{passive:false});
+canvas.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-'].includes(e.key)){e.preventDefault();if(e.key==='ArrowLeft')ay-=.12;if(e.key==='ArrowRight')ay+=.12;if(e.key==='ArrowUp')ax-=.12;if(e.key==='ArrowDown')ax+=.12;if(e.key==='+')zoom=Math.min(4,zoom*1.1);if(e.key==='-')zoom=Math.max(.3,zoom/1.1);draw()}});
+$('reset').onclick=()=>{ax=.35;ay=.5;zoom=1;draw()};$('zoomIn').onclick=()=>{zoom=Math.min(4,zoom*1.2);draw()};$('zoomOut').onclick=()=>{zoom=Math.max(.3,zoom/1.2);draw()};
+$('hydrogen').onchange=draw;$('labels').onchange=draw;$('colourMode').onchange=()=>{updateLegend();draw()};
+function toggleGroups(predicate){enabled.clear();for(const i of $('parts').querySelectorAll('input')){i.checked=predicate(i.dataset.group);if(i.checked)enabled.add(i.dataset.group)}draw()}
+$('allParts').onclick=()=>toggleGroups(()=>true);$('commonOnly').onclick=()=>toggleGroups(k=>k==='part:0'||k==='unassigned');
+window.addEventListener('resize',resize);updateLegend();resize();
+</script></body></html>

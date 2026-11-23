@@ -1,0 +1,21 @@
+{
+  "component": "Gemmi",
+  "version": "0.7.5",
+  "license_selected": "MPL-2.0",
+  "upstream_alternative": "LGPL-3.0 (as offered by upstream README)",
+  "copyright_notice": "© 2017–2025 Global Phasing Ltd.",
+  "project_url": "https://github.com/project-gemmi/gemmi",
+  "source_url": "https://github.com/project-gemmi/gemmi/tree/v0.7.5",
+  "source_archive_url": "https://github.com/project-gemmi/gemmi/archive/refs/tags/v0.7.5.tar.gz",
+  "source_archive_downloaded": false,
+  "license_url": "https://raw.githubusercontent.com/project-gemmi/gemmi/v0.7.5/LICENSE.txt",
+  "copyright_source_url": "https://raw.githubusercontent.com/project-gemmi/gemmi/v0.7.5/README.md",
+  "license_file": "Gemmi-MPL-2.0.txt",
+  "license_sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+  "readme_sha256": "abee5595eeea0b825aca1a2aee51d25707ce953f540345da1bd452197e5562e6",
+  "installed_license_sha256": "cde215e5b42363eb28ca2462c4558ff4807b38f383c537624c31e44657ac58f4",
+  "installed_license_matches_upstream_after_newline_normalization": true,
+  "checked_on": "2026-10-30",
+  "gemmi_library_bundled": false,
+  "scope": "Gemmi notice and source-only Cairystal skill package; not a complete third-party dependency audit."
+}

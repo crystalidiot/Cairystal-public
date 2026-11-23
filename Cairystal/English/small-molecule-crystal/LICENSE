@@ -1,0 +1,43 @@
+Cairystal 非商业学术使用许可 1.1
+Cairystal Noncommercial Academic Use License 1.1
+2026-11-02
+
+中文条款
+
+1. 范围与权利。许可方为对本包相应 Cairystal 代码、技能指令和文档有权授权的权利人。项目授权联系：caizhuoerr@qq.com；微信 crystal-idiot。除下述明确许可外，保留全部权利。GitHub 平台条款已授予的权利（包括平台内查看和 fork）以及不可排除的法定权利，不受本许可的复制、修改或再分发限制影响；这些例外本身不额外授予商业使用或平台外分发权。本许可为自定义限制性许可，不是 MIT、Apache、Creative Commons 或 OSI 批准的开源许可；不声称全部 AI 辅助内容均具有独立著作权。
+
+2. 允许的用途。对于从许可方授权渠道合法取得本包的使用者，许可在不修改本包的前提下，为非商业学术研究、教学、学习、复现与评估，阅读、安装并运行本包。可在自己控制的设备上制作完成上述用途所必需的安装及备份副本。合作人员应分别从授权渠道取得本包，不能由使用者转发。
+
+3. 禁止的行为。未经相应权利人另行书面许可，不得：
+   (a) 商业使用，包括商业机构的业务或产品研发、收费代解析、咨询/托管服务、销售、出租或将本包嵌入商业产品；
+   (b) 修改、改编、翻译、删改或创作本包代码、技能指令、文档的衍生版本，包括让 AI 自动改写或修补本包；
+   (c) 向他人再分发、转发、镜像、公开上传、重新打包、转售、转许可本包或其受保护部分，包括原样再分发。
+   支付普通设备、计算资源或 AI 工具费用，本身不把非商业学术用途变为商业用途。企业委托、商业合作或其他边界不明的用途须另行取得书面许可。
+
+4. 运行配置与助手。允许填写、修改本包之外的本机路径、环境配置、输入数据和任务参数，并按正常流程生成运行文件；这些操作不等于改写本包。允许使用者授权的 AI 助手在上述用途范围内读取、调用本包；不因此授予助手提供商独立使用、训练、修改或分发本包的许可。不得向要求取得超出本许可权利的服务上传本包。发现缺陷可反馈错误与复现步骤，代码修补由维护者提供或另行授权。
+
+5. 研究成果。用户有权处理的原始数据及正常运行产生的 CIF、模型、checkCIF 报告和中英文报表，不仅因使用 Cairystal 而受上述软件再分发禁令限制。允许合法学术研究中编辑、发表和分享自己有权分享的研究结果；这不允许同时公开本包源码、技能文档或私人资料。用户数据、第三方服务、模板中第三方材料和出版协议的适用权利仍需分别遵守。建议注明实际使用版本及实际执行的软件，但不以论文共同作者身份作为许可条件。
+
+6. 第三方与先前授权。SHELX、PLATON、Olex2、Gemmi、Python 依赖、其他第三方材料及数据权利不由本许可重新授权或追加限制，见 THIRD_PARTY_NOTICES.md。本许可不消除上游许可义务、不收回已经合法获得的先前许可，也不排除不可依法排除的法定权利。GitHub 等平台条款可能额外授予平台/用户权利；不能靠此文件覆盖冲突的平台条款。
+
+7. 终止与责任。在法律允许的范围内，违反本许可时本许可项下授权终止，应停止未获许可的使用并删除无权保留的软件副本；这不要求销毁自己合法拥有的研究数据。软件按现状提供，不保证可用性、结果准确性或适合特定目的。在适用法律允许的范围内，许可方不承担由使用软件产生的损失；不排除法律不得免除的责任。晶体结构和研究结论仍需使用者科学复核。
+
+本许可仅对许可方有权许可的内容有效。维护者仅对有权授权的内容作出许可；本文件不替代第三方条款，也不构成全面法律审查的证明。中文为控制文本，英文为对应说明。
+
+English terms (the Chinese text controls)
+
+1. Scope and rights. The licensor is the rights holder entitled to license the relevant Cairystal code, skill instructions and documentation. Licensing contact: caizhuoerr@qq.com; WeChat crystal-idiot. All rights not expressly granted are reserved. Rights granted under GitHub platform terms, including in-service viewing and forking, and non-waivable statutory rights are unaffected by the copying, modification and redistribution restrictions in this licence; these exceptions do not themselves grant additional commercial-use or off-platform distribution rights. This is a custom restrictive licence, not MIT, Apache, Creative Commons or an OSI-approved open-source licence. It does not assert independent copyright in every AI-assisted item.
+
+2. Permitted use. Recipients lawfully obtaining this package through an authorized channel may read, install and run it, unmodified, solely for noncommercial academic research, teaching, learning, reproduction and evaluation. Necessary installation and backup copies may be made on devices under their control. Collaborators must obtain their own authorized copies rather than receive forwarded copies.
+
+3. Restrictions. Separate written permission from the relevant rights holder is required for (a) commercial use, including commercial business/product R&D, paid structure services, consultancy/hosting, sale, rental or integration into a commercial product; (b) modification, adaptation, translation or derivative versions of package code, instructions or documentation, including AI-generated patches; or (c) redistribution, forwarding, mirrors, public uploads, repackaging, resale or sublicensing of the package or protected portions, including unchanged copies. Paying for ordinary equipment, computing or an AI tool does not alone make academic use commercial. Industry-commissioned, commercially collaborative or otherwise uncertain uses need separate permission.
+
+4. Configuration and agents. Recipients may edit external machine profiles, inputs and job parameters and generate normal run files without altering the package. Authorized AI agents may read and invoke it for permitted work; this does not grant the provider independent training, reuse, modification or distribution rights. Do not upload it to a service requiring broader rights. Report defects and reproduction steps; obtain patches from the maintainer or separate authorization to modify.
+
+5. Research outputs. Lawfully controlled input data and ordinary resulting CIFs, models, checkCIF reports and bilingual reports are not subject to the software redistribution ban merely because Cairystal was used. Users may edit, publish and share research outputs they are entitled to share in lawful academic work. This does not permit publishing the package source/instructions. Third-party, service, template and publication rights remain separate. Accurate version/software citation is requested; coauthorship is not a condition.
+
+6. Third parties and earlier rights. Dependencies and data-related rights retain their own terms; this licence neither relicenses nor adds restrictions to them. See THIRD_PARTY_NOTICES.md. It does not revoke prior lawful grants or override non-waivable legal rights. Hosting-platform terms may confer additional rights and cannot be overridden by this file.
+
+7. Termination and disclaimer. To the extent permitted by law, breach terminates the grant; stop unauthorized use and remove software copies you have no right to retain, without destroying research data you lawfully own. The package is provided as is, without warranties of availability, accuracy or suitability. Liability is excluded only to the extent permitted by law; non-excludable liability is unaffected. Users remain responsible for scientific review.
+
+The licence covers only material the licensor is entitled to license. It does not replace third-party terms or certify an exhaustive legal review.

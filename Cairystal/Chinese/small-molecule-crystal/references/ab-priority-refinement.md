@@ -1,0 +1,37 @@
+# Chemical-first diagnostic workflow (A/B second)
+
+Current user decision (2026-11-23): chemical reasonableness and support from the current diffraction data are the first priority; A/B alerts are second. This supersedes the earlier A/B-first preference. Chemical checks apply even when no alert exists. Fewer alerts cannot rescue a contradicted chemical model. Compare alert outcomes only after assessing model chemistry, symmetry/populations and density. A supported structure may retain explained or unresolved alerts. See [chemical-first selection](chemical-first.en.md).
+
+Current project convention (user decision, 2026-10-25): do not initiate further refinement solely to clear C alerts. Retain C/G in the unmodified validation report; flag a material validity concern if one is apparent, but do not expand the repair task silently. This is a workload preference, not a claim that all C/G findings are harmless or a universal rule for other users.
+
+## Reference-first preparation
+
+Supplied or authorized reference models can assist ordinary structure work as well as reference-guided learning. Verify sample, setting and data correspondence; refine and assess against the current reflections. Reference assistance is permitted, not compulsory, and is not a blind or no-answer reconstruction. For those exercises, use only declared inputs and freeze the candidate before any authorized reference comparison; see [learning-from-solved-models](learning-from-solved-models.md).
+
+Prefer supplied solved CIFs with validation reports as worked examples. Verify model/reflection correspondence and report version rather than assuming nearby filenames match. A supplied online report explicitly saying structure factors were supplied is stronger evidence of that historical submission than a local CHK; without the uploaded file/hash, its exact current-CIF pairing remains unverified. Read [learning-from-solved-models.md](learning-from-solved-models.md).
+
+Read the solved construction before independently rebuilding it: components and charge, symmetry and special sites, PART/FVAR roles, H membership, actual constraints/restraints, twin law and mask/FAB contributions. Record what was inherited versus recovered from fresh density. Reproducing an existing answer, rebuilding from new coordinates and solving a genuinely unfamiliar specimen are separate achievement levels.
+
+## Priority queue
+
+For PLAT080/934/939/919/430/306/234/242/420, use the [case-free action playbook](ab-alert-action-playbook.md). It records the user's preference for prompt, separately versioned OMIT comparisons for at most 20 identified anomalous reflections, not unconditional deletion or a claim of detector overload. Distinguish trial authorization from evidence for adopting the result. In an authorized autonomous task, record the diagnostic checkpoint and continue in scope without repeatedly asking permission; a frozen test protocol or explicit prohibition still controls that run.
+
+1. Eliminate syntax, missing/wrong file pairings and execution failures before comparing alert letters.
+2. For each A/B alert, preserve exact code/text, affected object and triggering quantity. Read its official explanation; separate metadata/file omissions from data, model and numerical deficiencies. The trigger is not itself a root-cause diagnosis: list plausible causes, supporting/contradicting evidence and a discriminating test before choosing an intervention. Recover missing metadata from this specimen's actual records; leave unknown fields unknown. Do not misdescribe the implemented absorption treatment.
+3. Address numerical nonconvergence, nonphysical parameters, serious geometry/ADP deficiencies and symmetry/data issues through targeted tests. Use [nonconvergence.md](nonconvergence.md). Test one identifiable change at a time where practicable; retain rejected alternatives.
+4. Regenerate CIF/FCF and validate the exact changed artifact, keeping local and online reports separate. Track new as well as resolved alerts: a smaller total can conceal a newly serious defect.
+5. First compare chemical connectivity/valence, composition/charge/H, geometry, symmetry/occupancy, ADPs, density and appropriate model complexity. Then compare A/B resolution among comparably supported models. A chemically justified model is not rejected merely because it has more alerts or a slightly larger R1. Keep the corresponding numerical/data concerns visible; never claim that an explained warning disappeared.
+
+Do not add broad restraints, tune WGHT, omit reflections, truncate resolution, clip occupancies/twin fractions, change symmetry, mask solvent or alter metadata solely to cross an alert threshold. Such actions may be valid when individually supported and documented; they are not forbidden universally and not automatic cleanup. Persistent experimentally unavoidable alerts can be explained and reviewed rather than erased.
+
+Before/after comparisons can confound resolution selection, OMIT, restraints, extinction corrections and metadata changes. Record which observations actually entered each refinement; reindexing equivalence alone does not prove identical selection. Compare coverage, parameter/restraint counts and residual defects. Reconstruct a controlled alternative only with appropriate authorization and evidence.
+
+## Measurable learning and delivery
+
+Maintain a per-case A/B table: baseline code, interpretation, evidence, attempted change, before/after statistics, newly introduced problems, final disposition and exact validated file hash. Mark `resolved_with_evidence`, `downgraded_requires_review`, `explained_requires_review`, `unresolved` or `not_applicable`; an explanation does not mean an alert disappeared. Use `downgraded_requires_review` when a B becomes C but the underlying defect or strong prior dependence remains. Do not count that as a demonstrated root-cause repair. An historical model with no A/B can still be a useful lesson in unresolved population accounting, formula reporting or insufficient symmetry tests.
+
+## Intensity-outlier counts and weighting
+
+For PLAT934, inspect the actual reflection indices and Fo²/Fc²/sigma values, not just the alert letter. The threshold uses sigmaW = sqrt(1/w); ordinary recommended-weight optimization can change both the model and this denominator. First preserve a matched fixed-weight comparison, then label the weighting step separately. A-to-B is `downgraded_requires_review` if unexplained mismatches persist; a reflection just below the threshold has not become experimentally sound.
+
+Group repeated raw HKL observations using the actual Laue symmetry and compare their scatter with stated uncertainties. Consistent repeats can contradict an isolated bad-observation explanation but do not determine the physical cause. Preserve raw negative intensities. Source-model OMIT lists, low reference R values or a quieter report are not evidence of detector overload. Inspect available images and integration/scaling logs before assigning a detector cause. Without those records, a specifically authorized, fixed-list OMIT sensitivity branch remains possible, but retain the full-data model and report the cause as unconfirmed; use the playbook's adoption and completeness checks. Do not require unavailable images merely to run that transparent comparison, or silently treat its result as a confirmed data correction.

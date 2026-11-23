@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "note": "Source locations and reviewed method mapping, not a copy of source teaching materials or historical models. Page numbers are 1-based.",
+  "documents": [
+    {
+      "id": "Checkcif所有检测内容汇总及解释案例.pdf",
+      "sha256": "e2ed6f37781d0d059e7a1f5fa8289a4b2f626d24b11f89a3f92c129bb340620f",
+      "pages_or_slides": 524,
+      "coverage": "text_extracted_not_all_visually_reviewed"
+    },
+    {
+      "id": "单晶解析相关知识.pptx",
+      "sha256": "10185b9a7f6af3a2a276fa66a4a2cec13f85f918f52a85575bce03b7db967dbe",
+      "pages_or_slides": 503,
+      "coverage": "text_extracted_not_all_visually_reviewed"
+    },
+    {
+      "id": "SHELXT未找到符合空间群或解析失败案例合集.pdf",
+      "sha256": "f7e7a0e237f5ad29f2f324ac5efb5c9bc48d67707ffb72f0ca6fa4863765f8c5",
+      "pages_or_slides": 1,
+      "coverage": "text_extracted_not_all_visually_reviewed"
+    },
+    {
+      "id": "shelx-manual.pdf",
+      "sha256": "d8a6a39b4cc46dfc9ebdd8cf98c7aff109045cd75dbb4374fdd79928d47d1fb8",
+      "pages_or_slides": 154,
+      "coverage": "text_extracted_not_all_visually_reviewed"
+    },
+    {
+      "id": "单晶结构解析之从从小白到大神.docx",
+      "sha256": "c01fe7e86227fd3738a3dac47799104a4910bb49912ca5a0e9dae980db80896a",
+      "pages_or_slides": 1,
+      "coverage": "text_extracted_not_all_visually_reviewed"
+    },
+    {
+      "id": "晶体解析授课用.pptx",
+      "sha256": "7deb62ed23d7f55a2bc33de65b9a9eb50fa359f9ee8e0549831030ec8a3a9334",
+      "pages_or_slides": 106,
+      "coverage": "text_extracted_not_all_visually_reviewed"
+    },
+    {
+      "id": "课题组培训.pptx",
+      "sha256": "6163e5aa27c9ff58d1a931edaa38d728246c44da4ce47276d28d4c1d275f84f1",
+      "pages_or_slides": 35,
+      "coverage": "text_extracted_not_all_visually_reviewed"
+    },
+    {
+      "id": "理学单晶数据还原操作步骤.pdf",
+      "sha256": "c072c34b774968a1b0f7d446d8b45ce934dad973ba23e108d500fd29bfbe0d92",
+      "pages_or_slides": 34,
+      "coverage": "text_extracted_not_all_visually_reviewed"
+    },
+    {
+      "id": "晶体Z值.pdf",
+      "sha256": "8efca24f2d96b9280965e1806bf18696d41811d0663d39b1a0e6db814de655f5",
+      "pages_or_slides": 3,
+      "coverage": "text_extracted_not_all_visually_reviewed"
+    }
+  ],
+  "reviewed_ppt_slides": [
+    68,
+    175,
+    206,
+    229,
+    230,
+    238,
+    241,
+    242,
+    243,
+    244,
+    245,
+    246,
+    247,
+    248,
+    254,
+    257,
+    258,
+    259,
+    260,
+    261,
+    262,
+    263,
+    264,
+    265,
+    305,
+    306,
+    307,
+    309,
+    310,
+    311,
+    317,
+    325,
+    332,
+    334,
+    385
+  ],
+  "reviewed_alert_sections": {
+    "080": [
+      132
+    ],
+    "088": [
+      145
+    ],
+    "097": [
+      153
+    ],
+    "098": [
+      155
+    ],
+    "213": [
+      203
+    ],
+    "214": [
+      209
+    ],
+    "220": [
+      212
+    ],
+    "221": [
+      218
+    ],
+    "230": [
+      222
+    ],
+    "232": [
+      227
+    ],
+    "234": [
+      229
+    ],
+    "241": [
+      232
+    ],
+    "242": [
+      239
+    ],
+    "306": [
+      261
+    ],
+    "420": [
+      314
+    ],
+    "430": [
+      317
+    ],
+    "919": [
+      409
+    ],
+    "934": [
+      418
+    ],
+    "939": [
+      423
+    ]
+  },
+  "visual_review": [
+    "PDF page 314",
+    "PPT slide 257 embedded before/after screenshots",
+    "PPT slide 307 embedded refinement settings"
+  ],
+  "limitations": "9 relevant documents indexed; targeted methods read, not every page/image/video in the folder. Extractions remain maintenance-only. No original molecular coordinates included in tools."
+}

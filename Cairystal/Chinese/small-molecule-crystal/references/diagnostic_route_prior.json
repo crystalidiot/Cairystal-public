@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "kind": "smoothed_historical_action_frequency",
+  "n": 44,
+  "global_counts": {
+    "adp": 16,
+    "composition": 15,
+    "elements": 28,
+    "hydrogens": 42,
+    "weights": 43,
+    "symmetry": 7,
+    "solvent_disorder": 10,
+    "water": 6,
+    "data": 5
+  },
+  "categories": {
+    "A1": {
+      "n": 4,
+      "family_counts": {
+        "adp": 2,
+        "composition": 4,
+        "elements": 1,
+        "hydrogens": 4,
+        "weights": 4,
+        "symmetry": 1
+      }
+    },
+    "A2": {
+      "n": 4,
+      "family_counts": {
+        "composition": 3,
+        "hydrogens": 4,
+        "weights": 4,
+        "elements": 2,
+        "solvent_disorder": 1
+      }
+    },
+    "A3": {
+      "n": 4,
+      "family_counts": {
+        "composition": 3,
+        "hydrogens": 4,
+        "weights": 4,
+        "water": 1,
+        "elements": 1
+      }
+    },
+    "B1": {
+      "n": 4,
+      "family_counts": {
+        "composition": 2,
+        "elements": 3,
+        "hydrogens": 4,
+        "weights": 4,
+        "adp": 2,
+        "water": 1
+      }
+    },
+    "B2": {
+      "n": 4,
+      "family_counts": {
+        "hydrogens": 4,
+        "water": 1,
+        "weights": 4,
+        "elements": 3,
+        "data": 1
+      }
+    },
+    "B3": {
+      "n": 4,
+      "family_counts": {
+        "adp": 2,
+        "symmetry": 2,
+        "data": 1,
+        "elements": 3,
+        "hydrogens": 3,
+        "weights": 3
+      }
+    },
+    "C1": {
+      "n": 4,
+      "family_counts": {
+        "adp": 4,
+        "composition": 1,
+        "elements": 3,
+        "hydrogens": 4,
+        "solvent_disorder": 4,
+        "weights": 4,
+        "data": 2
+      }
+    },
+    "C2": {
+      "n": 4,
+      "family_counts": {
+        "adp": 3,
+        "hydrogens": 4,
+        "solvent_disorder": 3,
+        "symmetry": 2,
+        "weights": 4,
+        "elements": 3,
+        "composition": 1,
+        "water": 1
+      }
+    },
+    "D1": {
+      "n": 4,
+      "family_counts": {
+        "hydrogens": 3,
+        "weights": 4,
+        "composition": 1,
+        "elements": 3,
+        "symmetry": 1,
+        "water": 1
+      }
+    },
+    "D2": {
+      "n": 4,
+      "family_counts": {
+        "adp": 1,
+        "elements": 2,
+        "hydrogens": 4,
+        "solvent_disorder": 1,
+        "weights": 4,
+        "data": 1
+      }
+    },
+    "D3": {
+      "n": 4,
+      "family_counts": {
+        "adp": 2,
+        "elements": 4,
+        "hydrogens": 4,
+        "water": 1,
+        "weights": 4,
+        "solvent_disorder": 1,
+        "symmetry": 1
+      }
+    }
+  },
+  "smoothing_case_equivalents": 2,
+  "features": [
+    "category"
+  ],
+  "labels": "Attempted diagnostic families inferred from stage names; not correct actions or verified structures.",
+  "limitations": [
+    "Small, retrospective sample. Earlier conversation exposure remains.",
+    "Only ranks optional diagnostics; cannot authorize atom, occupancy, reflection or symmetry changes.",
+    "No neural weights, reference identities, atomic coordinates, exact cells or case IDs are stored."
+  ]
+}

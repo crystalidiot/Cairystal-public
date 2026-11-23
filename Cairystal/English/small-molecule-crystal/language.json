@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "default_language": "en",
+  "supported_languages": [
+    "zh-CN",
+    "en"
+  ],
+  "scope": "Skill instructions, onboarding guide and intake form. Shared technical references/logs retain original languages; both Word reports remain required."
+}

@@ -1,0 +1,4029 @@
+{
+  "schema": 1,
+  "release": "five_tools_20261106_01",
+  "source": {
+    "name": "Checkcif所有检测内容汇总及解释案例.pdf",
+    "sha256": "e2ed6f37781d0d059e7a1f5fa8289a4b2f626d24b11f89a3f92c129bb340620f",
+    "publication_date": "2021-05-06"
+  },
+  "meaning": "Many-to-many strategy index; diagnosis/trial capability is distinct from automatic model acceptance.",
+  "strategies": [
+    {
+      "id": "strategy_metadata",
+      "strategy_id": "metadata",
+      "title": "追溯实验参数与单位",
+      "title_en": "Recover source-backed experimental metadata",
+      "alerts": [
+        "091",
+        "092",
+        "183",
+        "184",
+        "185",
+        "193",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "660",
+        "699",
+        "880",
+        "881",
+        "882",
+        "CELL003",
+        "CELL004",
+        "CELL005",
+        "CELLK01",
+        "DIFF001",
+        "DIFF005",
+        "DIFF019",
+        "DIFF020",
+        "DIFF022",
+        "EXPT005",
+        "EXPT009",
+        "EXPT010",
+        "RADNT01",
+        "RADNW01"
+      ],
+      "tools": [
+        "project-metadata",
+        "metadata"
+      ],
+      "source_pages": [
+        21,
+        22,
+        52,
+        53,
+        55,
+        56,
+        64,
+        65,
+        150,
+        193,
+        194,
+        195,
+        196,
+        197
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "查同一实验的 PCF/cif_od/记录及来源；区分测胞与强度温度。",
+        "核对单位和字段，按来源同步，未知保留未知。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "只有默认值或无法对应实验时，不当作实测；修改尺寸/误差必须有来源。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_source_sync",
+      "keywords": [
+        "metadata",
+        "Recover source-backed experimental metadata"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_scalar_consistency",
+      "strategy_id": "scalar_consistency",
+      "title": "核对 CIF 数值之间的关系",
+      "title_en": "Audit CIF scalar consistency",
+      "alerts": [
+        "018",
+        "019",
+        "025",
+        "030",
+        "053",
+        "054",
+        "055",
+        "063",
+        "064",
+        "067",
+        "095",
+        "096",
+        "099",
+        "150",
+        "151",
+        "152",
+        "CELLT01",
+        "CELLV01",
+        "CELLV02",
+        "CRYSS01",
+        "CRYSS02",
+        "DIFMN01",
+        "EXPT108",
+        "REFLL01",
+        "REFLG01",
+        "REFLT01",
+        "REFLT02"
+      ],
+      "tools": [
+        "project-metadata",
+        "cif-format",
+        "stage"
+      ],
+      "source_pages": [
+        22,
+        23,
+        24,
+        25,
+        48,
+        49,
+        57,
+        84,
+        85,
+        99,
+        119,
+        120,
+        124,
+        177,
+        178,
+        473,
+        474,
+        475,
+        476
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "区分字段填反、单位错误和真实实验异常。",
+        "先核对源记录或重新计算，再从对应当前模型重生 CIF；不编造标准不确定度。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "无法证明是填录错误时只诊断；不任意缩小 ZERR 或晶体尺寸。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_diagnostic_routes",
+      "keywords": [
+        "scalar_consistency",
+        "Audit CIF scalar consistency"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_composition",
+      "strategy_id": "composition",
+      "title": "组成、占有率、Z 与密度核算",
+      "title_en": "Reconcile composition occupancy Z and density",
+      "alerts": [
+        "041",
+        "042",
+        "043",
+        "044",
+        "045",
+        "046",
+        "047",
+        "048",
+        "049",
+        "050",
+        "051",
+        "068",
+        "CELLZ01",
+        "CHEMS01",
+        "CHEMW01",
+        "CHEMW03",
+        "DENSD01",
+        "DENSX01",
+        "FORMU01",
+        "ABSMU01"
+      ],
+      "tools": [
+        "occupancy",
+        "diagnose",
+        "project-metadata"
+      ],
+      "source_pages": [
+        26,
+        27,
+        28,
+        35,
+        37,
+        40,
+        50,
+        51,
+        52,
+        67,
+        68,
+        69,
+        70,
+        105,
+        110,
+        113,
+        114,
+        115,
+        116,
+        117,
+        126
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "按对称多重性与占有率核算模型晶胞内容，检查 UNIT 与 SFAC。",
+        "区分模型成分、已确认总成分与掩膜溶剂；确认后重新精修生成派生量。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不通过改 Z、分子式或密度掩盖未建模成分。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_diagnostic_and_review",
+      "keywords": [
+        "composition",
+        "Reconcile composition occupancy Z and density"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_absorption",
+      "strategy_id": "absorption",
+      "title": "吸收校正来源与适用性",
+      "title_en": "Investigate absorption correction provenance",
+      "alerts": [
+        "052",
+        "056",
+        "057",
+        "058",
+        "059",
+        "060",
+        "062",
+        "064",
+        "065",
+        "066",
+        "ABSTM02",
+        "ABSTY01",
+        "ABSTY02",
+        "ABSTY03"
+      ],
+      "tools": [
+        "project-metadata",
+        "metadata",
+        "reflection-audit"
+      ],
+      "source_pages": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "区分实际校正透射因子和 SIZE 推算值，核对原处理记录。",
+        "有原始帧和合适软件时另做吸收校正对照；只有合并 HKL 时说明限制。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不把填写 multi-scan 当作实际完成校正；不凭空改尺寸以改变透射率。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "diagnosis_or_reprocessing_required",
+      "keywords": [
+        "absorption",
+        "Investigate absorption correction provenance"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_labels",
+      "strategy_id": "labels",
+      "title": "统一原子身份与几何表标签",
+      "title_en": "Reconcile atom identities and labels",
+      "alerts": [
+        "069",
+        "070",
+        "071",
+        "711",
+        "712",
+        "713",
+        "714",
+        "715",
+        "716",
+        "717",
+        "718",
+        "720",
+        "798",
+        "799",
+        "812"
+      ],
+      "tools": [
+        "geometry-audit",
+        "labels"
+      ],
+      "source_pages": [
+        128,
+        129,
+        343,
+        344,
+        345,
+        368,
+        371
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "找出几何表或 ADP 表中无法对应坐标的标签。",
+        "明确旧新标签映射，统一更新当前模型及相关命令，再重生报表。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不认为 H0A/Cu01 必然非法；重名或歧义映射需要先解决。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_audit_existing_rename",
+      "keywords": [
+        "labels",
+        "Reconcile atom identities and labels"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_geometry_tables",
+      "strategy_id": "geometry_tables",
+      "title": "从坐标复核键长、键角和氢键表",
+      "title_en": "Recalculate reported geometry from coordinates",
+      "alerts": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706",
+        "707",
+        "708",
+        "721",
+        "722",
+        "723",
+        "724",
+        "725",
+        "726",
+        "727",
+        "728",
+        "731",
+        "732",
+        "733",
+        "734",
+        "735",
+        "736",
+        "737",
+        "738",
+        "741",
+        "742",
+        "743",
+        "744",
+        "745",
+        "746",
+        "747",
+        "748",
+        "751",
+        "752",
+        "753",
+        "754",
+        "755",
+        "756",
+        "757",
+        "758",
+        "760",
+        "761",
+        "762",
+        "763",
+        "764",
+        "SYMOP01"
+      ],
+      "tools": [
+        "geometry-audit",
+        "stage",
+        "refinement-controls"
+      ],
+      "source_pages": [
+        340,
+        341,
+        342,
+        343,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358,
+        517,
+        518
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "按明确对称操作重算距离、角度、扭角和氢键。",
+        "区分坐标/标签不一致与协方差误差；从当前完整精修重生几何表。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "无协方差矩阵时不重写 s.u.；不能靠删除不利表格行隐藏问题。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_audit",
+      "keywords": [
+        "geometry_tables",
+        "Recalculate reported geometry from coordinates"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_symmetry",
+      "strategy_id": "symmetry",
+      "title": "空间群、晶胞与设置核对",
+      "title_en": "Review symmetry cell and setting",
+      "alerts": [
+        "104",
+        "107",
+        "108",
+        "109",
+        "110",
+        "111",
+        "112",
+        "113",
+        "114",
+        "115",
+        "119",
+        "120",
+        "121",
+        "122",
+        "123",
+        "124",
+        "125",
+        "126",
+        "127",
+        "128",
+        "129",
+        "130",
+        "131",
+        "132",
+        "133",
+        "134",
+        "135",
+        "136",
+        "137",
+        "138",
+        "139",
+        "140",
+        "141",
+        "142",
+        "143",
+        "144",
+        "145",
+        "146",
+        "147",
+        "148",
+        "149",
+        "150",
+        "151",
+        "152",
+        "153",
+        "154",
+        "155",
+        "156",
+        "157",
+        "158",
+        "181",
+        "182",
+        "SYMMG01",
+        "SYMMG02",
+        "SYMMS01",
+        "SYMMS02"
+      ],
+      "tools": [
+        "initial-review",
+        "occupancy",
+        "platon",
+        "stage"
+      ],
+      "source_pages": [
+        157,
+        158,
+        162,
+        164,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        192,
+        193,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "比较空间群名称、显式操作和晶胞度量；ADDSYM 仅作为候选证据。",
+        "需要换基时同时变换坐标、反射、ADP 与对称信息，保留独立对照。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不能只改空间群标签或凭伪对称自动升群。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_diagnosis_specialist_transform",
+      "keywords": [
+        "symmetry",
+        "Review symmetry cell and setting"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_special_position",
+      "strategy_id": "special_position",
+      "title": "特殊位置与互斥无序占有率",
+      "title_en": "Audit special positions and mutually exclusive disorder",
+      "alerts": [
+        "074",
+        "075",
+        "076",
+        "077",
+        "101",
+        "102",
+        "103",
+        "300",
+        "303",
+        "304",
+        "789"
+      ],
+      "tools": [
+        "occupancy",
+        "disorder",
+        "diagnose",
+        "population-stability"
+      ],
+      "source_pages": [
+        130,
+        131,
+        157,
+        254,
+        259,
+        364
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "区分 CIF 占有率与 SHELXL SOF、特殊位置多重性。",
+        "检查对称重叠、PART 与 FVAR；101-103 检查的是坐标精度而非占有率本身。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "部分占有不一定错误；不自动把所有占有率设为 1。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_audit",
+      "keywords": [
+        "special_position",
+        "Audit special positions and mutually exclusive disorder"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_adp",
+      "strategy_id": "adp",
+      "title": "热椭球、刚性键与无序比较",
+      "title_en": "Diagnose ADP shape rigid bonds and disorder",
+      "alerts": [
+        "201",
+        "202",
+        "203",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "220",
+        "221",
+        "222",
+        "223",
+        "224",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "250",
+        "260"
+      ],
+      "tools": [
+        "adp-directions",
+        "diagnose",
+        "occupancy",
+        "restraint-tension",
+        "disorder",
+        "repair-plan",
+        "parameter-correlations",
+        "population-stability",
+        "restraint-strength"
+      ],
+      "source_pages": [
+        197,
+        201,
+        202,
+        203,
+        204,
+        209,
+        210,
+        211,
+        212,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        227,
+        229,
+        232,
+        239,
+        249,
+        250,
+        252
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "先分辨指认、无序、占有率及数据问题，再比较局部 RIGU/SIMU/DELU/ISOR 或 ISO。",
+        "检查残差、几何、参数和限制冲突；同一原子多种方法分别建候选。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "ISOR 不等于各向同性精修；SIMU 不等于 EADP；两个 sigma 不要求固定倍数。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_trials",
+      "keywords": [
+        "adp",
+        "Diagnose ADP shape rigid bonds and disorder"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_element",
+      "strategy_id": "element",
+      "title": "轻原子与配位身份核对",
+      "title_en": "Check atom assignment and coordination",
+      "alerts": [
+        "017",
+        "241",
+        "242",
+        "243",
+        "244",
+        "307",
+        "308",
+        "313",
+        "395",
+        "396",
+        "397",
+        "398",
+        "782"
+      ],
+      "tools": [
+        "initial-review",
+        "diagnose",
+        "repair-plan"
+      ],
+      "source_pages": [
+        84,
+        232,
+        239,
+        246,
+        247,
+        264,
+        265,
+        268,
+        300,
+        301,
+        364
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "结合化学连接、ADP、键长与本次密度比较元素假设。",
+        "当前支持的 C/N/O 单位点可走 element_scan；附属氢要同时考虑。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "Ueq 或短键本身不证明某元素错误。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_trials",
+      "keywords": [
+        "element",
+        "Check atom assignment and coordination"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_hydrogen_count",
+      "strategy_id": "hydrogen_count",
+      "title": "氢数目、杂化和质子化核对",
+      "title_en": "Check H count hybridisation and protonation",
+      "alerts": [
+        "040",
+        "073",
+        "078",
+        "079",
+        "093",
+        "245",
+        "303",
+        "305",
+        "306",
+        "309",
+        "311",
+        "312",
+        "315",
+        "316",
+        "317",
+        "318",
+        "319",
+        "320",
+        "321",
+        "322",
+        "323",
+        "324",
+        "325",
+        "326",
+        "327",
+        "328",
+        "HYDTR01"
+      ],
+      "tools": [
+        "donor-audit",
+        "hydrogen-plan",
+        "match",
+        "diagnose"
+      ],
+      "source_pages": [
+        76,
+        104,
+        130,
+        132,
+        150,
+        249,
+        259,
+        260,
+        261,
+        266,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "检查有证据的键级、价态、供氢依据与已有 H；先排重复加氢。",
+        "明确化学图后生成 HFIX；已有 H 的替换需按当前模型重新建立方案。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "水、氧化物、配位氧不能仅凭孤立氧或短接触判断；不把 AFIX 23/43 机械替换。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_bounded_plans_scientific_review",
+      "keywords": [
+        "hydrogen_count",
+        "Check H count hybridisation and protonation"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_hydrogen_direction",
+      "strategy_id": "hydrogen_direction",
+      "title": "氢方向与短接触对照",
+      "title_en": "Compare H directions and close contacts",
+      "alerts": [
+        "314",
+        "350",
+        "351",
+        "352",
+        "353",
+        "354",
+        "355",
+        "356",
+        "357",
+        "358",
+        "359",
+        "380",
+        "390",
+        "391",
+        "410",
+        "411",
+        "412",
+        "413",
+        "414",
+        "415",
+        "416",
+        "417",
+        "420",
+        "430",
+        "431",
+        "432",
+        "433",
+        "434",
+        "480",
+        "481",
+        "482",
+        "770",
+        "771",
+        "772"
+      ],
+      "tools": [
+        "donor-audit",
+        "water-h-trials",
+        "repair-plan"
+      ],
+      "source_pages": [
+        269,
+        287,
+        288,
+        289,
+        290,
+        298,
+        299,
+        301,
+        305,
+        307,
+        308,
+        310,
+        311,
+        312,
+        314,
+        315,
+        316,
+        317,
+        324,
+        326,
+        327,
+        328,
+        359,
+        360
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "检查供体身份、对称受体和密度；已有简单 OH 或全占有水可比较方向。",
+        "AFIX 3 只保持已有方向，不能自行决定正确氢位；验证短接触与密度变化。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不靠把 H 推向最近原子或固定一个 H-H 距离来默认制造氢键。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_trials",
+      "keywords": [
+        "hydrogen_direction",
+        "Compare H directions and close contacts"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_local_geometry",
+      "strategy_id": "local_geometry",
+      "title": "有依据的距离、等价性与平面限制",
+      "title_en": "Apply justified local geometry trials",
+      "alerts": [
+        "329",
+        "330",
+        "331",
+        "332",
+        "333",
+        "334",
+        "335",
+        "336",
+        "338",
+        "340",
+        "341",
+        "342",
+        "343",
+        "344",
+        "360",
+        "361",
+        "362",
+        "363",
+        "364",
+        "365",
+        "366",
+        "367",
+        "368",
+        "369",
+        "370",
+        "371",
+        "372",
+        "373",
+        "374",
+        "375",
+        "773",
+        "774",
+        "775",
+        "776",
+        "777",
+        "778",
+        "779",
+        "782"
+      ],
+      "tools": [
+        "diagnose",
+        "restraint-tension",
+        "disorder",
+        "repair-plan",
+        "restraint-strength"
+      ],
+      "source_pages": [
+        273,
+        274,
+        275,
+        276,
+        277,
+        286,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        360,
+        361,
+        362,
+        364
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "先区分键级/指认错误与正确片段受无序或数据影响。",
+        "按明确化学依据分别生成 DFIX/DANG/SADI/FLAT 对照，保留目标与 sigma。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不从警告阈值反推“应有键长”，不对所有短键强行拉长。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_trials",
+      "keywords": [
+        "local_geometry",
+        "Apply justified local geometry trials"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_convergence",
+      "strategy_id": "convergence",
+      "title": "定位不收敛参数与有限续算",
+      "title_en": "Diagnose shift/esd and bounded continuation",
+      "alerts": [
+        "080",
+        "081",
+        "SHFSU01"
+      ],
+      "tools": [
+        "convergence-trend",
+        "restraint-tension",
+        "refinement-controls",
+        "repair-plan",
+        "parameter-correlations"
+      ],
+      "source_pages": [
+        132,
+        133,
+        135,
+        497,
+        498,
+        499,
+        500,
+        501
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "读取最后多轮同一参数的有符号 shift/esd，分辨衰减、振荡、相关性。",
+        "满足条件有限续算；已有骑乘 H 可作 AFIX 3 固定向量对照。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不把 088/089/090 当作收敛警告，不任意固定重原子。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_auto_continuation_and_trials",
+      "keywords": [
+        "convergence",
+        "Diagnose shift/esd and bounded continuation"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_parameter_budget",
+      "strategy_id": "parameter_budget",
+      "title": "数据/参数比与模型自由度",
+      "title_en": "Audit data versus independent parameters",
+      "alerts": [
+        "088",
+        "089",
+        "090",
+        "904",
+        "REFNR01"
+      ],
+      "tools": [
+        "parameter-budget",
+        "hydrogen-plan",
+        "refinement-controls"
+      ],
+      "source_pages": [
+        145,
+        146,
+        147,
+        148,
+        149,
+        384,
+        481,
+        482,
+        483,
+        484
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "读取实际数据数、参数数和 H 处理；区分原生精修比与 Laue 合并后的 PLAT 比。",
+        "有化学依据时比较 C-H 骑乘、减少多余自由度；检查采集分辨率和剔除情况。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "限制不是新测量；不能把限制数直接加到数据数来宣称通过。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_audit",
+      "keywords": [
+        "parameter_budget",
+        "Audit data versus independent parameters"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_weights",
+      "strategy_id": "weights",
+      "title": "权重、GoF 与整体模型",
+      "title_en": "Review weights goodness of fit and global model",
+      "alerts": [
+        "072",
+        "082",
+        "083",
+        "084",
+        "085",
+        "086",
+        "087",
+        "808",
+        "809",
+        "929",
+        "937",
+        "939",
+        "963",
+        "964",
+        "965",
+        "GOODF01",
+        "WEIGH01",
+        "RFACG01",
+        "RFACR01"
+      ],
+      "tools": [
+        "finish",
+        "reflection-audit",
+        "diagnose",
+        "resolution-shells"
+      ],
+      "source_pages": [
+        74,
+        75,
+        129,
+        136,
+        139,
+        140,
+        144,
+        145,
+        370,
+        416,
+        423,
+        428,
+        485,
+        486,
+        489,
+        523,
+        524
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "核对实际使用与建议的 WGHT，常规迭代后检查残差趋势。",
+        "高权重不能单独诊断曝光/孪晶；排查模型和数据。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不人为调权重只为了 GoF=1；未知权重不冒充 sigmaW。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_refinement",
+      "keywords": [
+        "weights",
+        "Review weights goodness of fit and global model"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_extinction",
+      "strategy_id": "extinction",
+      "title": "无意义 EXTI 的移除对照",
+      "title_en": "Compare removal of insignificant extinction",
+      "alerts": [
+        "006",
+        "031",
+        "935"
+      ],
+      "tools": [
+        "refinement-controls",
+        "repair-plan"
+      ],
+      "source_pages": [
+        79,
+        80,
+        100,
+        422
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "比较 EXTI 与当前 CIF 的值及 s.u.；无显著性时准备 remove_extinction。",
+        "从同起点分别保留/移除 EXTI 后完整精修和验证。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "没有 s.u. 或文件配对不一致时不自动移除。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_trial",
+      "keywords": [
+        "extinction",
+        "Compare removal of insignificant extinction"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_final_controls",
+      "strategy_id": "final_controls",
+      "title": "撤销临时阻尼并核对最终精修",
+      "title_en": "Release damping for a checked final refinement",
+      "alerts": [
+        "731",
+        "732",
+        "936"
+      ],
+      "tools": [
+        "refinement-controls",
+        "repair-plan",
+        "convergence-trend"
+      ],
+      "source_pages": [
+        348,
+        349,
+        350,
+        351,
+        422
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "检查最终仍存在的 DAMP，准备 release_damping 独立对照。",
+        "复查真正收敛、协方差和几何 s.u.；失败保留原版本。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "删除 DAMP 不是收敛证明；BLOC/CGLS/特殊模型另行处理。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_trial",
+      "keywords": [
+        "final_controls",
+        "Release damping for a checked final refinement"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_outliers",
+      "strategy_id": "outliers",
+      "title": "固定异常反射列表的敏感性试验",
+      "title_en": "Compare an explicit fixed outlier list",
+      "alerts": [
+        "918",
+        "919",
+        "934"
+      ],
+      "tools": [
+        "reflection-audit",
+        "reflection-omit",
+        "resolution-shells"
+      ],
+      "source_pages": [
+        409,
+        410,
+        418,
+        419,
+        420,
+        421,
+        422
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "基于实际权重列出异常点、角度和残差符号。",
+        "符合支持条件时对固定列表作 OMIT 对照，保留原 HKL。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不循环挑点；少于 20 点不证明曝光错误；不同数据集合不按 R 排胜负。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_trial",
+      "keywords": [
+        "outliers",
+        "Compare an explicit fixed outlier list"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_resolution",
+      "strategy_id": "resolution",
+      "title": "高角截断与全数据敏感性比较",
+      "title_en": "Compare explicit resolution windows",
+      "alerts": [
+        "019",
+        "020",
+        "023",
+        "026",
+        "027",
+        "028",
+        "029",
+        "905",
+        "906",
+        "910",
+        "911",
+        "912",
+        "913",
+        "950",
+        "951",
+        "952",
+        "953",
+        "954",
+        "955",
+        "956",
+        "957",
+        "958",
+        "RINTA01",
+        "THETM01"
+      ],
+      "tools": [
+        "reflection-audit",
+        "refinement-controls",
+        "repair-plan",
+        "resolution-shells"
+      ],
+      "source_pages": [
+        85,
+        86,
+        89,
+        90,
+        91,
+        93,
+        94,
+        95,
+        96,
+        384,
+        385,
+        391,
+        397,
+        403,
+        404,
+        425,
+        426,
+        493,
+        519
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "检查高角壳层信号、缺失和原有 SHEL/OMIT；明确 d_min 与理由。",
+        "用 resolution_window 建全数据和指定范围的独立精修对照，记录损失与输出指标。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "只作显式敏感性试验；完整度改善或 R 降低不说明增加了信息，不能隐去分辨率损失。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_sensitivity_trial",
+      "keywords": [
+        "resolution",
+        "Compare explicit resolution windows"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_absolute",
+      "strategy_id": "absolute",
+      "title": "绝对结构证据与报告方式",
+      "title_en": "Assess absolute-structure evidence",
+      "alerts": [
+        "024",
+        "032",
+        "033",
+        "034",
+        "035",
+        "036",
+        "107",
+        "109",
+        "781",
+        "791",
+        "792",
+        "793",
+        "907",
+        "914",
+        "915",
+        "916",
+        "917",
+        "987"
+      ],
+      "tools": [
+        "platon",
+        "diagnose",
+        "project-metadata"
+      ],
+      "source_pages": [
+        90,
+        100,
+        101,
+        102,
+        103,
+        104,
+        158,
+        363,
+        366,
+        367,
+        390,
+        406,
+        408,
+        459,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "连同 Flack/Hooft 的 s.u.、Bijvoet 覆盖和异常散射证据判断。",
+        "证据不足用未知；反转或孪晶是有依据的独立模型假设。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不因 x 接近零就默认确定；不靠不上传结构因子消警告。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "scientific_review_existing_tools",
+      "keywords": [
+        "absolute",
+        "Assess absolute-structure evidence"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_voids",
+      "strategy_id": "voids",
+      "title": "空隙、溶剂与掩膜记录",
+      "title_en": "Handle solvent voids and mask accounting",
+      "alerts": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606",
+        "607",
+        "868",
+        "869",
+        "990"
+      ],
+      "tools": [
+        "disorder",
+        "squeeze",
+        "occupancy"
+      ],
+      "source_pages": [
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        377,
+        378,
+        379,
+        461,
+        462
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "区分空孔和有电子密度的难处理溶剂，主体须可靠。",
+        "获授权后走 SQUEEZE，保留原始数据与 FAB/ABIN 及电子数/空隙记录。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不隐藏主体缺失原子；电子数不唯一确定溶剂身份。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_authorized_workflow",
+      "keywords": [
+        "voids",
+        "Handle solvent voids and mask accounting"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_file_pairing",
+      "strategy_id": "file_pairing",
+      "title": "重生同一最终模型的 CIF/FCF/RES",
+      "title_en": "Regenerate a consistent final file bundle",
+      "alerts": [
+        "005",
+        "010",
+        "011",
+        "012",
+        "013",
+        "014",
+        "015",
+        "016",
+        "161",
+        "162",
+        "163",
+        "166",
+        "170",
+        "217",
+        "224",
+        "697",
+        "698",
+        "900",
+        "901",
+        "902",
+        "903",
+        "920",
+        "921",
+        "922",
+        "923",
+        "924",
+        "925",
+        "926",
+        "927",
+        "928",
+        "949",
+        "992",
+        "993",
+        "994",
+        "996",
+        "997",
+        "998",
+        "999"
+      ],
+      "tools": [
+        "cif-format",
+        "stage",
+        "finish",
+        "check-delivery"
+      ],
+      "source_pages": [
+        79,
+        80,
+        81,
+        82,
+        83,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        212,
+        222,
+        338,
+        339,
+        382,
+        383,
+        411,
+        412,
+        413,
+        414,
+        415,
+        424,
+        462,
+        463
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "核对版本、校验和、晶胞和反射配对，避免旧 FCF 配新 CIF。",
+        "从明确最终模型重新运行生成 CIF/FCF；正常用 LIST 4，特殊模型按专门路线。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不手改 R、残差、checksum 或未确认的 s.u. 来追平验证结果。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_regeneration",
+      "keywords": [
+        "file_pairing",
+        "Regenerate a consistent final file bundle"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_validation_failure",
+      "strategy_id": "validation_failure",
+      "title": "验证器输入、容量与缺失检查",
+      "title_en": "Handle validation execution and capacity limits",
+      "alerts": [
+        "608",
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806",
+        "807",
+        "810",
+        "811",
+        "813",
+        "814",
+        "815",
+        "820"
+      ],
+      "tools": [
+        "cif-format",
+        "platon",
+        "support"
+      ],
+      "source_pages": [
+        338,
+        368,
+        369,
+        370,
+        371,
+        372
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "先检查语法、软件与规则文件，再区分验证跳过和真实零警告。",
+        "容量或不支持模型保留失败原因，必要时专门本地检查。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不删对称信息或未检查部分来假装验证通过。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_diagnostics_environment_review",
+      "keywords": [
+        "validation_failure",
+        "Handle validation execution and capacity limits"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_documentation",
+      "strategy_id": "documentation",
+      "title": "记录限制、约束、无序与特殊散射",
+      "title_en": "Document model treatment and special scattering",
+      "alerts": [
+        "002",
+        "003",
+        "004",
+        "007",
+        "164",
+        "165",
+        "168",
+        "169",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "186",
+        "187",
+        "218",
+        "301",
+        "302",
+        "650",
+        "768",
+        "769",
+        "794",
+        "850",
+        "860",
+        "870",
+        "871",
+        "872",
+        "930",
+        "931",
+        "933",
+        "970",
+        "978",
+        "980",
+        "981",
+        "982",
+        "983",
+        "984",
+        "985",
+        "986",
+        "988",
+        "989",
+        "991"
+      ],
+      "tools": [
+        "restraint-tension",
+        "diagnose",
+        "platon",
+        "support"
+      ],
+      "source_pages": [
+        77,
+        78,
+        79,
+        80,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        195,
+        255,
+        258,
+        338,
+        358,
+        359,
+        367,
+        372,
+        373,
+        374,
+        375,
+        376,
+        379,
+        380,
+        416,
+        417,
+        428,
+        455,
+        458,
+        459,
+        460,
+        461,
+        462
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "核对处理是否确实使用，记录作用原子、理由与局限。",
+        "告知信息类提示不一定需要模型改变；真正 A/B 仍按问题分流。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "说明必须对应实际操作，不能用论文案例文字替代本次证据。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "documentation_and_specialist_review",
+      "keywords": [
+        "documentation",
+        "Document model treatment and special scattering"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    }
+  ],
+  "official_checked": [
+    "PLAT031",
+    "PLAT088",
+    "PLAT089",
+    "PLAT090",
+    "PLAT711",
+    "PLAT380",
+    "SHELXL instructions"
+  ],
+  "reference_pages": {
+    "ABSTY01": [
+      17,
+      16
+    ],
+    "ABSTY02": [
+      18,
+      17
+    ],
+    "ABSTY03": [
+      19,
+      18
+    ],
+    "CELLK01": [
+      21,
+      22
+    ],
+    "CELLT01": [
+      22
+    ],
+    "CELLV01": [
+      23
+    ],
+    "CELLV02": [
+      24,
+      23,
+      25
+    ],
+    "CELLZ01": [
+      27,
+      25,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33
+    ],
+    "CHEMS01": [
+      34,
+      35
+    ],
+    "CHEMS02": [
+      35
+    ],
+    "CHEMW01": [
+      36,
+      37,
+      38
+    ],
+    "CHEMW03": [
+      39,
+      38,
+      40,
+      42,
+      44
+    ],
+    "CRYSC01": [
+      47,
+      46
+    ],
+    "CRYSR01": [
+      48,
+      47
+    ],
+    "CRYSS01": [
+      48
+    ],
+    "CRYSS02": [
+      49
+    ],
+    "DENSD01": [
+      50,
+      49,
+      51
+    ],
+    "DENSX01": [
+      51,
+      52
+    ],
+    "DIFMN01": [
+      56
+    ],
+    "DIFMN02": [
+      57,
+      58,
+      59
+    ],
+    "DIFMN03": [
+      59,
+      60
+    ],
+    "DIFMX01": [
+      60,
+      61,
+      62
+    ],
+    "DIFMX02": [
+      62,
+      63
+    ],
+    "FCOEF01": [
+      66
+    ],
+    "FORMU01": [
+      68,
+      67,
+      69,
+      70,
+      71,
+      72
+    ],
+    "GOODF01": [
+      74,
+      73,
+      75
+    ],
+    "HYDTR01": [
+      76,
+      75
+    ],
+    "002": [
+      76,
+      77
+    ],
+    "003": [
+      77,
+      78
+    ],
+    "004": [
+      79,
+      78
+    ],
+    "005": [
+      79
+    ],
+    "006": [
+      79
+    ],
+    "007": [
+      80
+    ],
+    "010": [
+      81,
+      80
+    ],
+    "011": [
+      81
+    ],
+    "012": [
+      81
+    ],
+    "013": [
+      81,
+      82
+    ],
+    "014": [
+      82
+    ],
+    "015": [
+      82
+    ],
+    "016": [
+      83
+    ],
+    "017": [
+      84
+    ],
+    "018": [
+      84,
+      85
+    ],
+    "019": [
+      85
+    ],
+    "020": [
+      86,
+      87,
+      88,
+      218
+    ],
+    "021": [
+      89,
+      88
+    ],
+    "022": [
+      89
+    ],
+    "023": [
+      90
+    ],
+    "024": [
+      90
+    ],
+    "025": [
+      91,
+      90
+    ],
+    "026": [
+      91,
+      92
+    ],
+    "027": [
+      93,
+      92
+    ],
+    "028": [
+      93
+    ],
+    "029": [
+      94,
+      93,
+      95,
+      96,
+      97,
+      98,
+      99
+    ],
+    "030": [
+      99
+    ],
+    "031": [
+      100
+    ],
+    "032": [
+      100,
+      101
+    ],
+    "033": [
+      101
+    ],
+    "034": [
+      102
+    ],
+    "035": [
+      102,
+      103
+    ],
+    "036": [
+      104,
+      103
+    ],
+    "037": [
+      104
+    ],
+    "038": [
+      104
+    ],
+    "039": [
+      104
+    ],
+    "040": [
+      104
+    ],
+    "041": [
+      105,
+      106,
+      107,
+      108
+    ],
+    "042": [
+      108,
+      109
+    ],
+    "043": [
+      110,
+      111,
+      112,
+      113
+    ],
+    "044": [
+      113
+    ],
+    "045": [
+      114,
+      115
+    ],
+    "046": [
+      115
+    ],
+    "047": [
+      115
+    ],
+    "048": [
+      115
+    ],
+    "049": [
+      116,
+      117
+    ],
+    "050": [
+      117
+    ],
+    "051": [
+      117,
+      118,
+      119
+    ],
+    "052": [
+      119
+    ],
+    "053": [
+      119
+    ],
+    "054": [
+      120,
+      119
+    ],
+    "055": [
+      120
+    ],
+    "056": [
+      120
+    ],
+    "057": [
+      121,
+      120
+    ],
+    "058": [
+      121,
+      122
+    ],
+    "059": [
+      122,
+      123
+    ],
+    "060": [
+      123
+    ],
+    "061": [
+      123
+    ],
+    "062": [
+      124
+    ],
+    "063": [
+      124
+    ],
+    "064": [
+      124
+    ],
+    "065": [
+      125
+    ],
+    "066": [
+      125
+    ],
+    "067": [
+      125
+    ],
+    "068": [
+      126,
+      125,
+      127
+    ],
+    "069": [
+      128
+    ],
+    "070": [
+      128,
+      129
+    ],
+    "071": [
+      129
+    ],
+    "072": [
+      129
+    ],
+    "073": [
+      130,
+      129
+    ],
+    "074": [
+      130
+    ],
+    "075": [
+      130
+    ],
+    "076": [
+      131
+    ],
+    "077": [
+      131,
+      132
+    ],
+    "078": [
+      132
+    ],
+    "079": [
+      132
+    ],
+    "080": [
+      133,
+      132,
+      134,
+      135
+    ],
+    "081": [
+      135
+    ],
+    "082": [
+      136,
+      137,
+      138
+    ],
+    "083": [
+      139
+    ],
+    "084": [
+      140,
+      139,
+      141,
+      142,
+      143,
+      144
+    ],
+    "085": [
+      144
+    ],
+    "086": [
+      145,
+      144
+    ],
+    "087": [
+      145
+    ],
+    "088": [
+      145,
+      146,
+      147
+    ],
+    "089": [
+      147,
+      148
+    ],
+    "090": [
+      149,
+      148
+    ],
+    "091": [
+      149
+    ],
+    "092": [
+      150
+    ],
+    "093": [
+      150
+    ],
+    "094": [
+      151,
+      150,
+      152
+    ],
+    "095": [
+      153
+    ],
+    "096": [
+      153
+    ],
+    "097": [
+      153,
+      154,
+      155
+    ],
+    "098": [
+      155,
+      156
+    ],
+    "099": [
+      156
+    ],
+    "101": [
+      157
+    ],
+    "102": [
+      157
+    ],
+    "103": [
+      157
+    ],
+    "104": [
+      157
+    ],
+    "107": [
+      158
+    ],
+    "108": [
+      158
+    ],
+    "109": [
+      158
+    ],
+    "110": [
+      158,
+      159,
+      160
+    ],
+    "111": [
+      160,
+      161
+    ],
+    "112": [
+      162,
+      161,
+      163,
+      164
+    ],
+    "113": [
+      164,
+      165,
+      166,
+      167
+    ],
+    "114": [
+      167
+    ],
+    "115": [
+      167
+    ],
+    "119": [
+      167
+    ],
+    "120": [
+      168,
+      167
+    ],
+    "121": [
+      168
+    ],
+    "122": [
+      168
+    ],
+    "123": [
+      168
+    ],
+    "124": [
+      169
+    ],
+    "125": [
+      169
+    ],
+    "126": [
+      169
+    ],
+    "127": [
+      170,
+      169
+    ],
+    "128": [
+      170
+    ],
+    "129": [
+      171,
+      170
+    ],
+    "130": [
+      171
+    ],
+    "131": [
+      171
+    ],
+    "132": [
+      171
+    ],
+    "133": [
+      171
+    ],
+    "134": [
+      172
+    ],
+    "135": [
+      172
+    ],
+    "136": [
+      172
+    ],
+    "137": [
+      172
+    ],
+    "138": [
+      172
+    ],
+    "139": [
+      173,
+      172
+    ],
+    "140": [
+      173
+    ],
+    "141": [
+      173
+    ],
+    "142": [
+      173,
+      174
+    ],
+    "143": [
+      174
+    ],
+    "144": [
+      175,
+      174
+    ],
+    "145": [
+      175
+    ],
+    "146": [
+      175
+    ],
+    "147": [
+      175
+    ],
+    "148": [
+      175,
+      176,
+      177
+    ],
+    "149": [
+      177
+    ],
+    "150": [
+      177,
+      178
+    ],
+    "151": [
+      178
+    ],
+    "152": [
+      178,
+      179
+    ],
+    "153": [
+      179
+    ],
+    "154": [
+      179,
+      180
+    ],
+    "155": [
+      180
+    ],
+    "156": [
+      180
+    ],
+    "157": [
+      181,
+      180
+    ],
+    "158": [
+      181
+    ],
+    "161": [
+      181
+    ],
+    "162": [
+      182
+    ],
+    "163": [
+      184
+    ],
+    "164": [
+      185
+    ],
+    "165": [
+      185
+    ],
+    "166": [
+      186
+    ],
+    "168": [
+      186
+    ],
+    "169": [
+      186
+    ],
+    "170": [
+      186
+    ],
+    "171": [
+      187,
+      188
+    ],
+    "172": [
+      188
+    ],
+    "173": [
+      189,
+      188
+    ],
+    "174": [
+      189
+    ],
+    "175": [
+      189,
+      190
+    ],
+    "176": [
+      190
+    ],
+    "177": [
+      191
+    ],
+    "178": [
+      191,
+      192
+    ],
+    "179": [
+      192
+    ],
+    "180": [
+      192
+    ],
+    "181": [
+      192
+    ],
+    "182": [
+      193,
+      192
+    ],
+    "183": [
+      193
+    ],
+    "184": [
+      194
+    ],
+    "185": [
+      194,
+      195
+    ],
+    "186": [
+      195
+    ],
+    "187": [
+      195
+    ],
+    "193": [
+      196
+    ],
+    "197": [
+      196
+    ],
+    "198": [
+      196
+    ],
+    "199": [
+      197
+    ],
+    "200": [
+      197
+    ],
+    "201": [
+      197,
+      198,
+      199,
+      200,
+      201
+    ],
+    "202": [
+      201
+    ],
+    "203": [
+      202,
+      201
+    ],
+    "210": [
+      202
+    ],
+    "211": [
+      202,
+      203
+    ],
+    "212": [
+      203
+    ],
+    "213": [
+      204,
+      203,
+      205,
+      206,
+      207,
+      208,
+      209
+    ],
+    "214": [
+      210,
+      209,
+      211
+    ],
+    "215": [
+      211
+    ],
+    "216": [
+      212,
+      211
+    ],
+    "217": [
+      212
+    ],
+    "218": [
+      212
+    ],
+    "220": [
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218
+    ],
+    "221": [
+      218,
+      219
+    ],
+    "222": [
+      219,
+      220,
+      221
+    ],
+    "223": [
+      221,
+      222
+    ],
+    "224": [
+      222
+    ],
+    "230": [
+      223,
+      222,
+      224,
+      225,
+      226
+    ],
+    "231": [
+      226,
+      227
+    ],
+    "232": [
+      227,
+      228
+    ],
+    "233": [
+      229,
+      228
+    ],
+    "234": [
+      229,
+      230,
+      231,
+      232
+    ],
+    "241": [
+      232,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239
+    ],
+    "242": [
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246
+    ],
+    "243": [
+      246,
+      247
+    ],
+    "244": [
+      247,
+      248,
+      249
+    ],
+    "245": [
+      249
+    ],
+    "250": [
+      250,
+      251,
+      252
+    ],
+    "260": [
+      252,
+      253,
+      254
+    ],
+    "300": [
+      254,
+      255
+    ],
+    "301": [
+      255,
+      256,
+      257,
+      258
+    ],
+    "302": [
+      258,
+      259
+    ],
+    "303": [
+      259
+    ],
+    "304": [
+      259,
+      260
+    ],
+    "305": [
+      260
+    ],
+    "306": [
+      261,
+      262,
+      263,
+      264
+    ],
+    "307": [
+      264,
+      265
+    ],
+    "308": [
+      265,
+      266
+    ],
+    "309": [
+      266
+    ],
+    "310": [
+      266,
+      267
+    ],
+    "311": [
+      267
+    ],
+    "312": [
+      268
+    ],
+    "313": [
+      268,
+      269
+    ],
+    "314": [
+      269
+    ],
+    "315": [
+      269
+    ],
+    "316": [
+      270,
+      269
+    ],
+    "317": [
+      270
+    ],
+    "318": [
+      270
+    ],
+    "319": [
+      270
+    ],
+    "320": [
+      271
+    ],
+    "321": [
+      271
+    ],
+    "322": [
+      271
+    ],
+    "323": [
+      271
+    ],
+    "324": [
+      272,
+      271
+    ],
+    "325": [
+      272
+    ],
+    "326": [
+      272
+    ],
+    "327": [
+      272
+    ],
+    "328": [
+      272
+    ],
+    "329": [
+      273
+    ],
+    "330": [
+      273
+    ],
+    "331": [
+      273,
+      274,
+      275
+    ],
+    "332": [
+      275
+    ],
+    "333": [
+      275
+    ],
+    "334": [
+      275,
+      276
+    ],
+    "335": [
+      276
+    ],
+    "336": [
+      276
+    ],
+    "338": [
+      276
+    ],
+    "340": [
+      277,
+      278,
+      279
+    ],
+    "341": [
+      280,
+      279,
+      281,
+      282
+    ],
+    "342": [
+      283,
+      282,
+      284,
+      285,
+      286
+    ],
+    "343": [
+      286
+    ],
+    "344": [
+      286
+    ],
+    "350": [
+      287
+    ],
+    "351": [
+      287
+    ],
+    "352": [
+      287
+    ],
+    "353": [
+      287,
+      288
+    ],
+    "354": [
+      288
+    ],
+    "355": [
+      288,
+      289
+    ],
+    "357": [
+      289
+    ],
+    "358": [
+      290,
+      289
+    ],
+    "359": [
+      290
+    ],
+    "360": [
+      290,
+      291
+    ],
+    "361": [
+      291
+    ],
+    "362": [
+      292
+    ],
+    "363": [
+      292
+    ],
+    "364": [
+      293,
+      292
+    ],
+    "365": [
+      293
+    ],
+    "366": [
+      293
+    ],
+    "367": [
+      294
+    ],
+    "368": [
+      294
+    ],
+    "369": [
+      295,
+      294,
+      296
+    ],
+    "370": [
+      296
+    ],
+    "371": [
+      296
+    ],
+    "372": [
+      297
+    ],
+    "373": [
+      297
+    ],
+    "374": [
+      297
+    ],
+    "375": [
+      298
+    ],
+    "380": [
+      298
+    ],
+    "390": [
+      298,
+      299
+    ],
+    "391": [
+      299
+    ],
+    "395": [
+      300
+    ],
+    "396": [
+      300
+    ],
+    "397": [
+      301
+    ],
+    "398": [
+      301
+    ],
+    "410": [
+      301,
+      302,
+      303,
+      304
+    ],
+    "411": [
+      305,
+      306
+    ],
+    "412": [
+      307,
+      306,
+      308
+    ],
+    "413": [
+      308,
+      309,
+      310
+    ],
+    "414": [
+      310,
+      311
+    ],
+    "415": [
+      311,
+      312
+    ],
+    "416": [
+      312
+    ],
+    "417": [
+      312,
+      313,
+      314
+    ],
+    "420": [
+      315,
+      314,
+      316,
+      317
+    ],
+    "430": [
+      317,
+      318,
+      319,
+      320,
+      321,
+      322,
+      323,
+      324
+    ],
+    "431": [
+      324
+    ],
+    "432": [
+      324,
+      325,
+      326
+    ],
+    "433": [
+      326
+    ],
+    "434": [
+      326,
+      327
+    ],
+    "480": [
+      327
+    ],
+    "481": [
+      328,
+      327
+    ],
+    "482": [
+      328
+    ],
+    "601": [
+      328,
+      329,
+      330,
+      331
+    ],
+    "602": [
+      332,
+      333,
+      334
+    ],
+    "603": [
+      334
+    ],
+    "604": [
+      334
+    ],
+    "605": [
+      335,
+      334,
+      336
+    ],
+    "606": [
+      336,
+      337
+    ],
+    "607": [
+      338
+    ],
+    "608": [
+      338
+    ],
+    "650": [
+      338
+    ],
+    "660": [
+      338
+    ],
+    "697": [
+      338
+    ],
+    "698": [
+      339
+    ],
+    "699": [
+      339
+    ],
+    "701": [
+      340
+    ],
+    "702": [
+      341,
+      340
+    ],
+    "703": [
+      341
+    ],
+    "704": [
+      341
+    ],
+    "705": [
+      341
+    ],
+    "706": [
+      342
+    ],
+    "707": [
+      342
+    ],
+    "708": [
+      343,
+      342
+    ],
+    "710": [
+      343
+    ],
+    "711": [
+      343
+    ],
+    "712": [
+      343,
+      344
+    ],
+    "713": [
+      344
+    ],
+    "714": [
+      344
+    ],
+    "715": [
+      344
+    ],
+    "716": [
+      344
+    ],
+    "717": [
+      345
+    ],
+    "718": [
+      345
+    ],
+    "720": [
+      345
+    ],
+    "721": [
+      345
+    ],
+    "722": [
+      346
+    ],
+    "723": [
+      346
+    ],
+    "724": [
+      347
+    ],
+    "725": [
+      347
+    ],
+    "726": [
+      347
+    ],
+    "727": [
+      348,
+      347
+    ],
+    "728": [
+      348
+    ],
+    "731": [
+      348,
+      349
+    ],
+    "732": [
+      349
+    ],
+    "733": [
+      350,
+      351
+    ],
+    "734": [
+      351
+    ],
+    "735": [
+      351
+    ],
+    "736": [
+      352,
+      351
+    ],
+    "737": [
+      352
+    ],
+    "738": [
+      352
+    ],
+    "741": [
+      352
+    ],
+    "742": [
+      352,
+      353
+    ],
+    "743": [
+      353
+    ],
+    "744": [
+      353
+    ],
+    "745": [
+      353
+    ],
+    "746": [
+      353
+    ],
+    "747": [
+      353
+    ],
+    "748": [
+      354
+    ],
+    "751": [
+      354
+    ],
+    "752": [
+      354,
+      355
+    ],
+    "753": [
+      355
+    ],
+    "754": [
+      355
+    ],
+    "755": [
+      356
+    ],
+    "756": [
+      356
+    ],
+    "757": [
+      356
+    ],
+    "758": [
+      356
+    ],
+    "760": [
+      357,
+      356
+    ],
+    "761": [
+      357
+    ],
+    "762": [
+      357
+    ],
+    "763": [
+      358
+    ],
+    "764": [
+      358
+    ],
+    "768": [
+      358
+    ],
+    "769": [
+      359
+    ],
+    "770": [
+      359
+    ],
+    "771": [
+      359,
+      360
+    ],
+    "772": [
+      360
+    ],
+    "773": [
+      360,
+      361
+    ],
+    "774": [
+      361
+    ],
+    "775": [
+      361
+    ],
+    "776": [
+      361
+    ],
+    "777": [
+      361
+    ],
+    "778": [
+      362
+    ],
+    "779": [
+      362
+    ],
+    "780": [
+      362,
+      363
+    ],
+    "781": [
+      363
+    ],
+    "782": [
+      364
+    ],
+    "789": [
+      364
+    ],
+    "790": [
+      364,
+      365
+    ],
+    "791": [
+      366,
+      365
+    ],
+    "792": [
+      366
+    ],
+    "793": [
+      367,
+      366
+    ],
+    "794": [
+      367
+    ],
+    "798": [
+      368
+    ],
+    "799": [
+      368
+    ],
+    "801": [
+      368
+    ],
+    "802": [
+      368
+    ],
+    "803": [
+      369
+    ],
+    "804": [
+      369
+    ],
+    "805": [
+      369
+    ],
+    "806": [
+      369
+    ],
+    "807": [
+      370,
+      369
+    ],
+    "808": [
+      370
+    ],
+    "809": [
+      370
+    ],
+    "810": [
+      371,
+      370
+    ],
+    "811": [
+      371
+    ],
+    "812": [
+      371
+    ],
+    "813": [
+      371
+    ],
+    "814": [
+      371
+    ],
+    "815": [
+      372,
+      371
+    ],
+    "820": [
+      372
+    ],
+    "850": [
+      372
+    ],
+    "860": [
+      373,
+      372,
+      374,
+      375,
+      376
+    ],
+    "868": [
+      377,
+      376
+    ],
+    "869": [
+      378,
+      379
+    ],
+    "870": [
+      379,
+      380
+    ],
+    "871": [
+      380
+    ],
+    "872": [
+      380
+    ],
+    "880": [
+      380,
+      381
+    ],
+    "881": [
+      381
+    ],
+    "882": [
+      382,
+      381
+    ],
+    "883": [
+      382
+    ],
+    "898": [
+      382
+    ],
+    "899": [
+      382
+    ],
+    "900": [
+      382
+    ],
+    "901": [
+      383,
+      382
+    ],
+    "902": [
+      383
+    ],
+    "903": [
+      383
+    ],
+    "904": [
+      384,
+      383
+    ],
+    "905": [
+      384
+    ],
+    "906": [
+      385,
+      387
+    ],
+    "907": [
+      390
+    ],
+    "908": [
+      391
+    ],
+    "909": [
+      391
+    ],
+    "910": [
+      391,
+      392,
+      394,
+      395,
+      396
+    ],
+    "911": [
+      397,
+      398,
+      399,
+      400
+    ],
+    "912": [
+      403,
+      404
+    ],
+    "913": [
+      404,
+      405
+    ],
+    "914": [
+      406
+    ],
+    "915": [
+      406
+    ],
+    "916": [
+      408
+    ],
+    "917": [
+      408
+    ],
+    "918": [
+      408,
+      409
+    ],
+    "919": [
+      410,
+      409
+    ],
+    "920": [
+      411,
+      410
+    ],
+    "921": [
+      411
+    ],
+    "922": [
+      411,
+      412
+    ],
+    "923": [
+      412
+    ],
+    "924": [
+      412
+    ],
+    "925": [
+      413
+    ],
+    "926": [
+      414,
+      413
+    ],
+    "927": [
+      414
+    ],
+    "928": [
+      415
+    ],
+    "929": [
+      416
+    ],
+    "930": [
+      416,
+      417
+    ],
+    "931": [
+      417
+    ],
+    "933": [
+      417,
+      418
+    ],
+    "934": [
+      418,
+      420
+    ],
+    "935": [
+      422
+    ],
+    "936": [
+      422
+    ],
+    "937": [
+      422
+    ],
+    "939": [
+      423
+    ],
+    "940": [
+      423,
+      424
+    ],
+    "941": [
+      424
+    ],
+    "949": [
+      424
+    ],
+    "950": [
+      424
+    ],
+    "951": [
+      425,
+      424
+    ],
+    "952": [
+      425
+    ],
+    "953": [
+      425
+    ],
+    "954": [
+      425
+    ],
+    "955": [
+      425
+    ],
+    "956": [
+      426
+    ],
+    "957": [
+      426
+    ],
+    "958": [
+      426
+    ],
+    "960": [
+      426
+    ],
+    "961": [
+      427
+    ],
+    "962": [
+      427,
+      428
+    ],
+    "963": [
+      428
+    ],
+    "964": [
+      428
+    ],
+    "965": [
+      428
+    ],
+    "970": [
+      428
+    ],
+    "971": [
+      429,
+      428,
+      432,
+      433,
+      434,
+      435,
+      436,
+      437
+    ],
+    "972": [
+      438,
+      437,
+      440,
+      441,
+      442
+    ],
+    "973": [
+      443,
+      444,
+      445,
+      446
+    ],
+    "974": [
+      446,
+      447
+    ],
+    "975": [
+      447,
+      448,
+      449,
+      450
+    ],
+    "976": [
+      450,
+      451
+    ],
+    "977": [
+      452,
+      454
+    ],
+    "978": [
+      455,
+      456
+    ],
+    "980": [
+      458
+    ],
+    "981": [
+      458
+    ],
+    "982": [
+      458
+    ],
+    "983": [
+      458
+    ],
+    "984": [
+      458,
+      459
+    ],
+    "985": [
+      459
+    ],
+    "986": [
+      459
+    ],
+    "987": [
+      459,
+      460
+    ],
+    "988": [
+      460
+    ],
+    "989": [
+      461
+    ],
+    "990": [
+      461
+    ],
+    "991": [
+      462
+    ],
+    "992": [
+      462
+    ],
+    "993": [
+      462
+    ],
+    "994": [
+      463,
+      462
+    ],
+    "996": [
+      463
+    ],
+    "997": [
+      463
+    ],
+    "998": [
+      463
+    ],
+    "999": [
+      463
+    ],
+    "RADNT01": [
+      464,
+      465
+    ],
+    "RADNW01": [
+      466,
+      467
+    ],
+    "REFLE01": [
+      472,
+      471
+    ],
+    "REFLG01": [
+      473
+    ],
+    "REFLL01": [
+      474,
+      473
+    ],
+    "REFLT01": [
+      474,
+      475
+    ],
+    "REFLT02": [
+      475
+    ],
+    "REFLT03": [
+      478,
+      476,
+      480
+    ],
+    "REFNR01": [
+      482,
+      481,
+      483,
+      484
+    ],
+    "RFACG01": [
+      485,
+      484,
+      486
+    ],
+    "RFACR01": [
+      488,
+      489,
+      490
+    ],
+    "RINTA01": [
+      492,
+      493,
+      494,
+      495,
+      496
+    ],
+    "SHFSU01": [
+      497,
+      496,
+      498,
+      499,
+      500,
+      501
+    ],
+    "STRDE01": [
+      502
+    ],
+    "SYMMG01": [
+      509,
+      508
+    ],
+    "SYMMG02": [
+      511,
+      510,
+      512
+    ],
+    "SYMMS01": [
+      513,
+      512
+    ],
+    "SYMMS02": [
+      515,
+      513,
+      516
+    ],
+    "SYMOP01": [
+      517,
+      516
+    ],
+    "THETM01": [
+      518,
+      519,
+      520,
+      521,
+      522
+    ],
+    "WEIGH01": [
+      523
+    ],
+    "ABSMU01": [
+      14,
+      15
+    ],
+    "ABSTM02": [
+      15
+    ],
+    "ATOM007": [
+      20,
+      21
+    ],
+    "CELL003": [
+      21
+    ],
+    "CELL004": [
+      21
+    ],
+    "CELL005": [
+      21
+    ],
+    "DIFF003": [
+      52,
+      53
+    ],
+    "DIFF005": [
+      53
+    ],
+    "DIFF019": [
+      55
+    ],
+    "DIFF020": [
+      55
+    ],
+    "DIFF022": [
+      56
+    ],
+    "EXPT005": [
+      64
+    ],
+    "EXPT108": [
+      64
+    ],
+    "EXPT009": [
+      65
+    ],
+    "EXPT010": [
+      65
+    ],
+    "GEOM001": [
+      72
+    ],
+    "GEOM002": [
+      72
+    ],
+    "GEOM003": [
+      72,
+      73
+    ],
+    "GEOM006": [
+      73
+    ],
+    "GEOM007": [
+      73
+    ],
+    "LABEL01": [
+      75
+    ],
+    "LAT075": [
+      130
+    ],
+    "LAT201": [
+      198
+    ],
+    "356": [
+      289
+    ],
+    "LAT602": [
+      333
+    ],
+    "REFI015": [
+      469,
+      470
+    ],
+    "SYMM001": [
+      508,
+      513
+    ],
+    "TYPE031": [
+      522
+    ]
+  },
+  "source_coverage_note": "Source pages include actual definition/alert headings. PLAT196 is evidenced by the current native validation. Number-range gaps are not treated as known alert definitions."
+}

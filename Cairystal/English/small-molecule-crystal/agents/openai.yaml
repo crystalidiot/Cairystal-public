@@ -1,0 +1,7 @@
+interface:
+  display_name: "Cairystal · 小分子单晶解析与精修"
+  short_description: "按简明 SOP 调用通用工具，完成单晶解析、精修、验证与双语报告"
+  default_prompt: "使用 $small-molecule-crystal，以中文检查环境并完成单晶解析、精修、AB检查、官网验证与中英文Word。"
+
+policy:
+  allow_implicit_invocation: true

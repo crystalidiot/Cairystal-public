@@ -1,0 +1,2168 @@
+{
+  "schema": 1,
+  "groups": {
+    "environment": {
+      "zh-CN": "环境与版本",
+      "en": "Environment/version"
+    },
+    "input": {
+      "zh-CN": "输入与参数",
+      "en": "Inputs/metadata"
+    },
+    "model": {
+      "zh-CN": "解析、精修与诊断",
+      "en": "Solve/refine/diagnose"
+    },
+    "validation": {
+      "zh-CN": "验证",
+      "en": "Validation"
+    },
+    "delivery": {
+      "zh-CN": "报告与交付",
+      "en": "Reports/delivery"
+    },
+    "support": {
+      "zh-CN": "故障与测试",
+      "en": "Support/tests"
+    }
+  },
+  "tools": [
+    {
+      "id": "probe",
+      "group": "environment",
+      "script": "probe_environment.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "发现本机软件",
+        "en": "Discover local software"
+      },
+      "inputs": {
+        "zh-CN": "--software-dir SOFTWARE --profile solve",
+        "en": "--software-dir SOFTWARE --profile solve"
+      },
+      "outputs": {
+        "zh-CN": "环境能力 JSON / environment JSON",
+        "en": "Environment JSON"
+      },
+      "effects": {
+        "zh-CN": "只读明确输入，输出至 stdout；不会上传。",
+        "en": "Read inputs and write stdout; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/portable-environment.md"
+      ],
+      "example": "--software-dir SOFTWARE --profile solve --json"
+    },
+    {
+      "id": "doctor",
+      "group": "environment",
+      "script": "runtime_capabilities.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "检查配置与依赖",
+        "en": "Check profile and capabilities"
+      },
+      "inputs": {
+        "zh-CN": "--profile PROFILE.json",
+        "en": "--profile PROFILE.json"
+      },
+      "outputs": {
+        "zh-CN": "硬件与自动资源建议、依赖、选定软件路径/哈希和可选磁盘空间",
+        "en": "Hardware/resource recommendation, dependencies, selected executable paths/hashes and optional disk space"
+      },
+      "effects": {
+        "zh-CN": "只读本机与指定配置，保存可选报告；不启动原生程序、不上传样品。",
+        "en": "Read local machine and selected profile; optional saved report. No native execution or specimen upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/portable-environment.md",
+        "references/native-performance.md"
+      ],
+      "example": "--profile LOCAL_PROFILE.json --output-root JOBS_DIRECTORY --output NEW_ENVIRONMENT.json"
+    },
+    {
+      "id": "profile",
+      "group": "environment",
+      "script": "crystal_pipeline.py",
+      "prefix": [
+        "profile"
+      ],
+      "title": {
+        "zh-CN": "创建本机配置",
+        "en": "Create a machine profile"
+      },
+      "inputs": {
+        "zh-CN": "软件、渲染器路径 / software and renderer paths",
+        "en": "Explicit software and renderer paths; see --help"
+      },
+      "outputs": {
+        "zh-CN": "PROFILE.json",
+        "en": "PROFILE.json"
+      },
+      "effects": {
+        "zh-CN": "写本地派生文件；viewer 的 --open 可打开浏览器；不上传。",
+        "en": "Write local outputs; viewer --open may open a browser; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/scripted-pipeline.md"
+      ],
+      "example": "--help"
+    },
+    {
+      "id": "verify",
+      "group": "environment",
+      "script": "verify_release.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "核对版本文件哈希",
+        "en": "Verify release hashes"
+      },
+      "inputs": {
+        "zh-CN": "--skill SKILL --manifest MANIFEST.json",
+        "en": "--skill SKILL --manifest MANIFEST.json"
+      },
+      "outputs": {
+        "zh-CN": "哈希核对结果 / hash audit",
+        "en": "Hash audit"
+      },
+      "effects": {
+        "zh-CN": "只读明确输入，输出至 stdout；不会上传。",
+        "en": "Read inputs and write stdout; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/updates-and-support.md"
+      ],
+      "example": "--skill SKILL --manifest MANIFEST.json"
+    },
+    {
+      "id": "intake-form",
+      "group": "input",
+      "script": "intake_once.py",
+      "prefix": [
+        "form"
+      ],
+      "title": {
+        "zh-CN": "生成一次性问卷",
+        "en": "Create intake form"
+      },
+      "inputs": {
+        "zh-CN": "--output NEW_FORM [--known KNOWN.json] [--metadata-ledger LEDGER.json] [--data-dir SPECIMEN_DIR]；已明确配对的仪器记录可用 --hkl、--paired-record、--pairing-basis",
+        "en": "--output NEW_FORM [--known KNOWN.json] [--metadata-ledger LEDGER.json] [--data-dir SPECIMEN_DIR]. For known instrument pairing, use --hkl, --paired-record and --pairing-basis."
+      },
+      "outputs": {
+        "zh-CN": "本地 HTML、缺失/冲突提问清单 question_plan.json、文件参数来源记录",
+        "en": "Local HTML, question_plan.json for missing/conflicting fields, metadata provenance"
+      },
+      "effects": {
+        "zh-CN": "写本地派生文件；viewer 的 --open 可打开浏览器；不上传。",
+        "en": "Write local outputs; viewer --open may open a browser; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/one-time-intake.md"
+      ],
+      "example": "--language zh-CN --output NEW_FORM"
+    },
+    {
+      "id": "intake-accept",
+      "group": "input",
+      "script": "intake_once.py",
+      "prefix": [
+        "accept"
+      ],
+      "title": {
+        "zh-CN": "接收本次样品信息",
+        "en": "Accept specimen intake"
+      },
+      "inputs": {
+        "zh-CN": "--input ANSWERS.json --profile PROFILE.json --output NEW_INTAKE",
+        "en": "--input ANSWERS.json --profile PROFILE.json --output NEW_INTAKE"
+      },
+      "outputs": {
+        "zh-CN": "intake_state.json / specimen.json / autorun_config.json（信息足够时 / when sufficient）",
+        "en": "intake_state.json, specimen.json, autorun_config.json when sufficient"
+      },
+      "effects": {
+        "zh-CN": "写本地派生文件；viewer 的 --open 可打开浏览器；不上传。",
+        "en": "Write local outputs; viewer --open may open a browser; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/one-time-intake.md"
+      ],
+      "example": "--input ANSWERS.json --profile PROFILE.json --output NEW_INTAKE"
+    },
+    {
+      "id": "inspect",
+      "group": "input",
+      "script": "inspect_case.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "检查允许的数据目录",
+        "en": "Inspect an allowed data directory"
+      },
+      "inputs": {
+        "zh-CN": "DATA_DIRECTORY [--stem STEM]",
+        "en": "DATA_DIRECTORY [--stem STEM]"
+      },
+      "outputs": {
+        "zh-CN": "输入检查 / input inventory",
+        "en": "Input inventory"
+      },
+      "effects": {
+        "zh-CN": "只读明确输入，输出至 stdout；不会上传。",
+        "en": "Read inputs and write stdout; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/workflow.md"
+      ],
+      "example": "DATA_DIRECTORY --json"
+    },
+    {
+      "id": "metadata",
+      "group": "input",
+      "script": "inspect_experiment_metadata.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "读取一个实验参数源",
+        "en": "Read one metadata source"
+      },
+      "inputs": {
+        "zh-CN": "ALLOWED_METADATA_FILE",
+        "en": "ALLOWED_METADATA_FILE"
+      },
+      "outputs": {
+        "zh-CN": "标量、来源行 / scalars and provenance",
+        "en": "Scalars and provenance"
+      },
+      "effects": {
+        "zh-CN": "只读明确输入，输出至 stdout；不会上传。",
+        "en": "Read inputs and write stdout; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/project-metadata-companions.md"
+      ],
+      "example": "ALLOWED_METADATA_FILE"
+    },
+    {
+      "id": "project-metadata",
+      "group": "input",
+      "script": "project_metadata_preflight.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "核查同项目参数与配对",
+        "en": "Check project metadata and pairing"
+      },
+      "inputs": {
+        "zh-CN": "--project-dir DATA --hkl INPUT.hkl [--source ALLOWED_FILE]",
+        "en": "--project-dir DATA --hkl INPUT.hkl [--source ALLOWED_FILE]"
+      },
+      "outputs": {
+        "zh-CN": "来源与冲突 JSON / provenance and conflicts",
+        "en": "Provenance/conflict JSON"
+      },
+      "effects": {
+        "zh-CN": "只读明确输入，输出至 stdout；不会上传。",
+        "en": "Read inputs and write stdout; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "默认会发现同名侧文件；盲测必须显式限定允许的 --source。绝不读取被禁止的模型或身份文件。",
+        "en": "Default discovers same-stem companions; blind tasks must explicitly restrict --source. Never read prohibited models or identity files."
+      },
+      "references": [
+        "references/project-metadata-companions.md"
+      ],
+      "example": "--project-dir DATA --hkl INPUT.hkl --source ALLOWED_FILE"
+    },
+    {
+      "id": "setup",
+      "group": "model",
+      "script": "setup_job.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "准备独立运行目录",
+        "en": "Prepare an isolated job"
+      },
+      "inputs": {
+        "zh-CN": "DATA_DIRECTORY --output-root JOB_ROOT --software-dir SOFTWARE",
+        "en": "DATA_DIRECTORY --output-root JOB_ROOT --software-dir SOFTWARE"
+      },
+      "outputs": {
+        "zh-CN": "独立工作目录 / isolated job",
+        "en": "Isolated job directory"
+      },
+      "effects": {
+        "zh-CN": "写本地派生文件；viewer 的 --open 可打开浏览器；不上传。",
+        "en": "Write local outputs; viewer --open may open a browser; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/workflow.md"
+      ],
+      "example": "DATA_DIRECTORY --output-root JOB_ROOT --software-dir SOFTWARE --json"
+    },
+    {
+      "id": "stage",
+      "group": "model",
+      "script": "run_crystal_stage.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "执行一次原生求解或精修",
+        "en": "Run a native solve/refine stage"
+      },
+      "inputs": {
+        "zh-CN": "--executable EXE --ins INPUT.ins --hkl INPUT.hkl --output NEW_STAGE --reason REASON",
+        "en": "--executable EXE --ins INPUT.ins --hkl INPUT.hkl --output NEW_STAGE --reason REASON"
+      },
+      "outputs": {
+        "zh-CN": "原生文件与日志 / native outputs and logs",
+        "en": "Native outputs and logs"
+      },
+      "effects": {
+        "zh-CN": "按子命令写本地文件或调用配置的原生程序；不自动上传。",
+        "en": "Write local outputs or call configured native programs; no automatic upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/workflow.md"
+      ],
+      "example": "--executable EXE --ins INPUT.ins --hkl INPUT.hkl --output NEW_STAGE --reason REASON"
+    },
+    {
+      "id": "pipeline",
+      "group": "model",
+      "script": "crystal_pipeline.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "分步控制解析流程",
+        "en": "Control pipeline stages"
+      },
+      "inputs": {
+        "zh-CN": "start/step/match/finish/autofinish/deliver/finalize/status；见 --help / see --help",
+        "en": "start/step/match/finish/autofinish/deliver/finalize/status; see --help"
+      },
+      "outputs": {
+        "zh-CN": "分阶段产物、状态 / staged outputs and state",
+        "en": "Staged outputs and state"
+      },
+      "effects": {
+        "zh-CN": "写本地文件并可能运行原生程序、渲染报告；只在有效授权下进行官网上传。",
+        "en": "Write local outputs, possibly run native programs/render reports; official upload only with valid authorization."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/scripted-pipeline.md"
+      ],
+      "example": "--help"
+    },
+    {
+      "id": "autorun",
+      "group": "model",
+      "script": "crystal_autorun.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "正常步骤自动调度",
+        "en": "Dispatch routine workflow"
+      },
+      "inputs": {
+        "zh-CN": "run --config JOB.json --output NEW_RUN",
+        "en": "run --config JOB.json --output NEW_RUN"
+      },
+      "outputs": {
+        "zh-CN": "运行状态、复核包或交付 / state, review packet or delivery",
+        "en": "Run state, review packet or delivery"
+      },
+      "effects": {
+        "zh-CN": "写本地文件并可能运行原生程序、渲染报告；只在有效授权下进行官网上传。",
+        "en": "Write local outputs, possibly run native programs/render reports; official upload only with valid authorization."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/automatic-dispatch.md"
+      ],
+      "example": "run --config JOB.json --output NEW_RUN"
+    },
+    {
+      "id": "match",
+      "group": "model",
+      "script": "crystal_pipeline.py",
+      "prefix": [
+        "match"
+      ],
+      "title": {
+        "zh-CN": "二维化学图与当前模型匹配",
+        "en": "Match chemical graph to current model"
+      },
+      "inputs": {
+        "zh-CN": "--run RUN --source SOURCE --graph GRAPH.json",
+        "en": "--run RUN --source SOURCE --graph GRAPH.json"
+      },
+      "outputs": {
+        "zh-CN": "候选元素指认及精修 / candidate assignments and refinement",
+        "en": "Candidate assignments and refinement"
+      },
+      "effects": {
+        "zh-CN": "按子命令写本地文件或调用配置的原生程序；不自动上传。",
+        "en": "Write local outputs or call configured native programs; no automatic upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "需要本次核实过的化学图/映射；质子化或元素歧义交复核。生成氢后仍需精修和验证。",
+        "en": "Requires a verified current chemical graph/mapping; review protonation or element ambiguity. Hydrogen generation still needs refinement and validation."
+      },
+      "references": [
+        "references/graph-matching.md"
+      ],
+      "example": "--run RUN --source SOURCE --graph GRAPH.json"
+    },
+    {
+      "id": "hydrogen-plan",
+      "group": "model",
+      "script": "hydrogen_plan.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "依据化学图生成氢计划",
+        "en": "Prepare graph-based hydrogen plan"
+      },
+      "inputs": {
+        "zh-CN": "--model MODEL --graph GRAPH.json --mapping MAPPING.json --output NEW_PLAN",
+        "en": "--model MODEL --graph GRAPH.json --mapping MAPPING.json --output NEW_PLAN"
+      },
+      "outputs": {
+        "zh-CN": "加氢计划与检查 / hydrogen plan and checks",
+        "en": "Hydrogen plan and checks"
+      },
+      "effects": {
+        "zh-CN": "写本地派生文件；viewer 的 --open 可打开浏览器；不上传。",
+        "en": "Write local outputs; viewer --open may open a browser; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "需要本次核实过的化学图/映射；质子化或元素歧义交复核。生成氢后仍需精修和验证。",
+        "en": "Requires a verified current chemical graph/mapping; review protonation or element ambiguity. Hydrogen generation still needs refinement and validation."
+      },
+      "references": [
+        "references/hydrogen-and-report-rules.md"
+      ],
+      "example": "--model MODEL --graph GRAPH.json --mapping MAPPING.json --output NEW_PLAN"
+    },
+    {
+      "id": "diagnose",
+      "group": "model",
+      "script": "structure_diagnostics.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "当前原子与密度诊断",
+        "en": "Diagnose atoms and density"
+      },
+      "inputs": {
+        "zh-CN": "DIRECTORY --stem STEM --output OUTPUT.json",
+        "en": "DIRECTORY --stem STEM --output OUTPUT.json"
+      },
+      "outputs": {
+        "zh-CN": "局部诊断 / local diagnostics",
+        "en": "Local diagnostics"
+      },
+      "effects": {
+        "zh-CN": "写本地派生文件；viewer 的 --open 可打开浏览器；不上传。",
+        "en": "Write local outputs; viewer --open may open a browser; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/atom-diagnostics-and-trials.md"
+      ],
+      "example": "DIRECTORY --stem model --output OUTPUT.json"
+    },
+    {
+      "id": "occupancy",
+      "group": "model",
+      "script": "audit_occupancy.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "占有率和特殊位置核算",
+        "en": "Audit occupancy and special positions"
+      },
+      "inputs": {
+        "zh-CN": "MODEL_FILE [--dependency-dir DIR]",
+        "en": "MODEL_FILE [--dependency-dir DIR]"
+      },
+      "outputs": {
+        "zh-CN": "核算 JSON / audit JSON",
+        "en": "Occupancy audit JSON"
+      },
+      "effects": {
+        "zh-CN": "只读明确输入，输出至 stdout；不会上传。",
+        "en": "Read inputs and write stdout; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/disorder-occupancy.md"
+      ],
+      "example": "MODEL_FILE"
+    },
+    {
+      "id": "disorder",
+      "group": "model",
+      "script": "common_disorder.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "常见无序筛查及对照",
+        "en": "Screen and compare common disorder"
+      },
+      "inputs": {
+        "zh-CN": "scan/prepare/run；见 --help",
+        "en": "scan/prepare/run; see --help"
+      },
+      "outputs": {
+        "zh-CN": "密度支持候选、对照与日志 / supported candidates, controls and logs",
+        "en": "Supported candidates, controls and logs"
+      },
+      "effects": {
+        "zh-CN": "按子命令写本地文件或调用配置的原生程序；不自动上传。",
+        "en": "Write local outputs or call configured native programs; no automatic upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/common-disorder-automation.md"
+      ],
+      "example": "--help"
+    },
+    {
+      "id": "trials",
+      "group": "model",
+      "script": "candidate_trials.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "运行有界模型对照",
+        "en": "Run bounded candidate trials"
+      },
+      "inputs": {
+        "zh-CN": "PLAN.json",
+        "en": "PLAN.json"
+      },
+      "outputs": {
+        "zh-CN": "对照产物与比较 / trial outputs and comparison",
+        "en": "Trial outputs and comparison"
+      },
+      "effects": {
+        "zh-CN": "按子命令写本地文件或调用配置的原生程序；不自动上传。",
+        "en": "Write local outputs or call configured native programs; no automatic upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/atom-diagnostics-and-trials.md"
+      ],
+      "example": "PLAN.json"
+    },
+    {
+      "id": "squeeze",
+      "group": "model",
+      "script": "squeeze_request.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "SQUEEZE 选择与执行",
+        "en": "Prepare/record/execute SQUEEZE choice"
+      },
+      "inputs": {
+        "zh-CN": "prepare/respond/execute；见 --help / see --help",
+        "en": "prepare/respond/execute; see --help"
+      },
+      "outputs": {
+        "zh-CN": "选择记录及获准的对照 / decision record and authorized trial",
+        "en": "Decision record and authorized trial"
+      },
+      "effects": {
+        "zh-CN": "按子命令写本地文件或调用配置的原生程序；不自动上传。",
+        "en": "Write local outputs or call configured native programs; no automatic upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/squeeze-workflow.md"
+      ],
+      "example": "--help"
+    },
+    {
+      "id": "labels",
+      "group": "model",
+      "script": "atom_labels.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "按元素规范编号",
+        "en": "Normalize atom labels"
+      },
+      "inputs": {
+        "zh-CN": "--res MODEL.res --output NEW_LABELS",
+        "en": "--res MODEL.res --output NEW_LABELS"
+      },
+      "outputs": {
+        "zh-CN": "改名模型及映射 / renamed model and mapping",
+        "en": "Renamed model and mapping"
+      },
+      "effects": {
+        "zh-CN": "写本地派生文件；viewer 的 --open 可打开浏览器；不上传。",
+        "en": "Write local outputs; viewer --open may open a browser; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/final-atom-numbering.md"
+      ],
+      "example": "--res MODEL.res --output NEW_LABELS"
+    },
+    {
+      "id": "finish",
+      "group": "delivery",
+      "script": "routine_finish.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "权重、精修和常规收尾",
+        "en": "Refinement, weighting and finishing"
+      },
+      "inputs": {
+        "zh-CN": "--config CONFIG.json --output NEW_FINISH",
+        "en": "--config CONFIG.json --output NEW_FINISH"
+      },
+      "outputs": {
+        "zh-CN": "本地收尾或已授权交付 / local finish or authorized delivery",
+        "en": "Local finish or authorized delivery"
+      },
+      "effects": {
+        "zh-CN": "写本地文件并可能运行原生程序、渲染报告；只在有效授权下进行官网上传。",
+        "en": "Write local outputs, possibly run native programs/render reports; official upload only with valid authorization."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/routine-automation.md"
+      ],
+      "example": "--config CONFIG.json --output NEW_FINISH --local-only"
+    },
+    {
+      "id": "complete",
+      "group": "delivery",
+      "script": "complete_candidate.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "将复核候选走完整交付",
+        "en": "Complete a reviewed candidate"
+      },
+      "inputs": {
+        "zh-CN": "--input CANDIDATE --profile PROFILE.json --review REVIEW.json --output NEW_OUTPUT --data-dir ORIGINAL_DATA",
+        "en": "--input CANDIDATE --profile PROFILE.json --review REVIEW.json --output NEW_OUTPUT --data-dir ORIGINAL_DATA"
+      },
+      "outputs": {
+        "zh-CN": "精修、验证、双语报告与交付记录 / refinement, validation, bilingual reports and delivery record",
+        "en": "Refinement, validation, bilingual reports and delivery record"
+      },
+      "effects": {
+        "zh-CN": "写本地文件并可能运行原生程序、渲染报告；只在有效授权下进行官网上传。",
+        "en": "Write local outputs, possibly run native programs/render reports; official upload only with valid authorization."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/delivery-completion.md"
+      ],
+      "example": "--input CANDIDATE --profile PROFILE.json --review REVIEW.json --output NEW_OUTPUT --data-dir ORIGINAL_DATA --local-only"
+    },
+    {
+      "id": "platon",
+      "group": "validation",
+      "script": "platon_check.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "本地 PLATON 验证",
+        "en": "Run local PLATON validation"
+      },
+      "inputs": {
+        "zh-CN": "--cif MODEL.cif --profile PROFILE.json --output NEW_CHECK [--fcf MODEL.fcf]",
+        "en": "--cif MODEL.cif --profile PROFILE.json --output NEW_CHECK [--fcf MODEL.fcf]"
+      },
+      "outputs": {
+        "zh-CN": "本地报告与规则版本 / local report and rule version",
+        "en": "Local report and rule version"
+      },
+      "effects": {
+        "zh-CN": "按子命令写本地文件或调用配置的原生程序；不自动上传。",
+        "en": "Write local outputs or call configured native programs; no automatic upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/platon-and-pdf-reliability.md"
+      ],
+      "example": "--cif MODEL.cif --profile PROFILE.json --output NEW_CHECK"
+    },
+    {
+      "id": "checkcif",
+      "group": "validation",
+      "script": "iucr_validation.py",
+      "prefix": [
+        "submit"
+      ],
+      "title": {
+        "zh-CN": "IUCr 官网 checkCIF",
+        "en": "Submit official IUCr checkCIF"
+      },
+      "inputs": {
+        "zh-CN": "--cif FINAL.cif --output NEW_OFFICIAL；已有授权时才加上传选项 / upload flag only with authorization",
+        "en": "--cif FINAL.cif --output NEW_OFFICIAL; upload flag only with existing authorization"
+      },
+      "outputs": {
+        "zh-CN": "IUCr_checkCIF.pdf / submission.json / alerts",
+        "en": "IUCr_checkCIF.pdf, submission.json, alerts"
+      },
+      "effects": {
+        "zh-CN": "已有授权且传入 --authorize-iucr-upload 时才上传 CIF（可能包含结构因子）至 IUCr；不会因工具箱调用而授权。",
+        "en": "Upload CIF (possibly with structure factors) to IUCr only with existing authorization and --authorize-iucr-upload; routing grants none."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/validation-evidence.md"
+      ],
+      "example": "--cif FINAL.cif --output NEW_OFFICIAL"
+    },
+    {
+      "id": "recover-checkcif",
+      "group": "validation",
+      "script": "iucr_validation.py",
+      "prefix": [
+        "recover"
+      ],
+      "title": {
+        "zh-CN": "取回已有官网报告",
+        "en": "Recover an existing official report"
+      },
+      "inputs": {
+        "zh-CN": "--directory OFFICIAL_DIRECTORY [--cif FINAL_CIF] [--check-only]",
+        "en": "--directory OFFICIAL_DIRECTORY [--cif FINAL_CIF] [--check-only]"
+      },
+      "outputs": {
+        "zh-CN": "已有网址的报告 / report from recorded URLs",
+        "en": "Report recovered from recorded URLs"
+      },
+      "effects": {
+        "zh-CN": "联网读取已记录的 IUCr 结果网址，不重新 POST 结构。",
+        "en": "Fetch recorded IUCr result URLs; no new structure POST."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/platon-and-pdf-reliability.md"
+      ],
+      "example": "--directory OFFICIAL_DIRECTORY --cif FINAL_CIF --check-only"
+    },
+    {
+      "id": "compare-ab",
+      "group": "validation",
+      "script": "compare_ab_alerts.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "比较修改前后的 A/B",
+        "en": "Compare A/B before and after"
+      },
+      "inputs": {
+        "zh-CN": "--before BEFORE --after AFTER --output NEW_COMPARE",
+        "en": "--before BEFORE --after AFTER --output NEW_COMPARE"
+      },
+      "outputs": {
+        "zh-CN": "新增/消失/未变警告 / added, resolved, unchanged alerts",
+        "en": "Added, resolved and unchanged alerts"
+      },
+      "effects": {
+        "zh-CN": "写本地派生文件；viewer 的 --open 可打开浏览器；不上传。",
+        "en": "Write local outputs; viewer --open may open a browser; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/ab-alert-action-playbook.md"
+      ],
+      "example": "--before BEFORE --after AFTER --output NEW_COMPARE"
+    },
+    {
+      "id": "deliver",
+      "group": "delivery",
+      "script": "crystal_delivery.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "最终验证与中英文 Word",
+        "en": "Final validation and bilingual Word"
+      },
+      "inputs": {
+        "zh-CN": "run / continue / finalize；续交和跨任务导出核对 --expected-hkl 与 --cif",
+        "en": "run / continue / finalize; verify --expected-hkl and --cif for case-bound continuation and export"
+      },
+      "outputs": {
+        "zh-CN": "官网报告、双语 Word、查看器及审核 / official report, bilingual Word, viewer and review",
+        "en": "Official report, bilingual Word, viewer and review"
+      },
+      "effects": {
+        "zh-CN": "写本地文件并可能运行原生程序、渲染报告；只在有效授权下进行官网上传。",
+        "en": "Write local outputs, possibly run native programs/render reports; official upload only with valid authorization."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/delivery-completion.md",
+        "references/case-resume.md"
+      ],
+      "example": "run --help"
+    },
+    {
+      "id": "check-delivery",
+      "group": "delivery",
+      "script": "delivery_contract.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "核对四份主交付物",
+        "en": "Audit the four deliverables"
+      },
+      "inputs": {
+        "zh-CN": "--run DELIVERY_RUN [--stem STEM]",
+        "en": "--run DELIVERY_RUN [--stem STEM]"
+      },
+      "outputs": {
+        "zh-CN": "交付完整性 JSON / delivery audit",
+        "en": "Delivery completeness JSON"
+      },
+      "effects": {
+        "zh-CN": "只读明确输入，输出至 stdout；不会上传。",
+        "en": "Read inputs and write stdout; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/customer-delivery.md"
+      ],
+      "example": "--run DELIVERY_RUN"
+    },
+    {
+      "id": "viewer",
+      "group": "delivery",
+      "script": "structure_viewer.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "生成可拖动结构界面",
+        "en": "Create interactive structure viewer"
+      },
+      "inputs": {
+        "zh-CN": "--cif MODEL.cif --output NEW_VIEWER [--res MODEL.res]",
+        "en": "--cif MODEL.cif --output NEW_VIEWER [--res MODEL.res]"
+      },
+      "outputs": {
+        "zh-CN": "离线 HTML / offline HTML",
+        "en": "Offline HTML"
+      },
+      "effects": {
+        "zh-CN": "写本地派生文件；viewer 的 --open 可打开浏览器；不上传。",
+        "en": "Write local outputs; viewer --open may open a browser; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/interactive-structure-viewer.md"
+      ],
+      "example": "--cif MODEL.cif --res MODEL.res --output NEW_VIEWER"
+    },
+    {
+      "id": "support",
+      "group": "support",
+      "script": "support_report.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "保存本地故障反馈",
+        "en": "Save a local support bundle"
+      },
+      "inputs": {
+        "zh-CN": "--run RUN --reason REASON",
+        "en": "--run RUN --reason REASON"
+      },
+      "outputs": {
+        "zh-CN": "本地诊断与最小 ZIP / local diagnostics and minimal ZIP",
+        "en": "Local diagnostics and minimal ZIP"
+      },
+      "effects": {
+        "zh-CN": "写本地派生文件；viewer 的 --open 可打开浏览器；不上传。",
+        "en": "Write local outputs; viewer --open may open a browser; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/updates-and-support.md"
+      ],
+      "example": "--run RUN --reason REASON"
+    },
+    {
+      "id": "test",
+      "group": "support",
+      "script": "portable_tests.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "运行离线合成回归",
+        "en": "Run offline synthetic regressions"
+      },
+      "inputs": {
+        "zh-CN": "--output NEW_TEST [--module-dir DIR]",
+        "en": "--output NEW_TEST [--module-dir DIR]"
+      },
+      "outputs": {
+        "zh-CN": "results.json / tests.log",
+        "en": "results.json, tests.log"
+      },
+      "effects": {
+        "zh-CN": "写本地派生文件；viewer 的 --open 可打开浏览器；不上传。",
+        "en": "Write local outputs; viewer --open may open a browser; no upload."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "按原工具适用范围和日志判断；不保证模型正确。输入范围由调用者遵守，工具箱不是路径沙箱。",
+        "en": "Respect the native tool's scope and logs; no correctness guarantee. Caller must enforce allowed input scope; toolbox is not a filesystem sandbox."
+      },
+      "references": [
+        "references/portable-environment.md"
+      ],
+      "example": "--output NEW_TEST"
+    },
+    {
+      "id": "resume-delivery",
+      "group": "delivery",
+      "script": "deliver_ready.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "从封存的本地收尾点继续官网与双语报告",
+        "en": "Resume official validation and bilingual reports from a sealed checkpoint"
+      },
+      "inputs": {
+        "zh-CN": "--run FINISH_DIR [--authorize-iucr-upload]",
+        "en": "--run FINISH_DIR [--authorize-iucr-upload]"
+      },
+      "outputs": {
+        "zh-CN": "FINISH_DIR/delivery_run；仍需报告 QA 和最终导出",
+        "en": "FINISH_DIR/delivery_run; report QA and customer export still required"
+      },
+      "effects": {
+        "zh-CN": "已有上传授权时提交封存 CIF；生成官网 PDF 和两版 Word。不会重新精修。",
+        "en": "With existing authorization, submit the sealed CIF and generate official PDF and bilingual Word; no re-refinement."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "必须用产生检查点的同一版本；校验代码及文件哈希。保留授权、重复提交保护、A/B 及排版检查。",
+        "en": "Use the same version that created the checkpoint; hashes are checked. Authorization, replay protection, A/B and layout checks remain required."
+      },
+      "references": [
+        "references/workflow-reliability.md"
+      ],
+      "example": "--run FINISH_DIR"
+    },
+    {
+      "id": "report-qa",
+      "group": "delivery",
+      "script": "report_autoqa.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "复核现有官网 PDF 与双语 Word 的排版和文件配对",
+        "en": "Audit existing official PDF, bilingual Word and exact-file pairing"
+      },
+      "inputs": {
+        "zh-CN": "--run DELIVERY_RUN --output NEW_QA.json",
+        "en": "--run DELIVERY_RUN --output NEW_QA.json"
+      },
+      "outputs": {
+        "zh-CN": "新的 JSON 审计；不修改模型和报告",
+        "en": "New JSON audit; models and reports remain unchanged"
+      },
+      "effects": {
+        "zh-CN": "读取现有交付文件，只写新的本地审计。不精修、不上传、不生成替代官网 PDF。",
+        "en": "Read existing delivery artifacts and write a new local audit; no refinement, upload or substitute official PDF."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "自动排版检查不等于逐页目视或科学认可；AB 或配对错误仍返回待复核。",
+        "en": "Automated layout checks do not claim visual or scientific acceptance; A/B or pairing failures still require review."
+      },
+      "references": [
+        "references/workflow-reliability.md"
+      ],
+      "example": "--run DELIVERY_RUN --output NEW_QA.json"
+    },
+    {
+      "id": "console",
+      "group": "support",
+      "script": "crystal_console.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "本地可视化工作台",
+        "en": "Local visual console (Chinese UI)"
+      },
+      "inputs": {
+        "zh-CN": "--workspace NEW_WORKSPACE --profile PROFILE.json --open",
+        "en": "--workspace NEW_WORKSPACE --profile PROFILE.json --open"
+      },
+      "outputs": {
+        "zh-CN": "本机网页、保存的参数方案、新运行记录",
+        "en": "Local web UI, immutable plans and new runs"
+      },
+      "effects": {
+        "zh-CN": "读取已登记任务；显式保存或开始时才写新方案/运行；不隐式授权上传。",
+        "en": "Reads registered jobs; writes new plans/runs only on explicit actions. No implicit upload consent."
+      },
+      "requires": {
+        "zh-CN": "读取仅需 Python 标准库；保存/开始使用配置好的科学环境；不要求客户装 Node。",
+        "en": "Standard library to view; configured scientific environment to save/start. No Node required by users."
+      },
+      "boundary": {
+        "zh-CN": "仅本机；界面布局不改变步骤顺序；未知状态不填完成。",
+        "en": "Local-only; node layout does not change execution order; unknown is not complete."
+      },
+      "references": [
+        "references/local-console.md",
+        "references/local-console.en.md"
+      ],
+      "example": "--workspace NEW_WORKSPACE --profile PROFILE.json --open"
+    },
+    {
+      "id": "initial-review",
+      "group": "model",
+      "script": "initial_model_review.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "初解候选与 C/N/O 初筛",
+        "en": "Screen initial candidates and C/N/O"
+      },
+      "inputs": {
+        "zh-CN": "--directory CURRENT_CANDIDATE --stem model --elements C N O Cl --output NEW_REVIEW.json",
+        "en": "--directory CURRENT_CANDIDATE --stem model --elements C N O Cl --output NEW_REVIEW.json"
+      },
+      "outputs": {
+        "zh-CN": "记录与工具本身输出；见 --help",
+        "en": "Recorded tool output; see --help"
+      },
+      "effects": {
+        "zh-CN": "只读当前候选配套文件，写新的诊断 JSON；不修改模型、不上传。",
+        "en": "See native help; local records only unless the underlying action has explicit existing upload authorization."
+      },
+      "requires": {
+        "zh-CN": "使用本机配置的 Python 和工具依赖；检索工具仅需标准库。",
+        "en": "Configured Python and native tool dependencies; route retrieval uses the standard library."
+      },
+      "boundary": {
+        "zh-CN": "数值筛查不是化学认可；缺证据保持未知，C/N/O 替代类型只列候选。",
+        "en": "Evidence-based review is required; no automatic scientific acceptance."
+      },
+      "references": [
+        "references/initial-model-review.md",
+        "references/initial-model-review.en.md"
+      ],
+      "example": "--directory CURRENT_CANDIDATE --stem model --elements C N O Cl --output NEW_REVIEW.json"
+    },
+    {
+      "id": "route-problem",
+      "group": "model",
+      "script": "route_problem.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "按警告/现象查询处理工具",
+        "en": "Retrieve problem-to-tool routes"
+      },
+      "inputs": {
+        "zh-CN": "--alert-text \"PLAT306_ALERT_2_B ...\"（可粘贴多行）或 --alerts 242_ALERT_2_B 420_ALERT_2_B --json",
+        "en": "--alert-text \"PLAT306_ALERT_2_B ...\" (multiline paste) or --alerts 242_ALERT_2_B 420_ALERT_2_B --json"
+      },
+      "outputs": {
+        "zh-CN": "记录与工具本身输出；见 --help",
+        "en": "Recorded tool output; see --help"
+      },
+      "effects": {
+        "zh-CN": "检索规则，输出 stdout 或新的 JSON；不会执行所列修复命令。",
+        "en": "See native help; local records only unless the underlying action has explicit existing upload authorization."
+      },
+      "requires": {
+        "zh-CN": "使用本机配置的 Python 和工具依赖；检索工具仅需标准库。",
+        "en": "Configured Python and native tool dependencies; route retrieval uses the standard library."
+      },
+      "boundary": {
+        "zh-CN": "没有匹配路线则返回待复核，规则匹配不表示已经确认原因。",
+        "en": "Evidence-based review is required; no automatic scientific acceptance."
+      },
+      "references": [
+        "references/problem-tool-library.md",
+        "references/problem-tool-library.en.md"
+      ],
+      "example": "--alerts 242_ALERT_2_B 420_ALERT_2_B --json"
+    },
+    {
+      "id": "session",
+      "group": "model",
+      "script": "crystal_session.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "显式元素替代与精修方案",
+        "en": "Explicit element alternatives and refinement plans"
+      },
+      "inputs": {
+        "zh-CN": "refine --job CURRENT_SESSION --source stages/CURRENT/model.res --plan plans/NEW_PLAN.json --name NEW_STAGE",
+        "en": "refine --job CURRENT_SESSION --source stages/CURRENT/model.res --plan plans/NEW_PLAN.json --name NEW_STAGE"
+      },
+      "outputs": {
+        "zh-CN": "记录与工具本身输出；见 --help",
+        "en": "Recorded tool output; see --help"
+      },
+      "effects": {
+        "zh-CN": "调用已有 session 原生脚本，在新阶段运行明确的模型/精修方案；保存原版本。",
+        "en": "See native help; local records only unless the underlying action has explicit existing upload authorization."
+      },
+      "requires": {
+        "zh-CN": "使用本机配置的 Python 和工具依赖；检索工具仅需标准库。",
+        "en": "Configured Python and native tool dependencies; route retrieval uses the standard library."
+      },
+      "boundary": {
+        "zh-CN": "计划必须有本次证据原因；按原脚本的范围、依赖与授权检查运行，不自动接受科学结论。",
+        "en": "Evidence-based review is required; no automatic scientific acceptance."
+      },
+      "references": [
+        "references/scripted-pipeline.md",
+        "references/initial-model-review.md"
+      ],
+      "example": "refine --job CURRENT_SESSION --source stages/CURRENT/model.res --plan plans/NEW_PLAN.json --name NEW_STAGE"
+    },
+    {
+      "id": "restraint-tension",
+      "group": "model",
+      "script": "restraint_tension.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "读取最终几何限制冲突",
+        "en": "Read final geometric restraint conflicts"
+      },
+      "inputs": {
+        "zh-CN": "CURRENT.lst --output NEW_TENSION.json",
+        "en": "CURRENT.lst --output NEW_TENSION.json"
+      },
+      "outputs": {
+        "zh-CN": "记录与工具本身输出；见 --help",
+        "en": "Recorded tool output; see --help"
+      },
+      "effects": {
+        "zh-CN": "只读最终 LST，写新的限制残差记录；不精修、不上传。",
+        "en": "See native help; local records only unless the underlying action has explicit existing upload authorization."
+      },
+      "requires": {
+        "zh-CN": "使用本机配置的 Python 和工具依赖；检索工具仅需标准库。",
+        "en": "Configured Python and native tool dependencies; route retrieval uses the standard library."
+      },
+      "boundary": {
+        "zh-CN": "没有列出严重限制偏差不证明刚性模型或化学结构正确。",
+        "en": "Evidence-based review is required; no automatic scientific acceptance."
+      },
+      "references": [
+        "references/short-bond-disorder-diagnosis.md"
+      ],
+      "example": "CURRENT.lst --output NEW_TENSION.json"
+    },
+    {
+      "id": "repair-plan",
+      "group": "model",
+      "script": "repair_plan.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "生成并运行有依据的局部修复对照",
+        "en": "Prepare and run evidence-backed repair trials"
+      },
+      "inputs": {
+        "zh-CN": "prepare --baseline CURRENT --stem model --request REQUEST.json --profile PROFILE.json --output NEW_COMPARE；run --plan NEW_COMPARE/plan.json",
+        "en": "prepare --baseline CURRENT --stem model --request REQUEST.json --profile PROFILE.json --output NEW_COMPARE; run --plan NEW_COMPARE/plan.json"
+      },
+      "outputs": {
+        "zh-CN": "冻结基线、INS 预览、逐方案 SHELXL/PLATON 记录和 comparison.json",
+        "en": "Frozen baseline, INS previews, native SHELXL/PLATON records and comparison.json"
+      },
+      "effects": {
+        "zh-CN": "prepare 只准备；run 执行本地精修和 PLATON。均写新目录，不上传、不改原始 HKL、不自动采纳。",
+        "en": "Prepare previews; run local refinement and PLATON. New directories, no upload, original HKL untouched, no automatic adoption."
+      },
+      "requires": {
+        "zh-CN": "Gemmi，配套 CIF/RES/INS/HKL/FCF/LST，已固定的 SHELXL/PLATON profile。",
+        "en": "Gemmi, paired CIF/RES/INS/HKL/FCF/LST and pinned SHELXL/PLATON profile."
+      },
+      "boundary": {
+        "zh-CN": "六类有限操作；化学目标、局部原子和依据必须明确。通用无序/水氢/特殊位置需原有专用工具或复核。",
+        "en": "Six bounded recipes require explicit local atoms, targets and evidence. General disorder, water H and special positions use dedicated tools/review."
+      },
+      "references": [
+        "references/evidence-repair-tools.md",
+        "references/learning-method-map.md"
+      ],
+      "example": "list"
+    },
+    {
+      "id": "ab-auto",
+      "script": "ab_auto.py",
+      "prefix": [],
+      "group": "model",
+      "title": {
+        "zh-CN": "A/B 自动分流与候选对照",
+        "en": "Automatic A/B routing and candidate comparison"
+      },
+      "example": "--baseline CURRENT --validation LOCAL --profile MACHINE.json --output NEW",
+      "references": [
+        "references/automatic-ab-mainline.md"
+      ],
+      "inputs": {
+        "zh-CN": "本次数据/报告或 CIF；输出新目录",
+        "en": "Current model/validation or CIF; new output path"
+      },
+      "outputs": {
+        "zh-CN": "诊断、方案、对照或格式报告",
+        "en": "Diagnostics, plans, comparisons or format report"
+      },
+      "effects": {
+        "zh-CN": "ab-auto 运行独立候选；cif-format 只读",
+        "en": "ab-auto runs independent trials; cif-format is read-only"
+      },
+      "requires": {
+        "zh-CN": "本机依赖；原生试验需要 SHELXL/PLATON",
+        "en": "Local dependencies; native trials need SHELXL/PLATON"
+      },
+      "boundary": {
+        "zh-CN": "不修改原始数据，不自动接受模型，不上传",
+        "en": "No source edits, automatic model acceptance or upload"
+      }
+    },
+    {
+      "id": "cif-format",
+      "script": "cif_format_check.py",
+      "prefix": [],
+      "group": "validation",
+      "title": {
+        "zh-CN": "CIF 标准格式检查",
+        "en": "CIF syntax and bounded model checks"
+      },
+      "example": "--cif MODEL.cif --single-block --model",
+      "references": [
+        "references/automatic-ab-mainline.md"
+      ],
+      "inputs": {
+        "zh-CN": "本次数据/报告或 CIF；输出新目录",
+        "en": "Current model/validation or CIF; new output path"
+      },
+      "outputs": {
+        "zh-CN": "诊断、方案、对照或格式报告",
+        "en": "Diagnostics, plans, comparisons or format report"
+      },
+      "effects": {
+        "zh-CN": "ab-auto 运行独立候选；cif-format 只读",
+        "en": "ab-auto runs independent trials; cif-format is read-only"
+      },
+      "requires": {
+        "zh-CN": "本机依赖；原生试验需要 SHELXL/PLATON",
+        "en": "Local dependencies; native trials need SHELXL/PLATON"
+      },
+      "boundary": {
+        "zh-CN": "不修改原始数据，不自动接受模型，不上传",
+        "en": "No source edits, automatic model acceptance or upload"
+      }
+    },
+    {
+      "id": "donor-audit",
+      "group": "model",
+      "script": "donor_audit.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "水氢/羟基氢与对称接触检查",
+        "en": "Free/riding donor H and periodic-contact audit"
+      },
+      "inputs": {
+        "zh-CN": "同轮 CIF/RES；--directory DIR --stem case --output NEW.json",
+        "en": "--directory DIR --stem case --output NEW.json; matched same-run CIF/RES"
+      },
+      "outputs": {
+        "zh-CN": "供体、H、几何接触、含对称的邻居、保存的 Q 峰；原文件哈希",
+        "en": "JSON evidence, source hashes, limitations and timing"
+      },
+      "effects": {
+        "zh-CN": "只读原文件；仅新建 JSON，不覆盖、上传或精修",
+        "en": "Read source files; create a new JSON only; no overwrite/upload/refinement"
+      },
+      "requires": {
+        "zh-CN": "已配置科学 Python 与 Gemmi；不需要 Olex2 窗口",
+        "en": "Configured scientific Python/Gemmi; no Olex2 window"
+      },
+      "boundary": {
+        "zh-CN": "不自动认定水/受体，不增加或移动 H，不替代密度与化学判断",
+        "en": "Evidence screening only. No automatic chemical assignment or OMIT; unsupported metrics remain null. See tool reference."
+      },
+      "references": [
+        "references/donor-reflection-tools.md"
+      ],
+      "example": "--directory PAIRED --stem case --output NEW.json"
+    },
+    {
+      "id": "reflection-audit",
+      "group": "model",
+      "script": "reflection_audit.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "异常反射与实际权重检查",
+        "en": "Reflection outliers and actual weighting audit"
+      },
+      "inputs": {
+        "zh-CN": "配对 INS/RES/HKL/CIF/FCF/LST；--directory DIR --stem case --output NEW.json",
+        "en": "--directory DIR --stem case --output NEW.json; matched same-run INS/RES/HKL/CIF/LIST4 FCF/LST"
+      },
+      "outputs": {
+        "zh-CN": "σ 与 σW 分列；hkl/θ/负偏差、未知原因、原文件哈希",
+        "en": "JSON evidence, source hashes, limitations and timing"
+      },
+      "effects": {
+        "zh-CN": "只读原文件；仅新建 JSON，不覆盖、上传或精修",
+        "en": "Read source files; create a new JSON only; no overwrite/upload/refinement"
+      },
+      "requires": {
+        "zh-CN": "已配置科学 Python 与 Gemmi；不需要 Olex2 窗口",
+        "en": "Configured scientific Python/Gemmi; no Olex2 window"
+      },
+      "boundary": {
+        "zh-CN": "仅支持可识别的标准权重；孪晶/掩膜加权指标留空；点数比例不是完整度，不删除反射",
+        "en": "Evidence screening only. No automatic chemical assignment or OMIT; unsupported metrics remain null. See tool reference."
+      },
+      "references": [
+        "references/donor-reflection-tools.md"
+      ],
+      "example": "--directory PAIRED --stem case --output NEW.json"
+    },
+    {
+      "id": "water-h-trials",
+      "group": "model",
+      "script": "material_trials.py",
+      "prefix": [
+        "water"
+      ],
+      "title": {
+        "zh-CN": "已有水氢的方向/AFIX 3 对照",
+        "en": "Existing water-H orientation/AFIX 3 trials"
+      },
+      "inputs": {
+        "zh-CN": "prepare --baseline PAIRED --request WATER.json --profile MACHINE.json --output NEW_TRIALS",
+        "en": "prepare --baseline PAIRED --request WATER.json --profile MACHINE.json --output NEW_TRIALS"
+      },
+      "outputs": {
+        "zh-CN": "JSON 证据；试验工具另存 INS、精修/本地验证日志及对照",
+        "en": "JSON evidence; trial tools also preserve INS, native refinement/validation logs and comparison"
+      },
+      "effects": {
+        "zh-CN": "诊断只读；prepare 仅准备；run 在新目录运行 SHELXL/PLATON；不官网上传或覆盖原文件",
+        "en": "Audit is read-only; prepare creates plans; run executes native tools in new directories. No upload/source overwrite."
+      },
+      "requires": {
+        "zh-CN": "科学 Python、Gemmi、NumPy；run 另需已固定的 SHELXL/PLATON profile",
+        "en": "Scientific Python, Gemmi, NumPy; run requires pinned SHELXL/PLATON profile"
+      },
+      "boundary": {
+        "zh-CN": "只处理已确认身份、全占有普通位置的 O 与现有两颗 H；保留几何、占有率和 U。生成不改对照、固定当前向量、两种方向。",
+        "en": "Only an identified full-occupancy general-site water with two existing H and explicit acceptor images; preserve internal geometry, occupancy and U."
+      },
+      "references": [
+        "references/material-derived-tools.md"
+      ],
+      "example": "prepare --baseline PAIRED --request WATER.json --profile MACHINE.json --output NEW_TRIALS"
+    },
+    {
+      "id": "reflection-omit",
+      "group": "model",
+      "script": "material_trials.py",
+      "prefix": [
+        "reflections"
+      ],
+      "title": {
+        "zh-CN": "固定列表异常反射 OMIT 对照",
+        "en": "Fixed-list outlier OMIT comparison"
+      },
+      "inputs": {
+        "zh-CN": "prepare --baseline PAIRED --request OMIT.json --profile MACHINE.json --output NEW_TRIALS",
+        "en": "prepare --baseline PAIRED --request OMIT.json --profile MACHINE.json --output NEW_TRIALS"
+      },
+      "outputs": {
+        "zh-CN": "JSON 证据；试验工具另存 INS、精修/本地验证日志及对照",
+        "en": "JSON evidence; trial tools also preserve INS, native refinement/validation logs and comparison"
+      },
+      "effects": {
+        "zh-CN": "诊断只读；prepare 仅准备；run 在新目录运行 SHELXL/PLATON；不官网上传或覆盖原文件",
+        "en": "Audit is read-only; prepare creates plans; run executes native tools in new directories. No upload/source overwrite."
+      },
+      "requires": {
+        "zh-CN": "科学 Python、Gemmi、NumPy；run 另需已固定的 SHELXL/PLATON profile",
+        "en": "Scientific Python, Gemmi, NumPy; run requires pinned SHELXL/PLATON profile"
+      },
+      "boundary": {
+        "zh-CN": "1–20 个当前有效 >10σW 反射；仅新 INS 加 OMIT，原 HKL 不变。不循环剔除、不凭低 R 选胜者。",
+        "en": "One fixed list of 1–20 active >10 sigmaW reflections. Raw HKL is unchanged; no iterative pruning or same-data winner ranking."
+      },
+      "references": [
+        "references/material-derived-tools.md"
+      ],
+      "example": "prepare --baseline PAIRED --request OMIT.json --profile MACHINE.json --output NEW_TRIALS"
+    },
+    {
+      "id": "adp-directions",
+      "group": "model",
+      "script": "adp_directions.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "热椭球长轴与差值峰方向",
+        "en": "ADP axes versus saved residual peaks"
+      },
+      "inputs": {
+        "zh-CN": "--directory PAIRED --stem case --atoms C36 --output NEW_AXES.json",
+        "en": "--directory PAIRED --stem case --atoms C36 --output NEW_AXES.json"
+      },
+      "outputs": {
+        "zh-CN": "JSON 证据；试验工具另存 INS、精修/本地验证日志及对照",
+        "en": "JSON evidence; trial tools also preserve INS, native refinement/validation logs and comparison"
+      },
+      "effects": {
+        "zh-CN": "诊断只读；prepare 仅准备；run 在新目录运行 SHELXL/PLATON；不官网上传或覆盖原文件",
+        "en": "Audit is read-only; prepare creates plans; run executes native tools in new directories. No upload/source overwrite."
+      },
+      "requires": {
+        "zh-CN": "科学 Python、Gemmi、NumPy；run 另需已固定的 SHELXL/PLATON profile",
+        "en": "Scientific Python, Gemmi, NumPy; run requires pinned SHELXL/PLATON profile"
+      },
+      "boundary": {
+        "zh-CN": "笛卡尔张量主轴与保存 Q 峰方向；NPD/长轴简并不输出可靠唯一方向。不是无序确认。",
+        "en": "Cartesian tensor axes and saved Q-peak directions. NPD/degenerate axes are flagged; alignment is not a disorder diagnosis."
+      },
+      "references": [
+        "references/material-derived-tools.md"
+      ],
+      "example": "--directory PAIRED --stem case --atoms C36 --output NEW_AXES.json"
+    },
+    {
+      "id": "convergence-trend",
+      "group": "model",
+      "script": "convergence_trend.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "收敛趋势与续算依据",
+        "en": "Convergence trend and continuation evidence"
+      },
+      "inputs": {
+        "zh-CN": "同轮 INS/LST 与原数值门禁；--directory NATIVE --stem model --output NEW.json",
+        "en": "Same-run INS/LST; --directory NATIVE --stem model --output NEW.json"
+      },
+      "outputs": {
+        "zh-CN": "逐轮有符号 shift/esd、主导参数、有限续算建议与拒绝原因",
+        "en": "Signed shifts, dominant parameters, bounded continuation recommendation and reasons"
+      },
+      "effects": {
+        "zh-CN": "本工具只读并新建 JSON；权重主线可据此自动有限续算",
+        "en": "Read-only tool creates JSON; the weight finishing loop may perform bounded unchanged continuation"
+      },
+      "requires": {
+        "zh-CN": "科学 Python 与完整同轮原生文件",
+        "en": "Scientific Python and complete matching native outputs"
+      },
+      "boundary": {
+        "zh-CN": "不固定原子、不改变限制或权重、不降低收敛标准，不自动认定结构正确",
+        "en": "Does not freeze atoms, change restraints or weights, relax convergence thresholds or establish chemical correctness"
+      },
+      "references": [
+        "references/convergence-continuation.md"
+      ],
+      "example": "--directory NATIVE --stem model --output NEW.json"
+    },
+    {
+      "id": "parameter-budget",
+      "group": "model",
+      "script": "parameter_budget.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "数据/参数比与自由度诊断",
+        "en": "Audit data/parameter budget"
+      },
+      "inputs": {
+        "zh-CN": "当前配对 CIF/RES；--directory DIR --stem case --output NEW.json",
+        "en": "Current paired CIF/RES; --directory DIR --stem case --output NEW.json"
+      },
+      "outputs": {
+        "zh-CN": "证据、未知项与后续策略 JSON",
+        "en": "Evidence, unknowns and next strategy JSON"
+      },
+      "effects": {
+        "zh-CN": "只读输入，写新诊断；不上传、不改模型。",
+        "en": "Read inputs, write new diagnostics; no upload or model edit."
+      },
+      "requires": {
+        "zh-CN": "Gemmi；本版本脚本。",
+        "en": "Gemmi; scripts from this release."
+      },
+      "boundary": {
+        "zh-CN": "诊断不是结构正确或零 AB 的保证；修改另走显式对照。",
+        "en": "Diagnosis is not correctness or zero-AB assurance; changes require explicit trials."
+      },
+      "references": [
+        "references/problem-strategy-tools.md"
+      ],
+      "example": "--directory CURRENT --stem case --output NEW.json"
+    },
+    {
+      "id": "geometry-audit",
+      "group": "model",
+      "script": "geometry_audit.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "CIF 几何表与坐标一致性检查",
+        "en": "Audit CIF geometry against coordinates"
+      },
+      "inputs": {
+        "zh-CN": "当前配对 CIF/RES；--directory DIR --stem case --output NEW.json",
+        "en": "Current paired CIF/RES; --directory DIR --stem case --output NEW.json"
+      },
+      "outputs": {
+        "zh-CN": "证据、未知项与后续策略 JSON",
+        "en": "Evidence, unknowns and next strategy JSON"
+      },
+      "effects": {
+        "zh-CN": "只读输入，写新诊断；不上传、不改模型。",
+        "en": "Read inputs, write new diagnostics; no upload or model edit."
+      },
+      "requires": {
+        "zh-CN": "Gemmi；本版本脚本。",
+        "en": "Gemmi; scripts from this release."
+      },
+      "boundary": {
+        "zh-CN": "诊断不是结构正确或零 AB 的保证；修改另走显式对照。",
+        "en": "Diagnosis is not correctness or zero-AB assurance; changes require explicit trials."
+      },
+      "references": [
+        "references/problem-strategy-tools.md"
+      ],
+      "example": "--directory CURRENT --stem case --output NEW.json"
+    },
+    {
+      "id": "refinement-controls",
+      "group": "model",
+      "script": "refinement_controls.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "最终精修控制与敏感性方案检查",
+        "en": "Audit refinement controls and sensitivity options"
+      },
+      "inputs": {
+        "zh-CN": "当前配对 CIF/RES；--directory DIR --stem case --output NEW.json",
+        "en": "Current paired CIF/RES; --directory DIR --stem case --output NEW.json"
+      },
+      "outputs": {
+        "zh-CN": "证据、未知项与后续策略 JSON",
+        "en": "Evidence, unknowns and next strategy JSON"
+      },
+      "effects": {
+        "zh-CN": "只读输入，写新诊断；不上传、不改模型。",
+        "en": "Read inputs, write new diagnostics; no upload or model edit."
+      },
+      "requires": {
+        "zh-CN": "Gemmi；本版本脚本。",
+        "en": "Gemmi; scripts from this release."
+      },
+      "boundary": {
+        "zh-CN": "诊断不是结构正确或零 AB 的保证；修改另走显式对照。",
+        "en": "Diagnosis is not correctness or zero-AB assurance; changes require explicit trials."
+      },
+      "references": [
+        "references/problem-strategy-tools.md"
+      ],
+      "example": "--directory CURRENT --stem case --output NEW.json"
+    },
+    {
+      "id": "resolution-shells",
+      "group": "model",
+      "script": "resolution_shells.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "按分辨率分组诊断数据",
+        "en": "Audit resolution shells"
+      },
+      "inputs": {
+        "zh-CN": "当前模型或明确的无坐标求解输入；详见 --help",
+        "en": "Current model or explicit coordinate-free phasing inputs; see --help"
+      },
+      "outputs": {
+        "zh-CN": "新目录中的诊断/运行记录；不覆盖原件",
+        "en": "New diagnostic/run records; source inputs preserved"
+      },
+      "effects": {
+        "zh-CN": "只读诊断；实际候选比较使用 repair-plan prepare/run。",
+        "en": "Read-only audit; execute comparisons with repair-plan prepare/run."
+      },
+      "requires": {
+        "zh-CN": "Gemmi；本机已授权软件（运行求解或对照时）。",
+        "en": "Gemmi; available authorised local native software when executing trials."
+      },
+      "boundary": {
+        "zh-CN": "未知与失败如实记录；不自动认定结构正确或采纳最终模型。",
+        "en": "Retain unknowns/failures; no automatic scientific acceptance."
+      },
+      "references": [
+        "references/five-tool-enhancements.md"
+      ],
+      "example": "--directory CURRENT --stem case --bins 6 --output NEW.json"
+    },
+    {
+      "id": "parameter-correlations",
+      "group": "model",
+      "script": "parameter_correlations.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "定位相互牵制的参数",
+        "en": "Locate correlated parameter pairs"
+      },
+      "inputs": {
+        "zh-CN": "当前模型或明确的无坐标求解输入；详见 --help",
+        "en": "Current model or explicit coordinate-free phasing inputs; see --help"
+      },
+      "outputs": {
+        "zh-CN": "新目录中的诊断/运行记录；不覆盖原件",
+        "en": "New diagnostic/run records; source inputs preserved"
+      },
+      "effects": {
+        "zh-CN": "只读诊断；实际候选比较使用 repair-plan prepare/run。",
+        "en": "Read-only audit; execute comparisons with repair-plan prepare/run."
+      },
+      "requires": {
+        "zh-CN": "Gemmi；本机已授权软件（运行求解或对照时）。",
+        "en": "Gemmi; available authorised local native software when executing trials."
+      },
+      "boundary": {
+        "zh-CN": "未知与失败如实记录；不自动认定结构正确或采纳最终模型。",
+        "en": "Retain unknowns/failures; no automatic scientific acceptance."
+      },
+      "references": [
+        "references/five-tool-enhancements.md"
+      ],
+      "example": "--directory CURRENT --stem case --output NEW.json"
+    },
+    {
+      "id": "population-stability",
+      "group": "model",
+      "script": "population_stability.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "检查无序占有率多起点适用性",
+        "en": "Inspect population multistart eligibility"
+      },
+      "inputs": {
+        "zh-CN": "当前模型或明确的无坐标求解输入；详见 --help",
+        "en": "Current model or explicit coordinate-free phasing inputs; see --help"
+      },
+      "outputs": {
+        "zh-CN": "新目录中的诊断/运行记录；不覆盖原件",
+        "en": "New diagnostic/run records; source inputs preserved"
+      },
+      "effects": {
+        "zh-CN": "只读诊断；实际候选比较使用 repair-plan prepare/run。",
+        "en": "Read-only audit; execute comparisons with repair-plan prepare/run."
+      },
+      "requires": {
+        "zh-CN": "Gemmi；本机已授权软件（运行求解或对照时）。",
+        "en": "Gemmi; available authorised local native software when executing trials."
+      },
+      "boundary": {
+        "zh-CN": "未知与失败如实记录；不自动认定结构正确或采纳最终模型。",
+        "en": "Retain unknowns/failures; no automatic scientific acceptance."
+      },
+      "references": [
+        "references/five-tool-enhancements.md"
+      ],
+      "example": "--directory CURRENT --fvar-index 2 --output NEW.json"
+    },
+    {
+      "id": "restraint-strength",
+      "group": "model",
+      "script": "restraint_strength.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "检查局部限制强度对照",
+        "en": "Inspect local restraint strength comparison"
+      },
+      "inputs": {
+        "zh-CN": "当前模型或明确的无坐标求解输入；详见 --help",
+        "en": "Current model or explicit coordinate-free phasing inputs; see --help"
+      },
+      "outputs": {
+        "zh-CN": "新目录中的诊断/运行记录；不覆盖原件",
+        "en": "New diagnostic/run records; source inputs preserved"
+      },
+      "effects": {
+        "zh-CN": "只读诊断；实际候选比较使用 repair-plan prepare/run。",
+        "en": "Read-only audit; execute comparisons with repair-plan prepare/run."
+      },
+      "requires": {
+        "zh-CN": "Gemmi；本机已授权软件（运行求解或对照时）。",
+        "en": "Gemmi; available authorised local native software when executing trials."
+      },
+      "boundary": {
+        "zh-CN": "未知与失败如实记录；不自动认定结构正确或采纳最终模型。",
+        "en": "Retain unknowns/failures; no automatic scientific acceptance."
+      },
+      "references": [
+        "references/five-tool-enhancements.md"
+      ],
+      "example": "--directory CURRENT --instruction \"DFIX 1.4 .02 C1 O1\" --output NEW.json"
+    },
+    {
+      "id": "solve-cascade",
+      "group": "model",
+      "script": "solver_fallback.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "SHELXT 失败后自动尝试 SHELXD",
+        "en": "Run SHELXT with supported SHELXD fallback"
+      },
+      "inputs": {
+        "zh-CN": "当前模型或明确的无坐标求解输入；详见 --help",
+        "en": "Current model or explicit coordinate-free phasing inputs; see --help"
+      },
+      "outputs": {
+        "zh-CN": "新目录中的诊断/运行记录；不覆盖原件",
+        "en": "New diagnostic/run records; source inputs preserved"
+      },
+      "effects": {
+        "zh-CN": "后台运行本机 SHELXT/SHELXD，保留峰模型；不上传。",
+        "en": "Run local SHELXT/SHELXD and preserve peak models; no upload."
+      },
+      "requires": {
+        "zh-CN": "Gemmi；本机已授权软件（运行求解或对照时）。",
+        "en": "Gemmi; available authorised local native software when executing trials."
+      },
+      "boundary": {
+        "zh-CN": "未知与失败如实记录；不自动认定结构正确或采纳最终模型。",
+        "en": "Retain unknowns/failures; no automatic scientific acceptance."
+      },
+      "references": [
+        "references/five-tool-enhancements.md"
+      ],
+      "example": "--ins INPUT.ins --hkl INPUT.hkl --shelxt SHELXT --shelxd SHELXD --config SEARCH.json --output NEW_RUN"
+    },
+    {
+      "id": "trial-summary",
+      "group": "model",
+      "script": "trial_summary.py",
+      "prefix": [],
+      "title": {
+        "en": "Read trial states and specific A/B alerts",
+        "zh-CN": "查看对照分支和具体 A/B 警告"
+      },
+      "inputs": {
+        "en": "Checkpointed trials directory",
+        "zh-CN": "新版对照 trials 目录"
+      },
+      "outputs": {
+        "en": "Standalone HTML summary",
+        "zh-CN": "独立 HTML 简表"
+      },
+      "effects": {
+        "en": "Reads saved records; no refinement or upload",
+        "zh-CN": "只读已有记录，不精修或上传"
+      },
+      "requires": {
+        "en": "Python standard library",
+        "zh-CN": "Python 标准库"
+      },
+      "boundary": {
+        "en": "Missing validation is not zero A/B; not an official PDF",
+        "zh-CN": "失败及未运行不计作零 A/B；不替代官网 PDF"
+      },
+      "references": [
+        "references/evidence-repair-tools.md"
+      ],
+      "example": "--directory TRIALS --output NEW.html"
+    },
+    {
+      "id": "native-resources",
+      "group": "environment",
+      "script": "native_resources.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "检测本机配置并解释 SHELXL 资源分配",
+        "en": "Inspect this machine and explain SHELXL resource allocation"
+      },
+      "inputs": {
+        "en": "Local hardware; optional thread and matrix-capacity settings",
+        "zh-CN": "本机配置，可选线程数和全矩阵参数容量"
+      },
+      "outputs": {
+        "en": "Hardware and effective resource JSON",
+        "zh-CN": "资源与策略 JSON"
+      },
+      "effects": {
+        "en": "Read-only; no refinement or system setting changes",
+        "zh-CN": "只读查询，不启动精修，不修改系统"
+      },
+      "requires": {
+        "en": "Python standard library",
+        "zh-CN": "Python 标准库"
+      },
+      "boundary": {
+        "en": "-b is parameter capacity, not MB; more threads do not guarantee speed",
+        "zh-CN": "-b 是最大参数数，不是内存 MB；核数越多不保证越快"
+      },
+      "references": [
+        "references/native-performance.md"
+      ],
+      "example": "--output-root JOBS_DIRECTORY --output NEW_RESOURCE_INFO.json"
+    },
+    {
+      "id": "density-disorder",
+      "group": "model",
+      "script": "density_disorder.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "差值峰引导无序及分级筛选",
+        "en": "Density-guided disorder and staged screening"
+      },
+      "inputs": {
+        "zh-CN": "prepare 的当前成套模型、profile、新目录；run 的 plan.json",
+        "en": "prepare: current paired bundle, profile, new output; run: plan.json"
+      },
+      "outputs": {
+        "zh-CN": "差值峰证据、短筛、完整对照、耗时与未入选记录",
+        "en": "Peak evidence, short screens, full comparisons, timings and deferred candidates"
+      },
+      "effects": {
+        "zh-CN": "新目录内生成假设并调用 SHELXL/PLATON；不上传、不采纳模型。",
+        "en": "Generate hypotheses and run SHELXL/PLATON in a new directory; no upload or adoption."
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "只处理已核实的简单完整片段；短筛不当成通过验证，未知 A/B 为 null。",
+        "en": "Established simple full-occupancy fragments only; short screens are not validated, unknown AB stays null."
+      },
+      "references": [
+        "references/density-disorder-screening.md",
+        "references/density-disorder-screening.en.md"
+      ],
+      "example": "prepare --baseline CURRENT_BUNDLE --output NEW_COMPARISON --profile LOCAL_PROFILE.json"
+    },
+    {
+      "id": "fragment-orbits",
+      "group": "model",
+      "script": "fragment_orbits.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "完整片段对称与占有率相容性",
+        "en": "Whole-fragment symmetry and population compatibility"
+      },
+      "inputs": {
+        "zh-CN": "当前配对模型和已核实片段 JSON",
+        "en": "Current paired bundle and reviewed fragment JSON"
+      },
+      "outputs": {
+        "zh-CN": "完整构型去重、共享位点计数、CIF/SOF 交叉核对、骑乘氢 PART 与占有率、短接触及概率上界",
+        "en": "Whole-configuration deduplication, shared-site counts, CIF/SOF checks, riding-H PART and occupancy audit, contacts and population bounds"
+      },
+      "effects": {
+        "zh-CN": "只读诊断，不改模型、不上传",
+        "en": "Read-only audit; no changes or upload"
+      },
+      "requires": {
+        "zh-CN": "使用已配置 Python；具体科学包、原生软件/渲染器按本工具 --help 及环境说明检查。目录查询本身只需标准库。",
+        "en": "Use the configured Python; check this tool's dependencies/native programs/renderers via help and environment docs. Catalog lookup itself needs only the standard library."
+      },
+      "boundary": {
+        "zh-CN": "短接触与两/三构型界限仅提示复核，不证明结构正确",
+        "en": "Contacts and pair/triple bounds trigger review; no correctness claim"
+      },
+      "references": [
+        "references/symmetry-configurations.md",
+        "references/symmetry-configurations.en.md",
+        "references/complete-configurations.md",
+        "references/complete-configurations.en.md"
+      ],
+      "example": "--directory CURRENT_BUNDLE --config FRAGMENTS.json --output NEW_AUDIT.json"
+    },
+    {
+      "id": "performance",
+      "group": "support",
+      "script": "performance_audit.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "耗时诊断",
+        "en": "Timing diagnostics"
+      },
+      "inputs": {
+        "zh-CN": "--run 明确的交付运行目录；可选 --output 新 JSON",
+        "en": "--run explicit delivery-run directory; optional --output new JSON"
+      },
+      "outputs": {
+        "zh-CN": "阶段耗时排序、官网/渲染明细及独立报表复核时间",
+        "en": "Ranked stages, nested official/render timings and separate report QA duration"
+      },
+      "effects": {
+        "zh-CN": "读取本次运行日志；不扫描样本库、不运行精修或上传",
+        "en": "Read specified run records; no dataset scan, refinement or upload"
+      },
+      "requires": {
+        "zh-CN": "Python 标准库",
+        "en": "Python standard library"
+      },
+      "boundary": {
+        "zh-CN": "未记录的时间和 Token 为 null；不把局部提速当作全流程提速。",
+        "en": "Unrecorded timing/token values remain null; stage savings are not total-workflow savings."
+      },
+      "references": [
+        "references/speed-diagnostics.md"
+      ],
+      "example": "--run DELIVERY_RUN --output NEW_TIMING.json"
+    },
+    {
+      "id": "metadata-ledger",
+      "group": "input",
+      "script": "experiment_metadata_state.py",
+      "prefix": [
+        "collect"
+      ],
+      "title": {
+        "zh-CN": "建立同次实验的参数来源记录",
+        "en": "Collect paired experimental metadata"
+      },
+      "inputs": {
+        "zh-CN": "--config PAIRED_SOURCES.json --output NEW_LEDGER",
+        "en": "--config PAIRED_SOURCES.json --output NEW_LEDGER"
+      },
+      "outputs": {
+        "zh-CN": "NEW_LEDGER/metadata_ledger.json",
+        "en": "NEW_LEDGER/metadata_ledger.json"
+      },
+      "effects": {
+        "zh-CN": "读取明确列出的来源和 HKL，校验指纹并写入新的记录目录。",
+        "en": "Verify the listed source files and HKL and write a new ledger."
+      },
+      "requires": {
+        "zh-CN": "配置了 gemmi 的本机 Python。",
+        "en": "The configured Python with gemmi."
+      },
+      "boundary": {
+        "zh-CN": "来源须有同次实验配对依据。文件名相似不能证明属于同颗晶体。",
+        "en": "Each source requires evidence of pairing to this acquisition."
+      },
+      "references": [
+        "references/one-time-intake.md"
+      ],
+      "example": "--config PAIRED_SOURCES.json --output NEW_LEDGER"
+    }
+  ]
+}

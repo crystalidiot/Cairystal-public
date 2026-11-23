@@ -1,0 +1,22 @@
+{
+  "checked_date": "2026-11-08",
+  "sources": [
+    {
+      "name": "SHELX",
+      "url": "https://shelx.uni-goettingen.de/",
+      "status": "official_page_read"
+    },
+    {
+      "name": "Olex2",
+      "url": "https://www.olexsys.org/olex2/docs/getting-started/",
+      "status": "official_page_read"
+    },
+    {
+      "name": "PLATON",
+      "url": "https://www.platonsoft.nl/platon/pl030000.html",
+      "status": "fetch_timeout_recheck_at_install"
+    }
+  ],
+  "installers_included": false,
+  "credentials_included": false
+}

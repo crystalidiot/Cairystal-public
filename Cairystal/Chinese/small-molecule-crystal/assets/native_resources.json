@@ -1,0 +1,14 @@
+{
+  "schema": 2,
+  "shelxl": {
+    "threads": "auto", "max_auto_threads": 8, "matrix_parameters": 6000,
+    "reserve_logical_processors": 1,
+    "unknown_memory_threads": 2,
+    "memory_thread_caps": [
+      {"below_gib": 1, "threads": 1},
+      {"below_gib": 2, "threads": 2},
+      {"below_gib": 4, "threads": 4}
+    ]
+  },
+  "platon_completion": "strict_fast"
+}

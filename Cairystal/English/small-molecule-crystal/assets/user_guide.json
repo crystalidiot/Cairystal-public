@@ -1,0 +1,90 @@
+{
+  "new": {
+    "zh-CN": [
+      "第一次处理一颗晶体",
+      "请用 Cairystal 处理这个文件夹，只问文件中缺少的信息。",
+      "先确认允许使用的输入及本机配置。读取同一样品的实验记录，集中询问缺项。只有 HKL 和 INS 时先确认 INS 是否为允许使用的起始指令，再选择支持该格式的入口。 已确认属于本次采集的 PCF 或 cif_od，可由助手一次传入 HKL、记录和配对依据，直接生成只问缺项的表单。"
+    ],
+    "en": [
+      "Start a new crystal",
+      "Please process this folder with Cairystal and ask only for missing information.",
+      "Check the permitted input files and machine profile. Reuse paired observations and ask for the remaining facts together. For HKL and INS alone, establish whether the INS is an allowed starting instruction file and choose the corresponding input route. Pass the selected HKL, explicitly paired PCF or cif_od and its acquisition basis directly to intake-form."
+    ],
+    "tools": [
+      "doctor",
+      "project-metadata",
+      "metadata",
+      "metadata-ledger",
+      "intake-form",
+      "intake-accept",
+      "inspect",
+      "setup",
+      "autorun"
+    ],
+    "references": [
+      "references/one-time-intake.md",
+      "references/mainline-and-exceptions.md"
+    ]
+  },
+  "alerts": {
+    "zh-CN": [
+      "看懂 checkCIF 警告",
+      "下面是官网报告里复制的警告。请先列出原因和核对办法，再决定是否需要试修。",
+      "可把带 PLAT306_ALERT_2_B 等完整编号的多行原文交给 route-problem 的 --alert-text。保留原始警告等级，未匹配的编号单列复核。"
+    ],
+    "en": [
+      "Understand checkCIF alerts",
+      "Here are the lines I copied from checkCIF. Identify possible causes and checks before proposing a refinement trial.",
+      "Pass lines containing full IDs such as PLAT306_ALERT_2_B to route-problem with --alert-text. Retain the reported levels and review unmapped IDs separately."
+    ],
+    "tools": [
+      "route-problem",
+      "initial-review",
+      "compare-ab"
+    ],
+    "references": [
+      "references/problem-strategy-tools.md",
+      "references/automatic-ab-mainline.md"
+    ]
+  },
+  "reports": {
+    "zh-CN": [
+      "已有模型，报告还没齐",
+      "已有这次运行的 CIF。请先查看交付进度，接着补齐官网 PDF 和中英文 Word。",
+      "先用 recover-checkcif 的 --check-only --cif 核对原任务回执和客户手里的 CIF。先找原任务目录并核对版本和 CIF 指纹。已有官网回执，用 recover-checkcif 恢复下载。已有 delivery_run 时，在新的交付目录用 deliver run 的 --official-cache 复用同一 CIF 的完整官网结果，配对精修文件齐全后生成和核验 Word。只有单个 CIF 时先检查内嵌数据，再列出缺件。提交状态未明时先查回执。"
+    ],
+    "en": [
+      "Finish reports for an existing model",
+      "I have the CIF from this run. Check the saved progress and finish the official PDF and both Word reports.",
+      "Check the selected CIF against its saved receipt with recover-checkcif --check-only --cif. Find the original job and verify its version and CIF digest. Recover a saved receipt with recover-checkcif. If delivery_run already exists, build in a fresh delivery directory using deliver run --official-cache with complete results for the exact CIF and its paired refinement files. Generate and verify both Word reports. Inspect embedded data in a lone CIF before listing missing items. Resolve uncertain submissions via the receipt."
+    ],
+    "tools": [
+      "recover-checkcif",
+      "resume-delivery",
+      "deliver",
+      "report-qa",
+      "check-delivery"
+    ],
+    "references": [
+      "references/workflow-reliability.md",
+      "references/delivery-completion.md"
+    ]
+  },
+  "improve": {
+    "zh-CN": [
+      "用中文改进 Cairystal",
+      "遇到【现象】时，我希望【行为】。用【真实例子】验证，再用【反例】检查误判。请保留旧版并给我看前后差异。",
+      "把一次观察变成可复测的小改动。先列出用户看见的结果和证据，再交给维护助手改代码。"
+    ],
+    "en": [
+      "Improve Cairystal in plain language",
+      "When [situation] occurs, I want [behavior]. Test [example] and [counterexample], keep the previous version and show me the difference.",
+      "Turn one observation into a repeatable change. Specify what the user should see and what evidence to check; let the maintenance agent implement it."
+    ],
+    "tools": [],
+    "references": [
+      "references/owner-guide.zh-CN.md",
+      "references/owner-guide.en.md"
+    ]
+  }
+}

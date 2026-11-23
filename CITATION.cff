@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "Please cite the version and scientific programs actually used."
+title: "Cairystal"
+type: software
+version: "0.3.2-preview"
+license: "LicenseRef-Cairystal-Academic-Use-1.1"
+repository-code: "https://github.com/crystalidiot/Cairystal-public"
+authors:
+  - name: "Cairystal project maintained by crystalidiot"

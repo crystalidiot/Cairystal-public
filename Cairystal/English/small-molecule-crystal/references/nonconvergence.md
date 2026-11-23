@@ -1,0 +1,22 @@
+# Diagnose nonconvergence before changing a model
+
+## Locate the cause
+
+Keep a numbered baseline and compare several cycle lines in LST: which coordinate, Uij, population, methyl rotation or scale dominates shift/esd, whether its direction oscillates, and which parameters are strongly correlated. Inspect the final covariance/correlation list and residual-density location. Do not assume the atom with largest Ueq is the moving parameter.
+
+If shifts are steadily decreasing and the model remains physical, allow a small explicit number of unchanged continuation jobs (normally up to three diagnostic jobs, recording cycles). If shifts oscillate or the same problem persists, stop repeating and investigate. Distinguish insufficient iteration from insufficient information or a deficient model.
+
+Inspect active BLOC subsets and XNPD bounds before interpreting quiet output. BLOC -1 without atom names can leave coordinates fixed while populations/ADPs and global variables move; compare the per-cycle active/total parameter counts, not just the final summary. Geometry restraints listed only at the final structure-factor calculation were not necessarily optimized in that moving block. A positive XNPD floor, including the bare instruction's default, makes zero reported NPD conditional on that floor. Neither setting is inherently invalid, but neither proves unrestricted full-model convergence. The read-only gate flags both for contextual review; verify the echoed run input because a current INS may already belong to a later attempt.
+
+Read-only machine check and bounded weight-loop continuation: [convergence-continuation.md](convergence-continuation.md).
+
+## Evidence-dependent branches
+
+- **Rotating H group:** A poorly supported low-population methyl torsion can dominate shifts. Confirm the responsible group in LST and check PART/SOF, connectivity, geometry, temperature and difference density. Compare an appropriate less-flexible riding representation for only that group, preserving a defensible orientation and reporting the removed torsion freedom. Do not bulk-replace AFIX 137. The historical tutorial suggests AFIX 33, but current SHELXL m=3 needs an appropriate reference bond; it is not valid for every linear/isolated methyl environment (including some acetonitrile settings). Consult current AFIX syntax before generating H anew. Riding is relative to a carrier atom, not an independently fixed absolute H position.
+- **Population/U/position correlations:** Trace FVAR use column-by-column, including Uij and AFIX/PART overrides. Check multiplicity and total composition; identify overlapping sites, redundant components or missing shared-site constraints. Test whether data supports additional components. A large U alone is not a vacancy diagnosis. Do not just fix every population at 0.5.
+- **Geometry or ADP instability:** First check elements, connectivity, H/protonation, density and missed symmetry/twins. Where density genuinely supports a fragment but not all of its parameters, test physically justified constraints/restraints with explicit scope and uncertainties, comparing the parameter count and residuals. Do not force positive ellipsoids to disguise an incorrect element or space group.
+- **Large or poorly conditioned model:** Check singularities, excessive parameters and strong restraints. CGLS can aid early large-model refinement but is not a replacement for appropriate final uncertainty assessment. DAMP meanings differ between L.S. and CGLS. Strong L.S. damping can affect uncertainties; document it and assess whether reduced damping is feasible. `DAMP 0 0` estimates uncertainties without applying shifts: it cannot be used to claim that a divergent model now converges.
+- **Weights:** Follow the routine [weighting review](workflow.md#weighting-review): distinguish active WGHT from the next-job suggestion, preserve a fixed-weight baseline, and inspect intensity/resolution trends alongside model quality. A better GooF alone does not establish convergence or resolve missing density.
+- **Upstream data:** Missing/weak reflections, poor absorption/scaling, incorrect cell/Laue merging, radiation damage, twins or satellites may require original frames and integration records. HKL-only refinement cannot recover discarded observations. Request the missing upstream evidence when needed; no automatic cutoffs/OMIT.
+
+Primary syntax: [SHELXL AFIX, DAMP, CGLS and WGHT](https://shelx.uni-goettingen.de/shelxl_html.php).

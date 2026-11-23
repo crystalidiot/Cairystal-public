@@ -1,0 +1,1 @@
+Use Node 22+ and pnpm. From this directory run `pnpm install --frozen-lockfile --ignore-scripts`, then `node build.mjs`. On Windows systems that disallow symlinks use `--node-linker=hoisted --package-import-method=copy`. The prebuilt bundle is shipped for normal users; rebuilding is only for maintainers. Dependency licenses accompany the bundled output.

@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "aliases": {"甲醇":"methanol","meoh":"methanol","乙醇":"ethanol","etoh":"ethanol","乙醚":"diethyl_ether","et2o":"diethyl_ether","四氢呋喃":"thf","乙腈":"acetonitrile","mecn":"acetonitrile","二氯甲烷":"dichloromethane","dcm":"dichloromethane","氯仿":"chloroform","三氯甲烷":"chloroform","丙酮":"acetone","n,n-二甲基甲酰胺":"dmf","二甲基甲酰胺":"dmf","二甲基亚砜":"dmso","甲苯":"toluene","正己烷":"hexane","己烷":"hexane","n-hexane":"hexane"},
+  "scope": "Heavy-atom topology candidates only; possible solvent identity must come from this specimen. Rigid orientations do not model flexible ring/chain conformers. Water H orientation uses a separate workflow.",
+  "solvents": {
+    "methanol": {"elements":["C","O"],"bonds":[[0,1]]},
+    "ethanol": {"elements":["C","C","O"],"bonds":[[0,1],[1,2]]},
+    "diethyl_ether": {"elements":["C","C","O","C","C"],"bonds":[[0,1],[1,2],[2,3],[3,4]]},
+    "thf": {"elements":["O","C","C","C","C"],"bonds":[[0,1],[1,2],[2,3],[3,4],[4,0]]},
+    "acetonitrile": {"elements":["C","C","N"],"bonds":[[0,1],[1,2]]},
+    "dichloromethane": {"elements":["Cl","C","Cl"],"bonds":[[0,1],[1,2]]},
+    "chloroform": {"elements":["Cl","C","Cl","Cl"],"bonds":[[0,1],[1,2],[1,3]]},
+    "acetone": {"elements":["C","C","C","O"],"bonds":[[0,1],[1,2],[1,3]]},
+    "dmf": {"elements":["C","N","C","C","O"],"bonds":[[0,1],[1,2],[1,3],[3,4]]},
+    "dmso": {"elements":["C","S","C","O"],"bonds":[[0,1],[1,2],[1,3]]},
+    "toluene": {"elements":["C","C","C","C","C","C","C"],"bonds":[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[0,6]]},
+    "hexane": {"elements":["C","C","C","C","C","C"],"bonds":[[0,1],[1,2],[2,3],[3,4],[4,5]]}
+  }
+}

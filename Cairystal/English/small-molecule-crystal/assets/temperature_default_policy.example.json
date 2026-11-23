@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "enabled": false,
+  "scope": "explicit_user_project_only",
+  "temperature_K": 293,
+  "TEMP_C": "19.85",
+  "basis_kind": "user_authorized_assumption",
+  "measured": false,
+  "uncertainty_K": null,
+  "authorization": null,
+  "require_completed_permitted_source_check": true,
+  "require_no_unresolved_conflict": true,
+  "measured_source_has_priority": true,
+  "apply_to_cell_measurement_automatically": false,
+  "require_external_CIF_and_bilingual_report_disclosure": true,
+  "requires_new_native_refinement_and_validation_after_TEMP_change": true,
+  "authorizes_upload": false,
+  "consumer": "agent_instruction_only_not_automatically_loaded_by_pipeline"
+}

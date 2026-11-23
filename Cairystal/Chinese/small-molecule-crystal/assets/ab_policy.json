@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "objective": "chemical_and_diffraction_evidence_first_then_A_then_B",
+  "automatic_candidates": true,
+  "max_hypotheses": 8,
+  "cycles": 20,
+  "adp_sigma": 0.04,
+  "adp_terminal_sigma": 0.08,
+  "oh_angles": [
+    60,
+    120,
+    180,
+    240,
+    300
+  ],
+  "element_alternatives": [
+    "C",
+    "N",
+    "O"
+  ],
+  "allow_automatic_reflection_omission": true,
+  "allow_automatic_final_model_acceptance": false,
+  "rules": [
+    {
+      "alerts": [
+        "213",
+        "214"
+      ],
+      "recipe": "adp_local",
+      "mode": "atom_isor",
+      "requires": "One uniquely identified anisotropic non-H atom; no local disorder/short-contact/type-assignment flags"
+    },
+    {
+      "alerts": [
+        "234"
+      ],
+      "recipe": "adp_local",
+      "mode": "pair_rigu_simu",
+      "requires": "Explicit bonded anisotropic pair in same PART/RESI; no local chemical ambiguity"
+    },
+    {
+      "alerts": [
+        "241",
+        "242"
+      ],
+      "recipe": "element_scan",
+      "mode": "light_atom_scan",
+      "requires": "One C/N/O site; supplied SFAC alternatives; no riding-H changes"
+    },
+    {
+      "alerts": [
+        "420"
+      ],
+      "recipe": "oh_rotate",
+      "mode": "simple_oh",
+      "requires": "Existing simple full-occupancy C-O-H and one unambiguous carbon anchor"
+    },
+    {
+      "alerts": [
+        "080",
+        "SHFSU01"
+      ],
+      "recipe": "h_freeze",
+      "mode": "unstable_h",
+      "requires": "Last shift/esd explicitly identifies an existing H in an eligible riding group"
+    },
+    {
+      "alerts": [
+        "919",
+        "934"
+      ],
+      "recipe": "reflection_omit",
+      "mode": "fixed_list_working_selection",
+      "requires": "Use one verified list of 1..20 active outliers; compare all-data and OMIT working refinements and carry forward the checked selection with explicit reporting."
+    }
+  ],
+  "mainline": [
+    {
+      "id": "01",
+      "title": "输入与环境",
+      "action": "intake-form / intake-accept / doctor"
+    },
+    {
+      "id": "02",
+      "title": "初解及初筛",
+      "action": "SHELXT + initial-review；必要时按证据走 SHELXD 分支"
+    },
+    {
+      "id": "03",
+      "title": "化学合理性与加氢",
+      "action": "先核对元素、键连/价态、电荷、H、组成及占有率；参考模型需本次数据核验"
+    },
+    {
+      "id": "04",
+      "title": "精修和权重",
+      "action": "SHELXL；记录几何、占有率、ADP、差值密度"
+    },
+    {
+      "id": "05",
+      "title": "CIF格式和本地验证",
+      "action": "cif-format + PLATON"
+    },
+    {
+      "id": "06",
+      "title": "结构问题与A/B处理",
+      "action": "化学与衍射证据优先；ab-auto试修并保留对照；合理模型可保留已说明的AB"
+    },
+    {
+      "id": "07",
+      "title": "官网及双语Word",
+      "action": "复核后的同一最终CIF；已授权IUCr PDF + 中英文Word"
+    },
+    {
+      "id": "08",
+      "title": "客户交付",
+      "action": "原始目录/Cairystal；四个明确文件链接，剩余问题如实说明"
+    }
+  ],
+  "automatic_reflection_trials": true,
+  "reflection_selection_scope": "Set allow_automatic_reflection_omission=false for comparison only, or automatic_reflection_trials=false to retain all reflections. A previous point OMIT prevents another automatic selection.",
+  "priority_order": [
+    "chemical_reasonableness_and_current_diffraction_support",
+    "resolve_or_explain_A_B_alerts",
+    "numerical_fit_and_model_economy"
+  ],
+  "unknown_chemistry_is_not_pass": true,
+  "reference_model_policy": "Use supplied/authorized references with current-data verification and explicit provenance; explicit blind/no-reference instructions still govern that run."
+}

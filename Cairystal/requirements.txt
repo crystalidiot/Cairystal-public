@@ -1,0 +1,8 @@
+# Recorded Windows x64 / Python 3.12 baseline; no runtime binaries bundled.
+gemmi==0.7.5
+numpy==2.5.4
+python-docx==1.2.0
+pypdf==6.10.0
+Pillow==12.3.0
+pdfplumber==0.11.9
+playwright==1.65.2

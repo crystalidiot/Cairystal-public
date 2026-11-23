@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-23",
+  "release_id": "0.3.2-preview",
+  "engine_release": "usage_optimization_20261123_01",
+  "distribution_revision": "public-1",
+  "upstream_regressions": {
+    "modules": 86,
+    "tests": 1179,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "success": true,
+    "seconds": 101.85,
+    "scope": "Offline regression fixtures. No new crystal solution, scientific correctness or new IUCr receipt is claimed."
+  },
+  "local_distribution_tests": {
+    "Chinese": {
+      "tests": 38,
+      "success": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 63.599
+    },
+    "English": {
+      "tests": 38,
+      "success": true,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 64.414
+    }
+  },
+  "package_integrity": {
+    "status": "integrity_verified",
+    "files": 801,
+    "publisher_authenticated": false
+  },
+  "all_python_source_matches_upstream": true,
+  "licence_1_1_unchanged": true,
+  "console_licences_verified": 17,
+  "no_new_crystal_or_IUCr_work": true,
+  "content_audit": {
+    "schema": 1,
+    "files_checked": 819,
+    "relative_links_checked": 891,
+    "findings": [],
+    "passed": true,
+    "scope": "Bounded source/archive checks only; not legal clearance, originality proof, remote-history review or complete secret detection."
+  },
+  "scope": "Bounded distribution, licence and file checks; not a legal guarantee or scientific accuracy certification."
+}

@@ -1,0 +1,5161 @@
+{
+  "schema": 1,
+  "scope": "Read-only route library plus automatic initial-model screening in the new preview; selecting a UI route never executes a repair.",
+  "steps": [
+    {
+      "id": "intake",
+      "name": "收集信息 · 检查数据",
+      "action": "一次收集元素 / 预期二维式，以及颜色、形状、尺寸；核对 HKL、晶胞、波长与同项目实验参数。",
+      "output": "可用于求解的输入；缺失和冲突有记录。",
+      "availability": "脚本已有；特殊输入格式仍需准备",
+      "tools": [
+        "intake-form",
+        "intake-accept",
+        "inspect",
+        "project-metadata",
+        "setup"
+      ],
+      "source": [
+        "scripts/pipeline_intake.py",
+        "scripts/project_metadata_preflight.py"
+      ],
+      "branches": [
+        "input",
+        "metadata",
+        "temperature"
+      ]
+    },
+    {
+      "id": "solve",
+      "name": "SHELXT 初解 · 模型初筛",
+      "action": "SHELXT 输出只是候选。短程 SHELXL 基线后，逐一检查当前模型的元素范围、C/N/O 连接和热参数、PART/占有率及异常几何，再决定继续、改指认或换求解方案。",
+      "output": "每个候选的 initial_review.json：可疑位点、几何/热参数依据、待比较元素及缺失证据。无筛查标记也不等于结构已正确。",
+      "availability": "初解后自动只读初筛已接入；元素结论仍需化学/密度复核",
+      "tools": [
+        "stage",
+        "autorun",
+        "initial-review",
+        "route-problem"
+      ],
+      "source": [
+        "scripts/crystal_session.py",
+        "scripts/crystal_autorun.py",
+        "scripts/run_crystal_stage.py",
+        "scripts/initial_model_review.py",
+        "scripts/candidate_packet.py"
+      ],
+      "branches": [
+        "light_atoms",
+        "solve_d",
+        "missing_atoms",
+        "symmetry"
+      ]
+    },
+    {
+      "id": "chemistry",
+      "name": "核对元素 · 添加氢",
+      "action": "结合当前密度、键连和已知二维式核对元素与质子化，再按合适的几何模型加氢。",
+      "output": "元素与氢有依据，能够进入整体精修。",
+      "availability": "有已审核化学图时可自动；未知组成仍需判断",
+      "tools": [
+        "match",
+        "hydrogen-plan",
+        "occupancy"
+      ],
+      "source": [
+        "scripts/graph_assignment.py",
+        "scripts/hydrogen_plan.py",
+        "scripts/crystal_autorun.py"
+      ],
+      "branches": [
+        "light_atoms",
+        "chemistry",
+        "oh",
+        "hydrogen_missing",
+        "water"
+      ]
+    },
+    {
+      "id": "refine",
+      "name": "SHELXL 精修 · 更新权重",
+      "action": "精修坐标与热参数，检查收敛和权重；每次改变模型都保存新版本。",
+      "output": "可检查的精修结果及真实 R1 / wR2 / GoF 等指标。",
+      "availability": "常规精修和权重循环已有",
+      "tools": [
+        "stage",
+        "finish",
+        "repair-plan"
+      ],
+      "source": [
+        "scripts/routine_finish.py",
+        "scripts/refinement_gate.py"
+      ],
+      "branches": [
+        "convergence",
+        "adp_shape",
+        "adp_magnitude",
+        "weights"
+      ]
+    },
+    {
+      "id": "validate",
+      "name": "检查模型 · 处理 A/B",
+      "action": "检查本地 PLATON 警告、几何、占有率与差值密度。按原因选工具，修改后回到 SHELXL 重算。",
+      "output": "修复对照或明确记录的未解决问题。",
+      "availability": "检查已有；多数异常修复尚需 agent 调度",
+      "tools": [
+        "platon",
+        "diagnose",
+        "compare-ab"
+      ],
+      "source": [
+        "scripts/structure_diagnostics.py",
+        "scripts/candidate_trials.py",
+        "scripts/common_disorder.py"
+      ],
+      "branches": [
+        "oh",
+        "disorder",
+        "metadata",
+        "short_bond",
+        "cf3",
+        "tbutyl",
+        "chain",
+        "solvent",
+        "occupancy",
+        "squeeze",
+        "outliers",
+        "absolute",
+        "systematic"
+      ]
+    },
+    {
+      "id": "official",
+      "name": "IUCr 官网 checkCIF",
+      "action": "使用最终版本的 CIF 与结构因子做已授权的官网验证，并取得真正的官方 PDF。",
+      "output": "与提交版本对应的官网 PDF；如果模型再改，重新精修和验证。",
+      "availability": "官网提交、取回和断点交付工具已有",
+      "tools": [
+        "checkcif",
+        "recover-checkcif",
+        "resume-delivery"
+      ],
+      "source": [
+        "scripts/iucr_validation.py",
+        "scripts/deliver_ready.py"
+      ],
+      "branches": [
+        "official_ab",
+        "network",
+        "pairing"
+      ]
+    },
+    {
+      "id": "deliver",
+      "name": "交付 CIF · PDF · 双语 Word",
+      "action": "核对版本与文件配对，把最终 CIF、官网 PDF、中英文晶体学表放到原始数据目录的 Cairystal 文件夹。",
+      "output": "四份主交付物及位置提醒；未解决问题单列说明。",
+      "availability": "生成、排版检查和文件齐全检查已有",
+      "tools": [
+        "deliver",
+        "report-qa",
+        "check-delivery",
+        "viewer"
+      ],
+      "source": [
+        "scripts/crystal_delivery.py",
+        "scripts/report_autoqa.py",
+        "scripts/delivery_contract.py"
+      ],
+      "branches": [
+        "reports"
+      ]
+    }
+  ],
+  "branches": [
+    {
+      "id": "input",
+      "title": "输入文件缺失 / 格式不支持",
+      "trigger": "程序还没有拿到可用的晶胞、波长、元素和衍射数据。",
+      "actions": [
+        "先区分文件错误与结构求解困难。",
+        "用输入检查和目录准备工具整理本次数据。",
+        "关键数据仍缺失时明确指出缺什么；不靠猜测补齐。"
+      ],
+      "tools": [
+        "inspect",
+        "project-metadata",
+        "setup"
+      ],
+      "availability": "已有检查工具；其他格式需单独准备",
+      "missing": "自动主入口目前主要支持匹配的 HKL/P4P，尚非所有格式通吃。",
+      "validation": "输入一致，原始文件保留，能启动求解。",
+      "return_to": "intake",
+      "return_label": "回到第 1 步，检查通过后再求解",
+      "stop": "关键输入不可确定则保存记录并停止本例。",
+      "alerts": [],
+      "references": [
+        "references/mainline-and-exceptions.md"
+      ],
+      "keywords": "input 输入文件缺失 / 格式不支持 "
+    },
+    {
+      "id": "metadata",
+      "title": "缺温度、晶胞测定范围等参数",
+      "trigger": "警告来自实验参数缺失，而非原子模型本身。",
+      "actions": [
+        "读取同项目 PCF、cif_od、P4P 等允许的侧文件。",
+        "记录来源，核对样品身份、单位和冲突，再同步到 INS/CIF。",
+        "找不到就报告缺失，不能把衍射总体 theta 范围当成晶胞测定范围。"
+      ],
+      "tools": [
+        "metadata",
+        "project-metadata"
+      ],
+      "availability": "参数读取与同步工具已有",
+      "missing": "警告自动识别并精确分派到参数工具，仍需完善统一入口。",
+      "validation": "参数与来源一致；涉及精修设置的改变重新精修。",
+      "return_to": "validate",
+      "return_label": "返回参数核对和验证；必要时回第 4 步",
+      "stop": "来源冲突无法消解时保留未知。",
+      "alerts": [
+        "183",
+        "184",
+        "185",
+        "699",
+        "881"
+      ],
+      "references": [
+        "references/experimental-metadata-preflight.md",
+        "references/project-metadata-companions.md"
+      ],
+      "keywords": "metadata 缺温度、晶胞测定范围等参数 183 184 185 699 "
+    },
+    {
+      "id": "solve_d",
+      "title": "SHELXT 没有给出可用骨架",
+      "trigger": "确认原生程序确实运行，但没有可解释候选；不是路径、授权或输入错误。",
+      "actions": [
+        "区分输入/环境错误与没有可用候选；前者停止无效重跑。",
+        "对支持的假设自动运行独立 SHELXD 分支，记录 SFAC、搜索 UNIT、FIND/NTRY 和进程预算。",
+        "保留峰模型并返回元素/占有率指认，再精修与验证。"
+      ],
+      "tools": [
+        "solve-cascade",
+        "stage",
+        "initial-review",
+        "diagnose"
+      ],
+      "availability": "已接通有依据搜索假设的自动备用求解，保留元素指认交接。",
+      "missing": "未知空间群/FIND 无依据时需提供搜索假设；SHELXD 峰模型的化学身份不能自动认定。",
+      "validation": "候选有可解释骨架，元素/连接及精修表现值得继续；不能只看退出码或低 R。",
+      "return_to": "chemistry",
+      "return_label": "有可用候选 → 第 3 步核对元素和氢",
+      "stop": "没有新证据或仍无可用骨架，保留失败记录并交给 AI/专业人员；不无限重试。",
+      "references": [
+        "references/solution-failure-evidence.md",
+        "references/sparse-light-atom-solution.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "alerts": [],
+      "keywords": "solve_d SHELXT 没有给出可用骨架 "
+    },
+    {
+      "id": "chemistry",
+      "title": "只有元素清单，或元素指认不确定",
+      "trigger": "没有已审核的化学图，或二维图与当前三维候选对不上。",
+      "actions": [
+        "依据本次键连、热参数和差值密度提出元素/化学组成候选。",
+        "有二维式时用图匹配工具比较；不直接复制旧模型坐标。",
+        "歧义处由 AI/专业人员选择有依据的方案，再交给加氢脚本。",
+        "可执行对照配方：element_scan；先 prepare 预览，再 run 独立精修及本地 PLATON，比较后返回主线。"
+      ],
+      "tools": [
+        "repair-plan",
+        "match",
+        "diagnose",
+        "hydrogen-plan",
+        "trials"
+      ],
+      "availability": "匹配与对照脚本已有；未知化学仍需判断",
+      "missing": "当前 autorun 在缺少审核图或供氢依据时会停下，不会自己完成未知结构化学推断。",
+      "validation": "元素、价态、氢数和连接关系一致；候选经精修复核。",
+      "return_to": "chemistry",
+      "return_label": "回到第 3 步，再进入精修",
+      "stop": "证据不足时明确保留候选，不编造确定分子式。",
+      "alerts": [],
+      "references": [
+        "references/evidence-repair-tools.md",
+        "references/learning-method-map.md",
+        "references/mainline-and-exceptions.md"
+      ],
+      "keywords": "chemistry 只有元素清单，或元素指认不确定 element_scan",
+      "recipes": [
+        "element_scan"
+      ]
+    },
+    {
+      "id": "oh",
+      "title": "420：羟基氢没有合适受体",
+      "trigger": "出现 D–H 无受体警告；先确认属于 OH 方向问题。",
+      "actions": [
+        "确认该氧确实应该带 H，并搜索邻近晶胞中的受体与当前差值密度。",
+        "对已有 H 生成合理方向候选，不重复添加；必要时用 AFIX 3 保持选定的相对方向。",
+        "分别重新精修，比较接触、残余密度和新的警告，再决定是否采用。",
+        "可执行对照配方：oh_rotate, h_freeze；先 prepare 预览，再 run 独立精修及本地 PLATON，比较后返回主线。"
+      ],
+      "tools": [
+        "water-h-trials",
+        "donor-audit",
+        "ab-auto",
+        "repair-plan",
+        "diagnose",
+        "stage",
+        "platon",
+        "compare-ab"
+      ],
+      "availability": "已有有限 OH 旋转与 AFIX 3 对照工具；本版 ab-auto 会自动检查适用条件并运行有界候选，未满足条件保留原原因",
+      "missing": "支持已有单氢、完整占有率 PART 0 的 C–O–H，按给定角度旋转。受体质子化与差值密度仍需复核；不是自动水氢或全化学空间搜索。",
+      "validation": "D–H / H···A / D···A 与角度合理，无新碰撞或明显负密度；PART、占有率和氢数保持一致。",
+      "return_to": "refine",
+      "return_label": "回到第 4 步精修，再做第 5 步检查",
+      "stop": "受体缺失不一定代表模型错误；尤其 N–H 可能例外。证据不够时不强行挪到最近原子。",
+      "note": "AFIX 3 本身不会寻找正确 H 位置。先确定合理位置，再使用适当的约束。",
+      "sources": [
+        "https://journals.iucr.org/services/cif/checking/PLAT420.html",
+        "https://shelx.uni-goettingen.de/shelxl_html.php"
+      ],
+      "alerts": [
+        "420"
+      ],
+      "references": [
+        "references/evidence-repair-tools.md",
+        "references/learning-method-map.md",
+        "references/ab-alert-action-playbook.md#hydrogen-alerts"
+      ],
+      "keywords": "oh 420：羟基氢没有合适受体 420 oh_rotate h_freeze",
+      "recipes": [
+        "oh_rotate",
+        "h_freeze"
+      ]
+    },
+    {
+      "id": "convergence",
+      "title": "不收敛 / 热参数或权重异常",
+      "trigger": "最大 shift/esd 持续偏高、参数振荡、非正定或权重检查未通过。",
+      "actions": [
+        "先定位哪个原子、参数或氢组在振荡，区分坏模型与自由度问题。",
+        "权重按数据更新；有依据时分别试氢组处理、局部坐标约束或局部热参数限制。",
+        "每次只做可解释的改变，保留原模型作为对照。",
+        "可执行对照配方：h_freeze；先 prepare 预览，再 run 独立精修及本地 PLATON，比较后返回主线。"
+      ],
+      "tools": [
+        "ab-auto",
+        "repair-plan",
+        "diagnose",
+        "trials",
+        "stage",
+        "finish"
+      ],
+      "availability": "已有收敛检查、权重工具及现有骑乘氢 AFIX 3 对照；本版 ab-auto 会自动检查适用条件并运行有界候选，未满足条件保留原原因",
+      "missing": "原因分类与修复计划仍需 agent 选择；不能把固定坐标当万能收敛按钮。",
+      "validation": "收敛改善且几何、热参数与差值密度不被破坏；GoF 不是通过随意改权重凑到 1。",
+      "return_to": "refine",
+      "return_label": "回到第 4 步，收敛后再验证",
+      "stop": "无改善或强依赖限制时检查模型假设，不继续叠加限制。",
+      "alerts": [
+        "080",
+        "089",
+        "SHFSU01"
+      ],
+      "references": [
+        "references/evidence-repair-tools.md",
+        "references/learning-method-map.md",
+        "references/nonconvergence.md",
+        "references/ab-alert-action-playbook.md#plat080"
+      ],
+      "keywords": "convergence 不收敛 / 热参数或权重异常 080 h_freeze",
+      "recipes": [
+        "h_freeze"
+      ]
+    },
+    {
+      "id": "disorder",
+      "title": "无序迹象 / 难处理的溶剂",
+      "trigger": "异常 ADP、残余峰或短键等证据提示分裂位置或溶剂模型问题。",
+      "actions": [
+        "先区分错误元素、单一构象和真正无序；筛查叔丁基、烷基、CF₃ 与受支持的溶剂。",
+        "生成有密度依据的 PART / 占有率候选，用局部几何和 ADP 方案做对照。",
+        "主体明确且难点局限在溶剂时，可走有授权的 SQUEEZE 分支。"
+      ],
+      "tools": [
+        "diagnose",
+        "disorder",
+        "trials",
+        "occupancy",
+        "squeeze"
+      ],
+      "availability": "受限候选生成和对照工具已有",
+      "missing": "先按 CF₃、叔丁基、烷基链或溶剂等具体分支诊断；共享工具不会自动判断哪一个构型正确。",
+      "validation": "占有率、键连、ADP、残余密度与组成相容；SQUEEZE 后仍需精修和官方验证。",
+      "return_to": "refine",
+      "return_label": "回到第 4 步重新精修",
+      "stop": "候选不能解释密度时保留未解决状态，不能强行宣称解决。",
+      "alerts": [],
+      "references": [
+        "references/mainline-and-exceptions.md"
+      ],
+      "keywords": "disorder 无序迹象 / 难处理的溶剂 "
+    },
+    {
+      "id": "official_ab",
+      "title": "官网还有模型相关 A/B",
+      "trigger": "官网报告发现本地未消除或新增的模型问题。",
+      "actions": [
+        "先区分实验参数问题和结构模型问题。",
+        "模型问题回到对应修复分支，而不是修改报告隐藏警告。",
+        "模型改动后重新精修、生成同源 CIF，并取得更新的官网报告。"
+      ],
+      "tools": [
+        "diagnose",
+        "compare-ab",
+        "stage",
+        "checkcif"
+      ],
+      "availability": "验证与对照工具已有；修复路线按原因选择",
+      "missing": "需要统一告警分类和分派器，让常见问题少靠 AI 逐条挑工具。",
+      "validation": "最终模型与最终官网 PDF 对应，未解决问题明确列出。",
+      "return_to": "validate",
+      "return_label": "回到第 5 步查原因；改模型后从第 4 步重算",
+      "stop": "无法合理消除的警告保留并解释，不能伪装成零 A/B。",
+      "alerts": [],
+      "references": [
+        "references/mainline-and-exceptions.md"
+      ],
+      "keywords": "official_ab 官网还有模型相关 A/B "
+    },
+    {
+      "id": "network",
+      "title": "官网提交中断 / PDF 没拿到",
+      "trigger": "网络、上传路径或官网任务状态异常。",
+      "actions": [
+        "先查这次提交是否已经成功到达官网。",
+        "已提交就取回同一任务的报告，避免重复上传。",
+        "仅恢复验证/交付阶段，不从求解重跑。"
+      ],
+      "tools": [
+        "recover-checkcif",
+        "resume-delivery"
+      ],
+      "availability": "恢复工具已有",
+      "missing": "部分环境故障仍需看具体日志处理。",
+      "validation": "取得能识别的官方 PDF，并核对其对应提交文件。",
+      "return_to": "official",
+      "return_label": "从第 6 步继续，不重解结构",
+      "stop": "无法取回就如实标为官网报告缺失。",
+      "alerts": [],
+      "references": [
+        "references/mainline-and-exceptions.md"
+      ],
+      "keywords": "network 官网提交中断 / PDF 没拿到 "
+    },
+    {
+      "id": "reports",
+      "title": "报告缺项 / 格式或版本不一致",
+      "trigger": "四份交付物不齐，或 Word/PDF 与最终 CIF 配对未通过。",
+      "actions": [
+        "检查生成记录与失败阶段。",
+        "从已保存的最终模型恢复报告生成或排版检查。",
+        "核对四份文件及客户目录后再提醒用户。"
+      ],
+      "tools": [
+        "report-qa",
+        "check-delivery",
+        "resume-delivery"
+      ],
+      "availability": "交付检查和恢复工具已有",
+      "missing": "不能把“生成了一个 CIF”当成整个流程结束。",
+      "validation": "四份文件确实存在且版本一致；缺失仍需明确显示。",
+      "return_to": "deliver",
+      "return_label": "回到第 7 步交付",
+      "stop": "缺项未解决时明确标为未完整交付。",
+      "alerts": [],
+      "references": [
+        "references/mainline-and-exceptions.md"
+      ],
+      "keywords": "reports 报告缺项 / 格式或版本不一致 "
+    },
+    {
+      "id": "light_atoms",
+      "title": "C/N/O 指认是否错误？先做初解模型检查",
+      "alerts": [
+        "242",
+        "017",
+        "241",
+        "243",
+        "244"
+      ],
+      "trigger": "任何初解候选都检查；尤其相邻原子 Ueq 明显不协调、连接/价态不合理、局部残差不对称。",
+      "actions": [
+        "先核对 SFAC 编号与实际散射类型；标签叫 C1 不代表它一定按 C 精修。检查对称展开和 PART 内的完整连接。",
+        "先看几何与化学：重原子近邻、键长/角度、预期二维式、价态和电荷；距离本身不能唯一识别 C/N/O 或键级。",
+        "对比同环境、同占有率近邻的 Ueq。偏小可能指认过轻，偏大可能指认过重；末端运动、无序和占有率也会产生类似结果。",
+        "检查位点正/负差值密度，必要时只在允许元素中建立 C/N/O 替代对照，保持 HKL、初始权重、限制和精修设置可比。",
+        "有完整已审核二维图时调用 match；没有二维图时用 session 的显式元素对照计划。类型确定后再生成氢、核算 UNIT 和化学式。",
+        "可执行对照配方：element_scan；先 prepare 预览，再 run 独立精修及本地 PLATON，比较后返回主线。"
+      ],
+      "validation": "不是只比较 R1：看局部残差、合理连接/价态、电荷、ADP/占有率及收敛。证据冲突或多个候选近似时保留歧义。",
+      "tools": [
+        "ab-auto",
+        "repair-plan",
+        "initial-review",
+        "diagnose",
+        "match",
+        "session",
+        "occupancy"
+      ],
+      "references": [
+        "references/evidence-repair-tools.md",
+        "references/learning-method-map.md",
+        "references/initial-model-review.md",
+        "references/ab-alert-action-playbook.md#adp-alerts"
+      ],
+      "availability": "已有初筛 + 单个位点 C/N/O 替代精修对照；带氢位点需化学联动方案；本版 ab-auto 会自动检查适用条件并运行有界候选，未满足条件保留原原因",
+      "missing": "不从单个 Ueq、峰高或键长自动换元素；空间群、完整组成与质子化仍需综合判断。",
+      "return_to": "chemistry",
+      "return_label": "返回：核对元素 · 添加氢",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "light_atoms C/N/O 指认是否错误？先做初解模型检查 242 element_scan",
+      "recipes": [
+        "element_scan"
+      ]
+    },
+    {
+      "id": "missing_atoms",
+      "title": "初解骨架残缺 / 差值峰仍很大",
+      "alerts": [
+        "097",
+        "098"
+      ],
+      "trigger": "出现不完整环、孤立峰、缺失连接或成片未解释密度。",
+      "actions": [
+        "先确认原子没有被晶胞边界或对称位置拆开；聚拢展示不改变精修模型。",
+        "核对允许元素和求解得到的散射类型；根据本次差值密度补有证据的位点，先低复杂度精修。",
+        "重元素附近的残差先检查吸收、截断和元素/占有率；不要把每个峰都添成原子。整体失败再转备用求解。",
+        "可执行对照配方：omit_map；先 prepare 预览，再 run 独立精修及本地 PLATON，比较后返回主线。"
+      ],
+      "validation": "新位点有连贯几何和可重复的密度支持，ADP/占有率稳定；新原子附近显著负密度或不合理接触则拒绝。",
+      "tools": [
+        "repair-plan",
+        "initial-review",
+        "diagnose",
+        "stage",
+        "session"
+      ],
+      "references": [
+        "references/evidence-repair-tools.md",
+        "references/learning-method-map.md",
+        "references/solution-failure-evidence.md"
+      ],
+      "availability": "已有诊断/执行工具；具体方案需根据证据选择",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "solve",
+      "return_label": "返回：SHELXT 初解 · 模型初筛",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "missing_atoms 初解骨架残缺 / 差值峰仍很大 omit_map",
+      "recipes": [
+        "omit_map"
+      ]
+    },
+    {
+      "id": "hydrogen_missing",
+      "title": "漏氢 / 亚甲基、甲基、芳香氢设置不对",
+      "alerts": [
+        "430"
+      ],
+      "trigger": "基团价态不闭合、氢数与连接不符，或短供体–受体接触提示漏氢。",
+      "actions": [
+        "先确认母原子的元素、键级、质子化和电荷；sp2/sp3 是化学几何判断，不是两种碳散射因子。",
+        "已审核化学图可用 hydrogen-plan 生成 HFIX；例如亚甲基 23，芳香 CH 43，甲基按适合的旋转模型处理。",
+        "已存在氢时核对并修正，不重复添加；特别检查各 PART、特殊位置和母原子的 Uiso 关联。"
+      ],
+      "validation": "最终 RES 中实际生成的氢数、位置、PART/SOF、接触和化学式一致；新增 420/碰撞或负密度须回查。",
+      "tools": [
+        "donor-audit",
+        "hydrogen-plan",
+        "match",
+        "occupancy",
+        "session"
+      ],
+      "references": [
+        "references/hydrogen-and-report-rules.md",
+        "references/ab-alert-action-playbook.md#hydrogen-alerts"
+      ],
+      "availability": "已有诊断/执行工具；具体方案需根据证据选择",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "hydrogen_missing 漏氢 / 亚甲基、甲基、芳香氢设置不对 430 "
+    },
+    {
+      "id": "water",
+      "title": "孤立 O / 疑似水：寻找水氢",
+      "alerts": [
+        "306"
+      ],
+      "trigger": "孤立氧或水模型缺氢，先核对对称配位及化学身份。",
+      "actions": [
+        "排除对称相关配位氧、漏识别含氧基团和错指认；孤立 O 是水候选而非证明。",
+        "结合本次差值图、邻近晶胞受体和合理水几何提出氢方向；标明来源于密度还是几何假设。",
+        "必要时比较合理几何限制或 riding 方案，核对特殊位置和整个晶胞内的 H/O 数。"
+      ],
+      "validation": "O–H、H···H、氢键、PART/占有率及局部残差相容；方向不唯一时如实保留未定位氢。",
+      "tools": [
+        "donor-audit",
+        "diagnose",
+        "session",
+        "occupancy"
+      ],
+      "references": [
+        "references/ab-alert-action-playbook.md#hydrogen-alerts"
+      ],
+      "availability": "诊断和显式精修工具已有；完整水氢搜索器尚未接通",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "water 孤立 O / 疑似水：寻找水氢 306 "
+    },
+    {
+      "id": "short_bond",
+      "title": "异常短键：化学类型错误还是位置无序？",
+      "alerts": [],
+      "trigger": "有机键明显过短、几何限制冲突，或短键与拉长椭球同时出现。",
+      "actions": [
+        "确认这是同一构型内真正的键，不是不同 PART 间接触；核对元素、键级、氢和对称关系。",
+        "结构和键型有依据时，比较针对该化学环境的 DFIX/SADI，记录目标值和 s.u.，不为消警告随意拉长。",
+        "若相邻多点同时异常，检查完整片段密度并比较整体无序方案；模型 omit-map 是移除模型原子，区别于 OMIT 反射。",
+        "可执行对照配方：geometry_local, omit_map；先 prepare 预览，再 run 独立精修及本地 PLATON，比较后返回主线。"
+      ],
+      "validation": "几何合理、限制残差不冲突、ADP 与差值密度改善；强化限制才能维持的候选标为限制敏感。",
+      "tools": [
+        "repair-plan",
+        "diagnose",
+        "restraint-tension",
+        "trials",
+        "disorder",
+        "session"
+      ],
+      "references": [
+        "references/evidence-repair-tools.md",
+        "references/learning-method-map.md",
+        "references/short-bond-disorder-diagnosis.md"
+      ],
+      "availability": "已有局部 DFIX / DANG / SADI / FLAT 对照、原子 omit-map 与限制冲突检查",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "short_bond 异常短键：化学类型错误还是位置无序？ geometry_local omit_map",
+      "recipes": [
+        "geometry_local",
+        "omit_map"
+      ]
+    },
+    {
+      "id": "adp_shape",
+      "title": "椭球拉长 / NPD / 近乎扁平",
+      "alerts": [
+        "211",
+        "212",
+        "213",
+        "214"
+      ],
+      "trigger": "出现非正定、极端主轴比或近退化热椭球。",
+      "actions": [
+        "先查 C/N/O 指认、占有率和漏无序；若多原子朝同方向异常，检查整体数据/对称性而非逐个加 ISOR。",
+        "正确局部模型但参数弱定时，比较局部 RIGU/DELU、弱 SIMU 或 ISOR；读取实际限制对和最终残差。",
+        "弱定次要无序组分可比较 ISO；用真实晶胞度量下的 Ueq 初始化，清理不兼容 EADP/ANIS。",
+        "可执行对照配方：adp_local, omit_map；先 prepare 预览，再 run 独立精修及本地 PLATON，比较后返回主线。"
+      ],
+      "validation": "热参数物理合理、位置/占有率稳定、残余密度和几何不恶化；正定或 B 降 C 不等于模型正确。",
+      "tools": [
+        "adp-directions",
+        "ab-auto",
+        "repair-plan",
+        "diagnose",
+        "trials",
+        "occupancy",
+        "restraint-tension"
+      ],
+      "references": [
+        "references/evidence-repair-tools.md",
+        "references/learning-method-map.md",
+        "references/adp-model-selection.md"
+      ],
+      "availability": "已有诊断/执行工具；具体方案需根据证据选择；本版 ab-auto 会自动检查适用条件并运行有界候选，未满足条件保留原原因",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "adp_shape 椭球拉长 / NPD / 近乎扁平 211 212 213 214 adp_local omit_map",
+      "recipes": [
+        "adp_local",
+        "omit_map"
+      ]
+    },
+    {
+      "id": "adp_magnitude",
+      "title": "Ueq 范围过大 / 刚性键检验异常",
+      "alerts": [
+        "220",
+        "221",
+        "234",
+        "230",
+        "231",
+        "232",
+        "233",
+        "241",
+        "243"
+      ],
+      "trigger": "同元素 Ueq 差异大，或成键方向位移不协调。",
+      "actions": [
+        "区分位移大小与椭球形状；ISOR 只约束形状，不能保证修好过大的 Ueq。",
+        "先查类型、占有率、无序及末端运动；基团可信时再比较有理由的 RIGU/DELU 或局部 SIMU。",
+        "检查跨 PART 和特殊位置的实际限制配对；保留减弱或取消限制的对照。",
+        "可执行对照配方：adp_local, element_scan；先 prepare 预览，再 run 独立精修及本地 PLATON，比较后返回主线。"
+      ],
+      "validation": "局部几何、密度和位移关系均可解释；记录参数/限制数以及对限制强度是否敏感。",
+      "tools": [
+        "ab-auto",
+        "repair-plan",
+        "diagnose",
+        "trials",
+        "restraint-tension",
+        "occupancy"
+      ],
+      "references": [
+        "references/evidence-repair-tools.md",
+        "references/learning-method-map.md",
+        "references/adp-model-selection.md",
+        "references/ab-alert-action-playbook.md#adp-alerts"
+      ],
+      "availability": "已有诊断/执行工具；具体方案需根据证据选择；本版 ab-auto 会自动检查适用条件并运行有界候选，未满足条件保留原原因",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "adp_magnitude Ueq 范围过大 / 刚性键检验异常 220 221 234 adp_local element_scan",
+      "recipes": [
+        "adp_local",
+        "element_scan"
+      ]
+    },
+    {
+      "id": "cf3",
+      "title": "CF₃ 转动无序",
+      "alerts": [],
+      "trigger": "当前 ADP 和差值密度支持该基团存在多位置的可能。",
+      "actions": [
+        "检查 C–C 轴周围多个 F 密度峰；比较成套 F 位置，保留共同碳位点，F 数与占有率一致。",
+        "使用 common-disorder 工具生成限定范围的候选；明确 PART、共享原子、FVAR 互补关系和 SADI/SAME 的对应关系。",
+        "同数据、同初始权重比较未拆分基线与各方案；限制按化学对应关系设置，不套用历史样品坐标或比例。"
+      ],
+      "validation": "各完整构型几何合理；占有率及不确定度、ADP、局部密度和收敛支持增加的参数。不能仅凭 R 降低采用。",
+      "tools": [
+        "disorder",
+        "diagnose",
+        "trials",
+        "occupancy"
+      ],
+      "references": [
+        "references/common-disorder-automation.md",
+        "references/whole-fragment-disorder.md"
+      ],
+      "availability": "有界候选辅助工具已有；不会自动认定该基团或接受无序模型",
+      "missing": "已有 PART、特殊位置、部分占有率或基团无法可靠识别时转专门复核，不自动重写。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "cf3 CF₃ 转动无序 "
+    },
+    {
+      "id": "tbutyl",
+      "title": "叔丁基无序",
+      "alerts": [],
+      "trigger": "当前 ADP 和差值密度支持该基团存在多位置的可能。",
+      "actions": [
+        "检查三个甲基端点是否对应完整可共存的取向；不把不同取向的最近原子拼成一个基团。",
+        "使用 common-disorder 工具生成限定范围的候选；明确 PART、共享原子、FVAR 互补关系和 SADI/SAME 的对应关系。",
+        "同数据、同初始权重比较未拆分基线与各方案；限制按化学对应关系设置，不套用历史样品坐标或比例。"
+      ],
+      "validation": "各完整构型几何合理；占有率及不确定度、ADP、局部密度和收敛支持增加的参数。不能仅凭 R 降低采用。",
+      "tools": [
+        "disorder",
+        "diagnose",
+        "trials",
+        "occupancy"
+      ],
+      "references": [
+        "references/common-disorder-automation.md",
+        "references/whole-fragment-disorder.md"
+      ],
+      "availability": "有界候选辅助工具已有；不会自动认定该基团或接受无序模型",
+      "missing": "只在叔丁基连接有依据且 H 模型受支持时生成整组候选；不支持既有复杂 PART/特殊位置的自动重写。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "tbutyl 叔丁基无序 "
+    },
+    {
+      "id": "chain",
+      "title": "烷基链无序",
+      "alerts": [],
+      "trigger": "当前 ADP 和差值密度支持该基团存在多位置的可能。",
+      "actions": [
+        "从分岔开始沿完整链对应各构象，核对共享原子、键连、构象和各支链的氢归属。",
+        "使用 common-disorder 工具生成限定范围的候选；明确 PART、共享原子、FVAR 互补关系和 SADI/SAME 的对应关系。",
+        "同数据、同初始权重比较未拆分基线与各方案；限制按化学对应关系设置，不套用历史样品坐标或比例。"
+      ],
+      "validation": "各完整构型几何合理；占有率及不确定度、ADP、局部密度和收敛支持增加的参数。不能仅凭 R 降低采用。",
+      "tools": [
+        "disorder",
+        "diagnose",
+        "trials",
+        "occupancy"
+      ],
+      "references": [
+        "references/common-disorder-automation.md",
+        "references/whole-fragment-disorder.md"
+      ],
+      "availability": "有界候选辅助工具已有；不会自动认定该基团或接受无序模型",
+      "missing": "目前只支持 2–7 个原子的短非环碳链及已明确的 CH2/CH3 riding 氢；不覆盖长链构象搜索。共享枢轴的 EXYZ 表示仍需专门复核。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "chain 烷基链无序 "
+    },
+    {
+      "id": "solvent",
+      "title": "常见溶剂无序 / 片段翻转",
+      "alerts": [
+        "602"
+      ],
+      "trigger": "当前 ADP 和差值密度支持该基团存在多位置的可能。",
+      "actions": [
+        "先判断溶剂身份是否有化学/密度支持；THF 等应比较完整环或片段，不用孤立碳拆分勉强连环。",
+        "使用 common-disorder 工具生成限定范围的候选；明确 PART、共享原子、FVAR 互补关系和 SADI/SAME 的对应关系。",
+        "同数据、同初始权重比较未拆分基线与各方案；限制按化学对应关系设置，不套用历史样品坐标或比例。"
+      ],
+      "validation": "各完整构型几何合理；占有率及不确定度、ADP、局部密度和收敛支持增加的参数。不能仅凭 R 降低采用。",
+      "tools": [
+        "disorder",
+        "diagnose",
+        "trials",
+        "occupancy"
+      ],
+      "references": [
+        "references/common-disorder-automation.md",
+        "references/whole-fragment-disorder.md"
+      ],
+      "availability": "有界候选辅助工具已有；不会自动认定该基团或接受无序模型",
+      "missing": "需本样品提供溶剂身份；目前比较整分子刚性取向/平移，不支持 THF 内部环起伏、任意柔性构象、水方向或特殊位置溶剂的自动处理。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "solvent 常见溶剂无序 / 片段翻转 "
+    },
+    {
+      "id": "occupancy",
+      "title": "PART / FVAR / 特殊位置占有率不一致",
+      "alerts": [],
+      "trigger": "出现重叠组分、化学式异常、占有率超过合理范围或特殊位置计数疑问。",
+      "actions": [
+        "解码 SFAC、SOF、FVAR、PART/AFIX 覆盖，区分 SHELX SOF、CIF 化学占有率和晶胞贡献。",
+        "列出共享位点与互斥完整构型；一般位置 21/-21 互补不代表所有特殊位置都该直接用满占有率。",
+        "用 occupancy 检查对称轨道和总组成，同时人工确认局部构型能共存；核对 H 随对应组分分配。"
+      ],
+      "validation": "晶胞计数、化学式、电荷与各构型均相容；UNIT 一致本身不能证明模型占有率正确。",
+      "tools": [
+        "occupancy",
+        "diagnose",
+        "disorder"
+      ],
+      "references": [
+        "references/disorder-occupancy.md"
+      ],
+      "availability": "已有诊断/执行工具；具体方案需根据证据选择",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "occupancy PART / FVAR / 特殊位置占有率不一致 "
+    },
+    {
+      "id": "squeeze",
+      "title": "主体可靠，溶剂难处理：SQUEEZE",
+      "alerts": [],
+      "trigger": "主体结构已可解释，剩余溶剂区严重无序且显式模型难以支持。",
+      "actions": [
+        "先排除残余密度属于主体、关键反离子或未建模配位组分；评估是否仍需确定溶剂身份/电荷。",
+        "向客户说明具体掩膜范围和后果，复用或取得本次 SQUEEZE 授权后调用现有 squeeze 工具。",
+        "保留未处理原始 HKL、显式模型对照及 PLATON 输出；正确配套 ABIN/FAB，记录空腔体积和电子数。"
+      ],
+      "validation": "主体几何/ADP/密度合理，掩膜和结构因子配套、公式/密度报告有说明；电子数不能唯一确定溶剂。",
+      "tools": [
+        "squeeze",
+        "diagnose",
+        "occupancy",
+        "complete"
+      ],
+      "references": [
+        "references/squeeze-workflow.md"
+      ],
+      "availability": "SQUEEZE 请求/执行与文件配套工具已有；需具体样品授权和主体复核",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "squeeze 主体可靠，溶剂难处理：SQUEEZE "
+    },
+    {
+      "id": "outliers",
+      "title": "少量异常反射：OMIT 对照",
+      "alerts": [
+        "919",
+        "934"
+      ],
+      "trigger": "经核对的异常反射清单；本项目偏好不超过 20 个时优先尝试独立 OMIT 对照。",
+      "actions": [
+        "先区分 934 的 Fo/Fc 差异与 919 低角度强度偏低，去重索引；排除明显模型和配对错误。",
+        "在新 INS 逐项 OMIT h k l，保留原始 HKL 和完整数据基线，不从源文件删行，也不循环筛删到阈值以下。",
+        "先固定权重比较，报告独立反射数、总体/低角完整度和 Friedel 配对变化；没有测量证据不称为已确认过曝。"
+      ],
+      "validation": "记录删点敏感性、保留数据和被省略点的表现；模型几何、ADP、密度不被牺牲，原因未知则保留待复核。",
+      "tools": [
+        "reflection-omit",
+        "reflection-audit",
+        "diagnose",
+        "session",
+        "stage",
+        "compare-ab"
+      ],
+      "references": [
+        "references/ab-alert-action-playbook.md#intensity-outliers"
+      ],
+      "availability": "精修和对照工具已有；异常点证据核验仍需选择",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "outliers 少量异常反射：OMIT 对照 919 934 "
+    },
+    {
+      "id": "weights",
+      "title": "权重 / GoF / PLAT939",
+      "alerts": [
+        "939"
+      ],
+      "trigger": "加权 GoF 异常、建议 WGHT 未检查，或 PLAT939 仍存在。",
+      "actions": [
+        "区分 SHELXL 加权 GoF 与 PLAT939 仅依据 sigma(I) 的 S；两者不必同时接近 1。",
+        "先排查模型不完整、错元素及异常强度；模型合理后才用 finish 的有限权重更新循环。",
+        "记录活动 WGHT 与 END 后建议值；模型比较先固定权重，权重调整另列，不能篡改原始 sigma(I)。"
+      ],
+      "validation": "权重趋稳、收敛/模型合理；GoF 接近 1 不能替代对 939 原因及局部密度的检查。",
+      "tools": [
+        "reflection-audit",
+        "finish",
+        "diagnose",
+        "session"
+      ],
+      "references": [
+        "references/ab-alert-action-playbook.md#plat939"
+      ],
+      "availability": "已有诊断/执行工具；具体方案需根据证据选择",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "weights 权重 / GoF / PLAT939 939 "
+    },
+    {
+      "id": "temperature",
+      "title": "温度未写入 / TEMP 与 CIF 不一致",
+      "alerts": [
+        "196"
+      ],
+      "trigger": "温度相关警告，或采集温度/晶胞测定温度和精修输入未同步。",
+      "actions": [
+        "读取同样品允许的 P4P、PCF、CIF_OD 等侧文件，保存字段来源与冲突；不同测量温度不要合并。",
+        "TEMP 使用摄氏度，CIF 温度使用 K；转换并检查实际执行 INS/RES 与最终 CIF。",
+        "无来源时标未知，不拿文件夹名、通用默认温度当实测。"
+      ],
+      "validation": "温度语义、数值、单位及来源一致；若实际 TEMP 改动影响精修，必须重新计算配套文件。",
+      "tools": [
+        "project-metadata",
+        "metadata",
+        "finish"
+      ],
+      "references": [
+        "references/temperature-synchronization.md"
+      ],
+      "availability": "已有诊断/执行工具；具体方案需根据证据选择",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "temperature 温度未写入 / TEMP 与 CIF 不一致 196 "
+    },
+    {
+      "id": "absolute",
+      "title": "绝对构型字段 / Flack 证据",
+      "alerts": [
+        "035"
+      ],
+      "trigger": "绝对构型判定方式缺失或与当前异常散射证据不一致。",
+      "actions": [
+        "检查本次 Flack/Parsons/Hooft 的方法、值和标准不确定度，及反常散射/Friedel 数据支持。",
+        "有足够衍射证据支持时可填 ad；证据不足填 unk。独立合成构型证据必须另外说明。",
+        "核对对称性及坐标手性；不把字段填齐等同于证明化学纯度或对映体纯度。"
+      ],
+      "validation": "方法字段与真实证据一致；不要仅因 Flack 中心值接近零而忽略很大的标准不确定度。",
+      "tools": [
+        "diagnose",
+        "session",
+        "complete"
+      ],
+      "references": [
+        "references/checkcif-diagnostics.md#plat035-absolute-configuration-reporting"
+      ],
+      "availability": "已有诊断/执行工具；具体方案需根据证据选择",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "official",
+      "return_label": "返回：IUCr 官网 checkCIF",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "absolute 绝对构型字段 / Flack 证据 035 "
+    },
+    {
+      "id": "symmetry",
+      "title": "空间群 / 漏对称 / 孪晶的具体证据",
+      "alerts": [
+        "112",
+        "113",
+        "931"
+      ],
+      "trigger": "空间群候选不唯一、ADDSYM 提示、已有 TWIN/HKLF5 或其他具体模型/数据矛盾。",
+      "actions": [
+        "对照本次消光、衍射对称性和候选骨架；坐标拟合本身不能证明更高对称性。",
+        "常规 PLATON 无相关提示且无其他证据时按普通路线，不主动穷举孪晶律。",
+        "确需改变设置时记录矩阵及原点，配套变换 HKL/坐标；已有特殊模型使用支持的专门配套流程。"
+      ],
+      "validation": "变换、反射设置、模型计数和验证配套；没有提示不能写成已证明不存在孪晶。",
+      "tools": [
+        "platon",
+        "stage",
+        "diagnose",
+        "occupancy"
+      ],
+      "references": [
+        "references/routine-twin-routing.md",
+        "references/symmetry-and-twins.md"
+      ],
+      "availability": "已有诊断/执行工具；具体方案需根据证据选择",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "solve",
+      "return_label": "返回：SHELXT 初解 · 模型初筛",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "symmetry 空间群 / 漏对称 / 孪晶的具体证据 112 113 931 "
+    },
+    {
+      "id": "systematic",
+      "title": "多原子整体异常 / 残差系统性分布",
+      "alerts": [
+        "250"
+      ],
+      "trigger": "许多 ADP 同向拉长、强残差广泛分布或强度随分辨率系统性偏离。",
+      "actions": [
+        "检查输入版本、晶胞/波长、吸收/尺度处理来源、完整度及强度分布。",
+        "先排查整体模型/空间群问题，再考虑有证据的数据修正；不要给全结构叠加局部限制。",
+        "只能用现有数据确认的原因与需原始帧证实的假设分开记录。"
+      ],
+      "validation": "全局诊断证据能解释趋势；不靠大量 OMIT 或调权重掩盖系统性问题。",
+      "tools": [
+        "diagnose",
+        "metadata",
+        "platon"
+      ],
+      "references": [
+        "references/systematic-error-diagnostics.md",
+        "references/data-reduction-provenance.md"
+      ],
+      "availability": "已有诊断/执行工具；具体方案需根据证据选择",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "systematic 多原子整体异常 / 残差系统性分布 250 "
+    },
+    {
+      "id": "pairing",
+      "title": "CIF / RES / FCF 或统计不一致",
+      "alerts": [
+        "920",
+        "921",
+        "922",
+        "923",
+        "924",
+        "925",
+        "926",
+        "927",
+        "928"
+      ],
+      "trigger": "模型与结构因子、散射类型、坐标/热参数或精修统计不匹配。",
+      "actions": [
+        "核对文件哈希、时间、设置、实际 LIST 4 输出以及嵌入的 RES/HKL 来源。",
+        "从同一次最终精修重新生成配套 CIF/FCF，不复制旧报告的 R 值或残差。",
+        "确认差异来自文件配套还是模型复算，再做官网验证；旧 PDF 不能代表新模型。"
+      ],
+      "validation": "四份主交付物来自同一最终模型，官网提交摘要与最终 CIF 精确对应。",
+      "tools": [
+        "finish",
+        "complete",
+        "check-delivery",
+        "report-qa"
+      ],
+      "references": [
+        "references/validation-evidence.md"
+      ],
+      "availability": "已有诊断/执行工具；具体方案需根据证据选择",
+      "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",
+      "return_to": "refine",
+      "return_label": "返回：SHELXL 精修 · 更新权重",
+      "stop": "证据不足或对照不改善时保留当前版本及失败记录，交给 AI/专业人员复核。",
+      "keywords": "pairing CIF / RES / FCF 或统计不一致 920 921 922 923 924 925 926 927 928 "
+    },
+    {
+      "id": "strategy_metadata",
+      "strategy_id": "metadata",
+      "title": "追溯实验参数与单位",
+      "title_en": "Recover source-backed experimental metadata",
+      "alerts": [
+        "091",
+        "092",
+        "183",
+        "184",
+        "185",
+        "193",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "660",
+        "699",
+        "880",
+        "881",
+        "882",
+        "CELL003",
+        "CELL004",
+        "CELL005",
+        "CELLK01",
+        "DIFF001",
+        "DIFF005",
+        "DIFF019",
+        "DIFF020",
+        "DIFF022",
+        "EXPT005",
+        "EXPT009",
+        "EXPT010",
+        "RADNT01",
+        "RADNW01"
+      ],
+      "tools": [
+        "project-metadata",
+        "metadata"
+      ],
+      "source_pages": [
+        21,
+        22,
+        52,
+        53,
+        55,
+        56,
+        64,
+        65,
+        150,
+        193,
+        194,
+        195,
+        196,
+        197
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "查同一实验的 PCF/cif_od/记录及来源；区分测胞与强度温度。",
+        "核对单位和字段，按来源同步，未知保留未知。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "只有默认值或无法对应实验时，不当作实测；修改尺寸/误差必须有来源。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_source_sync",
+      "keywords": [
+        "metadata",
+        "Recover source-backed experimental metadata"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_scalar_consistency",
+      "strategy_id": "scalar_consistency",
+      "title": "核对 CIF 数值之间的关系",
+      "title_en": "Audit CIF scalar consistency",
+      "alerts": [
+        "018",
+        "019",
+        "025",
+        "030",
+        "053",
+        "054",
+        "055",
+        "063",
+        "064",
+        "067",
+        "095",
+        "096",
+        "099",
+        "150",
+        "151",
+        "152",
+        "CELLT01",
+        "CELLV01",
+        "CELLV02",
+        "CRYSS01",
+        "CRYSS02",
+        "DIFMN01",
+        "EXPT108",
+        "REFLL01",
+        "REFLG01",
+        "REFLT01",
+        "REFLT02"
+      ],
+      "tools": [
+        "project-metadata",
+        "cif-format",
+        "stage"
+      ],
+      "source_pages": [
+        22,
+        23,
+        24,
+        25,
+        48,
+        49,
+        57,
+        84,
+        85,
+        99,
+        119,
+        120,
+        124,
+        177,
+        178,
+        473,
+        474,
+        475,
+        476
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "区分字段填反、单位错误和真实实验异常。",
+        "先核对源记录或重新计算，再从对应当前模型重生 CIF；不编造标准不确定度。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "无法证明是填录错误时只诊断；不任意缩小 ZERR 或晶体尺寸。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_diagnostic_routes",
+      "keywords": [
+        "scalar_consistency",
+        "Audit CIF scalar consistency"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_composition",
+      "strategy_id": "composition",
+      "title": "组成、占有率、Z 与密度核算",
+      "title_en": "Reconcile composition occupancy Z and density",
+      "alerts": [
+        "041",
+        "042",
+        "043",
+        "044",
+        "045",
+        "046",
+        "047",
+        "048",
+        "049",
+        "050",
+        "051",
+        "068",
+        "CELLZ01",
+        "CHEMS01",
+        "CHEMW01",
+        "CHEMW03",
+        "DENSD01",
+        "DENSX01",
+        "FORMU01",
+        "ABSMU01"
+      ],
+      "tools": [
+        "occupancy",
+        "diagnose",
+        "project-metadata"
+      ],
+      "source_pages": [
+        26,
+        27,
+        28,
+        35,
+        37,
+        40,
+        50,
+        51,
+        52,
+        67,
+        68,
+        69,
+        70,
+        105,
+        110,
+        113,
+        114,
+        115,
+        116,
+        117,
+        126
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "按对称多重性与占有率核算模型晶胞内容，检查 UNIT 与 SFAC。",
+        "区分模型成分、已确认总成分与掩膜溶剂；确认后重新精修生成派生量。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不通过改 Z、分子式或密度掩盖未建模成分。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_diagnostic_and_review",
+      "keywords": [
+        "composition",
+        "Reconcile composition occupancy Z and density"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_absorption",
+      "strategy_id": "absorption",
+      "title": "吸收校正来源与适用性",
+      "title_en": "Investigate absorption correction provenance",
+      "alerts": [
+        "052",
+        "056",
+        "057",
+        "058",
+        "059",
+        "060",
+        "062",
+        "064",
+        "065",
+        "066",
+        "ABSTM02",
+        "ABSTY01",
+        "ABSTY02",
+        "ABSTY03"
+      ],
+      "tools": [
+        "project-metadata",
+        "metadata",
+        "reflection-audit"
+      ],
+      "source_pages": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "区分实际校正透射因子和 SIZE 推算值，核对原处理记录。",
+        "有原始帧和合适软件时另做吸收校正对照；只有合并 HKL 时说明限制。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不把填写 multi-scan 当作实际完成校正；不凭空改尺寸以改变透射率。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "diagnosis_or_reprocessing_required",
+      "keywords": [
+        "absorption",
+        "Investigate absorption correction provenance"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_labels",
+      "strategy_id": "labels",
+      "title": "统一原子身份与几何表标签",
+      "title_en": "Reconcile atom identities and labels",
+      "alerts": [
+        "069",
+        "070",
+        "071",
+        "711",
+        "712",
+        "713",
+        "714",
+        "715",
+        "716",
+        "717",
+        "718",
+        "720",
+        "798",
+        "799",
+        "812"
+      ],
+      "tools": [
+        "geometry-audit",
+        "labels"
+      ],
+      "source_pages": [
+        128,
+        129,
+        343,
+        344,
+        345,
+        368,
+        371
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "找出几何表或 ADP 表中无法对应坐标的标签。",
+        "明确旧新标签映射，统一更新当前模型及相关命令，再重生报表。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不认为 H0A/Cu01 必然非法；重名或歧义映射需要先解决。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_audit_existing_rename",
+      "keywords": [
+        "labels",
+        "Reconcile atom identities and labels"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_geometry_tables",
+      "strategy_id": "geometry_tables",
+      "title": "从坐标复核键长、键角和氢键表",
+      "title_en": "Recalculate reported geometry from coordinates",
+      "alerts": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706",
+        "707",
+        "708",
+        "721",
+        "722",
+        "723",
+        "724",
+        "725",
+        "726",
+        "727",
+        "728",
+        "731",
+        "732",
+        "733",
+        "734",
+        "735",
+        "736",
+        "737",
+        "738",
+        "741",
+        "742",
+        "743",
+        "744",
+        "745",
+        "746",
+        "747",
+        "748",
+        "751",
+        "752",
+        "753",
+        "754",
+        "755",
+        "756",
+        "757",
+        "758",
+        "760",
+        "761",
+        "762",
+        "763",
+        "764",
+        "SYMOP01"
+      ],
+      "tools": [
+        "geometry-audit",
+        "stage",
+        "refinement-controls"
+      ],
+      "source_pages": [
+        340,
+        341,
+        342,
+        343,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358,
+        517,
+        518
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "按明确对称操作重算距离、角度、扭角和氢键。",
+        "区分坐标/标签不一致与协方差误差；从当前完整精修重生几何表。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "无协方差矩阵时不重写 s.u.；不能靠删除不利表格行隐藏问题。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_audit",
+      "keywords": [
+        "geometry_tables",
+        "Recalculate reported geometry from coordinates"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_symmetry",
+      "strategy_id": "symmetry",
+      "title": "空间群、晶胞与设置核对",
+      "title_en": "Review symmetry cell and setting",
+      "alerts": [
+        "104",
+        "107",
+        "108",
+        "109",
+        "110",
+        "111",
+        "112",
+        "113",
+        "114",
+        "115",
+        "119",
+        "120",
+        "121",
+        "122",
+        "123",
+        "124",
+        "125",
+        "126",
+        "127",
+        "128",
+        "129",
+        "130",
+        "131",
+        "132",
+        "133",
+        "134",
+        "135",
+        "136",
+        "137",
+        "138",
+        "139",
+        "140",
+        "141",
+        "142",
+        "143",
+        "144",
+        "145",
+        "146",
+        "147",
+        "148",
+        "149",
+        "150",
+        "151",
+        "152",
+        "153",
+        "154",
+        "155",
+        "156",
+        "157",
+        "158",
+        "181",
+        "182",
+        "SYMMG01",
+        "SYMMG02",
+        "SYMMS01",
+        "SYMMS02"
+      ],
+      "tools": [
+        "initial-review",
+        "occupancy",
+        "platon",
+        "stage"
+      ],
+      "source_pages": [
+        157,
+        158,
+        162,
+        164,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        192,
+        193,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "比较空间群名称、显式操作和晶胞度量；ADDSYM 仅作为候选证据。",
+        "需要换基时同时变换坐标、反射、ADP 与对称信息，保留独立对照。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不能只改空间群标签或凭伪对称自动升群。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_diagnosis_specialist_transform",
+      "keywords": [
+        "symmetry",
+        "Review symmetry cell and setting"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_special_position",
+      "strategy_id": "special_position",
+      "title": "特殊位置与互斥无序占有率",
+      "title_en": "Audit special positions and mutually exclusive disorder",
+      "alerts": [
+        "074",
+        "075",
+        "076",
+        "077",
+        "101",
+        "102",
+        "103",
+        "300",
+        "303",
+        "304",
+        "789"
+      ],
+      "tools": [
+        "occupancy",
+        "disorder",
+        "diagnose",
+        "population-stability"
+      ],
+      "source_pages": [
+        130,
+        131,
+        157,
+        254,
+        259,
+        364
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "区分 CIF 占有率与 SHELXL SOF、特殊位置多重性。",
+        "检查对称重叠、PART 与 FVAR；101-103 检查的是坐标精度而非占有率本身。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "部分占有不一定错误；不自动把所有占有率设为 1。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_audit",
+      "keywords": [
+        "special_position",
+        "Audit special positions and mutually exclusive disorder"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_adp",
+      "strategy_id": "adp",
+      "title": "热椭球、刚性键与无序比较",
+      "title_en": "Diagnose ADP shape rigid bonds and disorder",
+      "alerts": [
+        "201",
+        "202",
+        "203",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "220",
+        "221",
+        "222",
+        "223",
+        "224",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "250",
+        "260"
+      ],
+      "tools": [
+        "adp-directions",
+        "diagnose",
+        "occupancy",
+        "restraint-tension",
+        "disorder",
+        "repair-plan",
+        "parameter-correlations",
+        "population-stability",
+        "restraint-strength"
+      ],
+      "source_pages": [
+        197,
+        201,
+        202,
+        203,
+        204,
+        209,
+        210,
+        211,
+        212,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        227,
+        229,
+        232,
+        239,
+        249,
+        250,
+        252
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "先分辨指认、无序、占有率及数据问题，再比较局部 RIGU/SIMU/DELU/ISOR 或 ISO。",
+        "检查残差、几何、参数和限制冲突；同一原子多种方法分别建候选。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "ISOR 不等于各向同性精修；SIMU 不等于 EADP；两个 sigma 不要求固定倍数。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_trials",
+      "keywords": [
+        "adp",
+        "Diagnose ADP shape rigid bonds and disorder"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_element",
+      "strategy_id": "element",
+      "title": "轻原子与配位身份核对",
+      "title_en": "Check atom assignment and coordination",
+      "alerts": [
+        "017",
+        "241",
+        "242",
+        "243",
+        "244",
+        "307",
+        "308",
+        "313",
+        "395",
+        "396",
+        "397",
+        "398",
+        "782"
+      ],
+      "tools": [
+        "initial-review",
+        "diagnose",
+        "repair-plan"
+      ],
+      "source_pages": [
+        84,
+        232,
+        239,
+        246,
+        247,
+        264,
+        265,
+        268,
+        300,
+        301,
+        364
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "结合化学连接、ADP、键长与本次密度比较元素假设。",
+        "当前支持的 C/N/O 单位点可走 element_scan；附属氢要同时考虑。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "Ueq 或短键本身不证明某元素错误。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_trials",
+      "keywords": [
+        "element",
+        "Check atom assignment and coordination"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_hydrogen_count",
+      "strategy_id": "hydrogen_count",
+      "title": "氢数目、杂化和质子化核对",
+      "title_en": "Check H count hybridisation and protonation",
+      "alerts": [
+        "040",
+        "073",
+        "078",
+        "079",
+        "093",
+        "245",
+        "303",
+        "305",
+        "306",
+        "309",
+        "311",
+        "312",
+        "315",
+        "316",
+        "317",
+        "318",
+        "319",
+        "320",
+        "321",
+        "322",
+        "323",
+        "324",
+        "325",
+        "326",
+        "327",
+        "328",
+        "HYDTR01"
+      ],
+      "tools": [
+        "donor-audit",
+        "hydrogen-plan",
+        "match",
+        "diagnose"
+      ],
+      "source_pages": [
+        76,
+        104,
+        130,
+        132,
+        150,
+        249,
+        259,
+        260,
+        261,
+        266,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "检查有证据的键级、价态、供氢依据与已有 H；先排重复加氢。",
+        "明确化学图后生成 HFIX；已有 H 的替换需按当前模型重新建立方案。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "水、氧化物、配位氧不能仅凭孤立氧或短接触判断；不把 AFIX 23/43 机械替换。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_bounded_plans_scientific_review",
+      "keywords": [
+        "hydrogen_count",
+        "Check H count hybridisation and protonation"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_hydrogen_direction",
+      "strategy_id": "hydrogen_direction",
+      "title": "氢方向与短接触对照",
+      "title_en": "Compare H directions and close contacts",
+      "alerts": [
+        "314",
+        "350",
+        "351",
+        "352",
+        "353",
+        "354",
+        "355",
+        "356",
+        "357",
+        "358",
+        "359",
+        "380",
+        "390",
+        "391",
+        "410",
+        "411",
+        "412",
+        "413",
+        "414",
+        "415",
+        "416",
+        "417",
+        "420",
+        "430",
+        "431",
+        "432",
+        "433",
+        "434",
+        "480",
+        "481",
+        "482",
+        "770",
+        "771",
+        "772"
+      ],
+      "tools": [
+        "donor-audit",
+        "water-h-trials",
+        "repair-plan"
+      ],
+      "source_pages": [
+        269,
+        287,
+        288,
+        289,
+        290,
+        298,
+        299,
+        301,
+        305,
+        307,
+        308,
+        310,
+        311,
+        312,
+        314,
+        315,
+        316,
+        317,
+        324,
+        326,
+        327,
+        328,
+        359,
+        360
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "检查供体身份、对称受体和密度；已有简单 OH 或全占有水可比较方向。",
+        "AFIX 3 只保持已有方向，不能自行决定正确氢位；验证短接触与密度变化。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不靠把 H 推向最近原子或固定一个 H-H 距离来默认制造氢键。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_trials",
+      "keywords": [
+        "hydrogen_direction",
+        "Compare H directions and close contacts"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_local_geometry",
+      "strategy_id": "local_geometry",
+      "title": "有依据的距离、等价性与平面限制",
+      "title_en": "Apply justified local geometry trials",
+      "alerts": [
+        "329",
+        "330",
+        "331",
+        "332",
+        "333",
+        "334",
+        "335",
+        "336",
+        "338",
+        "340",
+        "341",
+        "342",
+        "343",
+        "344",
+        "360",
+        "361",
+        "362",
+        "363",
+        "364",
+        "365",
+        "366",
+        "367",
+        "368",
+        "369",
+        "370",
+        "371",
+        "372",
+        "373",
+        "374",
+        "375",
+        "773",
+        "774",
+        "775",
+        "776",
+        "777",
+        "778",
+        "779",
+        "782"
+      ],
+      "tools": [
+        "diagnose",
+        "restraint-tension",
+        "disorder",
+        "repair-plan",
+        "restraint-strength"
+      ],
+      "source_pages": [
+        273,
+        274,
+        275,
+        276,
+        277,
+        286,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        360,
+        361,
+        362,
+        364
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "先区分键级/指认错误与正确片段受无序或数据影响。",
+        "按明确化学依据分别生成 DFIX/DANG/SADI/FLAT 对照，保留目标与 sigma。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不从警告阈值反推“应有键长”，不对所有短键强行拉长。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_trials",
+      "keywords": [
+        "local_geometry",
+        "Apply justified local geometry trials"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_convergence",
+      "strategy_id": "convergence",
+      "title": "定位不收敛参数与有限续算",
+      "title_en": "Diagnose shift/esd and bounded continuation",
+      "alerts": [
+        "080",
+        "081",
+        "SHFSU01"
+      ],
+      "tools": [
+        "convergence-trend",
+        "restraint-tension",
+        "refinement-controls",
+        "repair-plan",
+        "parameter-correlations"
+      ],
+      "source_pages": [
+        132,
+        133,
+        135,
+        497,
+        498,
+        499,
+        500,
+        501
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "读取最后多轮同一参数的有符号 shift/esd，分辨衰减、振荡、相关性。",
+        "满足条件有限续算；已有骑乘 H 可作 AFIX 3 固定向量对照。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不把 088/089/090 当作收敛警告，不任意固定重原子。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_auto_continuation_and_trials",
+      "keywords": [
+        "convergence",
+        "Diagnose shift/esd and bounded continuation"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_parameter_budget",
+      "strategy_id": "parameter_budget",
+      "title": "数据/参数比与模型自由度",
+      "title_en": "Audit data versus independent parameters",
+      "alerts": [
+        "088",
+        "089",
+        "090",
+        "904",
+        "REFNR01"
+      ],
+      "tools": [
+        "parameter-budget",
+        "hydrogen-plan",
+        "refinement-controls"
+      ],
+      "source_pages": [
+        145,
+        146,
+        147,
+        148,
+        149,
+        384,
+        481,
+        482,
+        483,
+        484
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "读取实际数据数、参数数和 H 处理；区分原生精修比与 Laue 合并后的 PLAT 比。",
+        "有化学依据时比较 C-H 骑乘、减少多余自由度；检查采集分辨率和剔除情况。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "限制不是新测量；不能把限制数直接加到数据数来宣称通过。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_audit",
+      "keywords": [
+        "parameter_budget",
+        "Audit data versus independent parameters"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_weights",
+      "strategy_id": "weights",
+      "title": "权重、GoF 与整体模型",
+      "title_en": "Review weights goodness of fit and global model",
+      "alerts": [
+        "072",
+        "082",
+        "083",
+        "084",
+        "085",
+        "086",
+        "087",
+        "808",
+        "809",
+        "929",
+        "937",
+        "939",
+        "963",
+        "964",
+        "965",
+        "GOODF01",
+        "WEIGH01",
+        "RFACG01",
+        "RFACR01"
+      ],
+      "tools": [
+        "finish",
+        "reflection-audit",
+        "diagnose",
+        "resolution-shells"
+      ],
+      "source_pages": [
+        74,
+        75,
+        129,
+        136,
+        139,
+        140,
+        144,
+        145,
+        370,
+        416,
+        423,
+        428,
+        485,
+        486,
+        489,
+        523,
+        524
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "核对实际使用与建议的 WGHT，常规迭代后检查残差趋势。",
+        "高权重不能单独诊断曝光/孪晶；排查模型和数据。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不人为调权重只为了 GoF=1；未知权重不冒充 sigmaW。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_refinement",
+      "keywords": [
+        "weights",
+        "Review weights goodness of fit and global model"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_extinction",
+      "strategy_id": "extinction",
+      "title": "无意义 EXTI 的移除对照",
+      "title_en": "Compare removal of insignificant extinction",
+      "alerts": [
+        "006",
+        "031",
+        "935"
+      ],
+      "tools": [
+        "refinement-controls",
+        "repair-plan"
+      ],
+      "source_pages": [
+        79,
+        80,
+        100,
+        422
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "比较 EXTI 与当前 CIF 的值及 s.u.；无显著性时准备 remove_extinction。",
+        "从同起点分别保留/移除 EXTI 后完整精修和验证。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "没有 s.u. 或文件配对不一致时不自动移除。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_trial",
+      "keywords": [
+        "extinction",
+        "Compare removal of insignificant extinction"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_final_controls",
+      "strategy_id": "final_controls",
+      "title": "撤销临时阻尼并核对最终精修",
+      "title_en": "Release damping for a checked final refinement",
+      "alerts": [
+        "731",
+        "732",
+        "936"
+      ],
+      "tools": [
+        "refinement-controls",
+        "repair-plan",
+        "convergence-trend"
+      ],
+      "source_pages": [
+        348,
+        349,
+        350,
+        351,
+        422
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "检查最终仍存在的 DAMP，准备 release_damping 独立对照。",
+        "复查真正收敛、协方差和几何 s.u.；失败保留原版本。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "删除 DAMP 不是收敛证明；BLOC/CGLS/特殊模型另行处理。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_trial",
+      "keywords": [
+        "final_controls",
+        "Release damping for a checked final refinement"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_outliers",
+      "strategy_id": "outliers",
+      "title": "固定异常反射列表的敏感性试验",
+      "title_en": "Compare an explicit fixed outlier list",
+      "alerts": [
+        "918",
+        "919",
+        "934"
+      ],
+      "tools": [
+        "reflection-audit",
+        "reflection-omit",
+        "resolution-shells"
+      ],
+      "source_pages": [
+        409,
+        410,
+        418,
+        419,
+        420,
+        421,
+        422
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "基于实际权重列出异常点、角度和残差符号。",
+        "符合支持条件时对固定列表作 OMIT 对照，保留原 HKL。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不循环挑点；少于 20 点不证明曝光错误；不同数据集合不按 R 排胜负。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_trial",
+      "keywords": [
+        "outliers",
+        "Compare an explicit fixed outlier list"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_resolution",
+      "strategy_id": "resolution",
+      "title": "高角截断与全数据敏感性比较",
+      "title_en": "Compare explicit resolution windows",
+      "alerts": [
+        "019",
+        "020",
+        "023",
+        "026",
+        "027",
+        "028",
+        "029",
+        "905",
+        "906",
+        "910",
+        "911",
+        "912",
+        "913",
+        "950",
+        "951",
+        "952",
+        "953",
+        "954",
+        "955",
+        "956",
+        "957",
+        "958",
+        "RINTA01",
+        "THETM01"
+      ],
+      "tools": [
+        "reflection-audit",
+        "refinement-controls",
+        "repair-plan",
+        "resolution-shells"
+      ],
+      "source_pages": [
+        85,
+        86,
+        89,
+        90,
+        91,
+        93,
+        94,
+        95,
+        96,
+        384,
+        385,
+        391,
+        397,
+        403,
+        404,
+        425,
+        426,
+        493,
+        519
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "检查高角壳层信号、缺失和原有 SHEL/OMIT；明确 d_min 与理由。",
+        "用 resolution_window 建全数据和指定范围的独立精修对照，记录损失与输出指标。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "只作显式敏感性试验；完整度改善或 R 降低不说明增加了信息，不能隐去分辨率损失。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "new_executable_sensitivity_trial",
+      "keywords": [
+        "resolution",
+        "Compare explicit resolution windows"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md",
+        "references/five-tool-enhancements.md"
+      ]
+    },
+    {
+      "id": "strategy_absolute",
+      "strategy_id": "absolute",
+      "title": "绝对结构证据与报告方式",
+      "title_en": "Assess absolute-structure evidence",
+      "alerts": [
+        "024",
+        "032",
+        "033",
+        "034",
+        "035",
+        "036",
+        "107",
+        "109",
+        "781",
+        "791",
+        "792",
+        "793",
+        "907",
+        "914",
+        "915",
+        "916",
+        "917",
+        "987"
+      ],
+      "tools": [
+        "platon",
+        "diagnose",
+        "project-metadata"
+      ],
+      "source_pages": [
+        90,
+        100,
+        101,
+        102,
+        103,
+        104,
+        158,
+        363,
+        366,
+        367,
+        390,
+        406,
+        408,
+        459,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "连同 Flack/Hooft 的 s.u.、Bijvoet 覆盖和异常散射证据判断。",
+        "证据不足用未知；反转或孪晶是有依据的独立模型假设。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不因 x 接近零就默认确定；不靠不上传结构因子消警告。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "scientific_review_existing_tools",
+      "keywords": [
+        "absolute",
+        "Assess absolute-structure evidence"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_voids",
+      "strategy_id": "voids",
+      "title": "空隙、溶剂与掩膜记录",
+      "title_en": "Handle solvent voids and mask accounting",
+      "alerts": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606",
+        "607",
+        "868",
+        "869",
+        "990"
+      ],
+      "tools": [
+        "disorder",
+        "squeeze",
+        "occupancy"
+      ],
+      "source_pages": [
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        377,
+        378,
+        379,
+        461,
+        462
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "区分空孔和有电子密度的难处理溶剂，主体须可靠。",
+        "获授权后走 SQUEEZE，保留原始数据与 FAB/ABIN 及电子数/空隙记录。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不隐藏主体缺失原子；电子数不唯一确定溶剂身份。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_authorized_workflow",
+      "keywords": [
+        "voids",
+        "Handle solvent voids and mask accounting"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_file_pairing",
+      "strategy_id": "file_pairing",
+      "title": "重生同一最终模型的 CIF/FCF/RES",
+      "title_en": "Regenerate a consistent final file bundle",
+      "alerts": [
+        "005",
+        "010",
+        "011",
+        "012",
+        "013",
+        "014",
+        "015",
+        "016",
+        "161",
+        "162",
+        "163",
+        "166",
+        "170",
+        "217",
+        "224",
+        "697",
+        "698",
+        "900",
+        "901",
+        "902",
+        "903",
+        "920",
+        "921",
+        "922",
+        "923",
+        "924",
+        "925",
+        "926",
+        "927",
+        "928",
+        "949",
+        "992",
+        "993",
+        "994",
+        "996",
+        "997",
+        "998",
+        "999"
+      ],
+      "tools": [
+        "cif-format",
+        "stage",
+        "finish",
+        "check-delivery"
+      ],
+      "source_pages": [
+        79,
+        80,
+        81,
+        82,
+        83,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        212,
+        222,
+        338,
+        339,
+        382,
+        383,
+        411,
+        412,
+        413,
+        414,
+        415,
+        424,
+        462,
+        463
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "核对版本、校验和、晶胞和反射配对，避免旧 FCF 配新 CIF。",
+        "从明确最终模型重新运行生成 CIF/FCF；正常用 LIST 4，特殊模型按专门路线。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不手改 R、残差、checksum 或未确认的 s.u. 来追平验证结果。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_executable_regeneration",
+      "keywords": [
+        "file_pairing",
+        "Regenerate a consistent final file bundle"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_validation_failure",
+      "strategy_id": "validation_failure",
+      "title": "验证器输入、容量与缺失检查",
+      "title_en": "Handle validation execution and capacity limits",
+      "alerts": [
+        "608",
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806",
+        "807",
+        "810",
+        "811",
+        "813",
+        "814",
+        "815",
+        "820"
+      ],
+      "tools": [
+        "cif-format",
+        "platon",
+        "support"
+      ],
+      "source_pages": [
+        338,
+        368,
+        369,
+        370,
+        371,
+        372
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "先检查语法、软件与规则文件，再区分验证跳过和真实零警告。",
+        "容量或不支持模型保留失败原因，必要时专门本地检查。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "不删对称信息或未检查部分来假装验证通过。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "existing_diagnostics_environment_review",
+      "keywords": [
+        "validation_failure",
+        "Handle validation execution and capacity limits"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    },
+    {
+      "id": "strategy_documentation",
+      "strategy_id": "documentation",
+      "title": "记录限制、约束、无序与特殊散射",
+      "title_en": "Document model treatment and special scattering",
+      "alerts": [
+        "002",
+        "003",
+        "004",
+        "007",
+        "164",
+        "165",
+        "168",
+        "169",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "186",
+        "187",
+        "218",
+        "301",
+        "302",
+        "650",
+        "768",
+        "769",
+        "794",
+        "850",
+        "860",
+        "870",
+        "871",
+        "872",
+        "930",
+        "931",
+        "933",
+        "970",
+        "978",
+        "980",
+        "981",
+        "982",
+        "983",
+        "984",
+        "985",
+        "986",
+        "988",
+        "989",
+        "991"
+      ],
+      "tools": [
+        "restraint-tension",
+        "diagnose",
+        "platon",
+        "support"
+      ],
+      "source_pages": [
+        77,
+        78,
+        79,
+        80,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        195,
+        255,
+        258,
+        338,
+        358,
+        359,
+        367,
+        372,
+        373,
+        374,
+        375,
+        376,
+        379,
+        380,
+        416,
+        417,
+        428,
+        455,
+        458,
+        459,
+        460,
+        461,
+        462
+      ],
+      "trigger": "相关 A/B 警告或同类问题；警告编号是问题线索，不是原因结论。",
+      "actions": [
+        "核对处理是否确实使用，记录作用原子、理由与局限。",
+        "告知信息类提示不一定需要模型改变；真正 A/B 仍按问题分流。"
+      ],
+      "validation": "保留未改对照；模型改变后返回 SHELXL、本地验证及最终精确 CIF 的官网验证。检查结果可比性，不能只凭 R 或 A/B 计数选择。",
+      "stop": "说明必须对应实际操作，不能用论文案例文字替代本次证据。",
+      "return_label": "返回精修/验证；仅报告或网络故障从相应断点恢复。",
+      "return_step": "refine",
+      "availability": "documentation_and_specialist_review",
+      "keywords": [
+        "documentation",
+        "Document model treatment and special scattering"
+      ],
+      "source": [
+        "references/problem-strategy-tools.md"
+      ],
+      "scientific_acceptance": false,
+      "return_to": "refine",
+      "references": [
+        "references/problem-strategy-tools.md"
+      ]
+    }
+  ],
+  "priority": [
+    {
+      "title": "先确定原因，再运行对照",
+      "text": "按警告查路线与原资料。repair-plan 已接入6类有限操作；先预览，再运行本地 SHELXL / PLATON，比较后返回主线。"
+    },
+    {
+      "title": "初解后就检查 C/N/O",
+      "text": "用邻近几何、Ueq、占有率和当前密度交叉检查；必要时只对明确位点做元素替代对照。"
+    },
+    {
+      "title": "保留完整交付",
+      "text": "候选对照不是最终版。模型复核后仍生成官网 checkCIF PDF 与中英文 Word；未解决问题如实保留。"
+    }
+  ],
+  "reference_pages": {
+    "002": [
+      76,
+      77
+    ],
+    "003": [
+      77,
+      78
+    ],
+    "004": [
+      79,
+      78
+    ],
+    "005": [
+      79
+    ],
+    "006": [
+      79
+    ],
+    "007": [
+      80
+    ],
+    "010": [
+      81,
+      80
+    ],
+    "011": [
+      81
+    ],
+    "012": [
+      81
+    ],
+    "013": [
+      81,
+      82
+    ],
+    "014": [
+      82
+    ],
+    "015": [
+      82
+    ],
+    "016": [
+      83
+    ],
+    "017": [
+      84
+    ],
+    "018": [
+      84,
+      85
+    ],
+    "019": [
+      85
+    ],
+    "020": [
+      86,
+      87,
+      88,
+      218
+    ],
+    "021": [
+      89,
+      88
+    ],
+    "022": [
+      89
+    ],
+    "023": [
+      90
+    ],
+    "024": [
+      90
+    ],
+    "025": [
+      91,
+      90
+    ],
+    "026": [
+      91,
+      92
+    ],
+    "027": [
+      93,
+      92
+    ],
+    "028": [
+      93
+    ],
+    "029": [
+      94,
+      93,
+      95,
+      96,
+      97,
+      98,
+      99
+    ],
+    "030": [
+      99
+    ],
+    "031": [
+      100
+    ],
+    "032": [
+      100,
+      101
+    ],
+    "033": [
+      101
+    ],
+    "034": [
+      102
+    ],
+    "035": [
+      102,
+      103
+    ],
+    "036": [
+      104,
+      103
+    ],
+    "037": [
+      104
+    ],
+    "038": [
+      104
+    ],
+    "039": [
+      104
+    ],
+    "040": [
+      104
+    ],
+    "041": [
+      105,
+      106,
+      107,
+      108
+    ],
+    "042": [
+      108,
+      109
+    ],
+    "043": [
+      110,
+      111,
+      112,
+      113
+    ],
+    "044": [
+      113
+    ],
+    "045": [
+      114,
+      115
+    ],
+    "046": [
+      115
+    ],
+    "047": [
+      115
+    ],
+    "048": [
+      115
+    ],
+    "049": [
+      116,
+      117
+    ],
+    "050": [
+      117
+    ],
+    "051": [
+      117,
+      118,
+      119
+    ],
+    "052": [
+      119
+    ],
+    "053": [
+      119
+    ],
+    "054": [
+      120,
+      119
+    ],
+    "055": [
+      120
+    ],
+    "056": [
+      120
+    ],
+    "057": [
+      121,
+      120
+    ],
+    "058": [
+      121,
+      122
+    ],
+    "059": [
+      122,
+      123
+    ],
+    "060": [
+      123
+    ],
+    "061": [
+      123
+    ],
+    "062": [
+      124
+    ],
+    "063": [
+      124
+    ],
+    "064": [
+      124
+    ],
+    "065": [
+      125
+    ],
+    "066": [
+      125
+    ],
+    "067": [
+      125
+    ],
+    "068": [
+      126,
+      125,
+      127
+    ],
+    "069": [
+      128
+    ],
+    "070": [
+      128,
+      129
+    ],
+    "071": [
+      129
+    ],
+    "072": [
+      129
+    ],
+    "073": [
+      130,
+      129
+    ],
+    "074": [
+      130
+    ],
+    "075": [
+      130
+    ],
+    "076": [
+      131
+    ],
+    "077": [
+      131,
+      132
+    ],
+    "078": [
+      132
+    ],
+    "079": [
+      132
+    ],
+    "080": [
+      133,
+      132,
+      134,
+      135
+    ],
+    "081": [
+      135
+    ],
+    "082": [
+      136,
+      137,
+      138
+    ],
+    "083": [
+      139
+    ],
+    "084": [
+      140,
+      139,
+      141,
+      142,
+      143,
+      144
+    ],
+    "085": [
+      144
+    ],
+    "086": [
+      145,
+      144
+    ],
+    "087": [
+      145
+    ],
+    "088": [
+      145,
+      146,
+      147
+    ],
+    "089": [
+      147,
+      148
+    ],
+    "090": [
+      149,
+      148
+    ],
+    "091": [
+      149
+    ],
+    "092": [
+      150
+    ],
+    "093": [
+      150
+    ],
+    "094": [
+      151,
+      150,
+      152
+    ],
+    "095": [
+      153
+    ],
+    "096": [
+      153
+    ],
+    "097": [
+      153,
+      154,
+      155
+    ],
+    "098": [
+      155,
+      156
+    ],
+    "099": [
+      156
+    ],
+    "104": [
+      157
+    ],
+    "107": [
+      158
+    ],
+    "108": [
+      158
+    ],
+    "109": [
+      158
+    ],
+    "110": [
+      158,
+      159,
+      160
+    ],
+    "111": [
+      160,
+      161
+    ],
+    "112": [
+      162,
+      161,
+      163,
+      164
+    ],
+    "113": [
+      164,
+      165,
+      166,
+      167
+    ],
+    "114": [
+      167
+    ],
+    "115": [
+      167
+    ],
+    "119": [
+      167
+    ],
+    "120": [
+      168,
+      167
+    ],
+    "121": [
+      168
+    ],
+    "122": [
+      168
+    ],
+    "123": [
+      168
+    ],
+    "124": [
+      169
+    ],
+    "125": [
+      169
+    ],
+    "126": [
+      169
+    ],
+    "127": [
+      170,
+      169
+    ],
+    "128": [
+      170
+    ],
+    "129": [
+      171,
+      170
+    ],
+    "130": [
+      171
+    ],
+    "131": [
+      171
+    ],
+    "132": [
+      171
+    ],
+    "133": [
+      171
+    ],
+    "134": [
+      172
+    ],
+    "135": [
+      172
+    ],
+    "136": [
+      172
+    ],
+    "137": [
+      172
+    ],
+    "138": [
+      172
+    ],
+    "139": [
+      173,
+      172
+    ],
+    "140": [
+      173
+    ],
+    "141": [
+      173
+    ],
+    "142": [
+      173,
+      174
+    ],
+    "143": [
+      174
+    ],
+    "144": [
+      175,
+      174
+    ],
+    "145": [
+      175
+    ],
+    "146": [
+      175
+    ],
+    "147": [
+      175
+    ],
+    "148": [
+      175,
+      176,
+      177
+    ],
+    "149": [
+      177
+    ],
+    "150": [
+      177,
+      178
+    ],
+    "151": [
+      178
+    ],
+    "152": [
+      178,
+      179
+    ],
+    "153": [
+      179
+    ],
+    "154": [
+      179,
+      180
+    ],
+    "155": [
+      180
+    ],
+    "156": [
+      180
+    ],
+    "157": [
+      181,
+      180
+    ],
+    "158": [
+      181
+    ],
+    "161": [
+      181
+    ],
+    "162": [
+      182
+    ],
+    "163": [
+      184
+    ],
+    "164": [
+      185
+    ],
+    "165": [
+      185
+    ],
+    "166": [
+      186
+    ],
+    "168": [
+      186
+    ],
+    "169": [
+      186
+    ],
+    "170": [
+      186
+    ],
+    "171": [
+      187,
+      188
+    ],
+    "172": [
+      188
+    ],
+    "173": [
+      189,
+      188
+    ],
+    "174": [
+      189
+    ],
+    "175": [
+      189,
+      190
+    ],
+    "176": [
+      190
+    ],
+    "177": [
+      191
+    ],
+    "178": [
+      191,
+      192
+    ],
+    "179": [
+      192
+    ],
+    "180": [
+      192
+    ],
+    "181": [
+      192
+    ],
+    "182": [
+      193,
+      192
+    ],
+    "183": [
+      193
+    ],
+    "184": [
+      194
+    ],
+    "185": [
+      194,
+      195
+    ],
+    "186": [
+      195
+    ],
+    "187": [
+      195
+    ],
+    "193": [
+      196
+    ],
+    "197": [
+      196
+    ],
+    "198": [
+      196
+    ],
+    "199": [
+      197
+    ],
+    "200": [
+      197
+    ],
+    "201": [
+      197,
+      198,
+      199,
+      200,
+      201
+    ],
+    "202": [
+      201
+    ],
+    "203": [
+      202,
+      201
+    ],
+    "210": [
+      202
+    ],
+    "211": [
+      202,
+      203
+    ],
+    "212": [
+      203
+    ],
+    "213": [
+      204,
+      203,
+      205,
+      206,
+      207,
+      208,
+      209
+    ],
+    "214": [
+      210,
+      209,
+      211
+    ],
+    "215": [
+      211
+    ],
+    "216": [
+      212,
+      211
+    ],
+    "217": [
+      212
+    ],
+    "218": [
+      212
+    ],
+    "220": [
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218
+    ],
+    "221": [
+      218,
+      219
+    ],
+    "222": [
+      219,
+      220,
+      221
+    ],
+    "223": [
+      221,
+      222
+    ],
+    "224": [
+      222
+    ],
+    "230": [
+      223,
+      222,
+      224,
+      225,
+      226
+    ],
+    "231": [
+      226,
+      227
+    ],
+    "232": [
+      227,
+      228
+    ],
+    "233": [
+      229,
+      228
+    ],
+    "234": [
+      229,
+      230,
+      231,
+      232
+    ],
+    "241": [
+      232,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239
+    ],
+    "242": [
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246
+    ],
+    "243": [
+      246,
+      247
+    ],
+    "244": [
+      247,
+      248,
+      249
+    ],
+    "245": [
+      249
+    ],
+    "250": [
+      250,
+      251,
+      252
+    ],
+    "300": [
+      254,
+      255
+    ],
+    "301": [
+      255,
+      256,
+      257,
+      258
+    ],
+    "302": [
+      258,
+      259
+    ],
+    "303": [
+      259
+    ],
+    "304": [
+      259,
+      260
+    ],
+    "305": [
+      260
+    ],
+    "306": [
+      261,
+      262,
+      263,
+      264
+    ],
+    "307": [
+      264,
+      265
+    ],
+    "308": [
+      265,
+      266
+    ],
+    "309": [
+      266
+    ],
+    "310": [
+      266,
+      267
+    ],
+    "311": [
+      267
+    ],
+    "312": [
+      268
+    ],
+    "313": [
+      268,
+      269
+    ],
+    "314": [
+      269
+    ],
+    "315": [
+      269
+    ],
+    "316": [
+      270,
+      269
+    ],
+    "317": [
+      270
+    ],
+    "318": [
+      270
+    ],
+    "319": [
+      270
+    ],
+    "320": [
+      271
+    ],
+    "321": [
+      271
+    ],
+    "322": [
+      271
+    ],
+    "323": [
+      271
+    ],
+    "324": [
+      272,
+      271
+    ],
+    "325": [
+      272
+    ],
+    "326": [
+      272
+    ],
+    "327": [
+      272
+    ],
+    "328": [
+      272
+    ],
+    "329": [
+      273
+    ],
+    "330": [
+      273
+    ],
+    "331": [
+      273,
+      274,
+      275
+    ],
+    "332": [
+      275
+    ],
+    "333": [
+      275
+    ],
+    "334": [
+      275,
+      276
+    ],
+    "335": [
+      276
+    ],
+    "336": [
+      276
+    ],
+    "338": [
+      276
+    ],
+    "340": [
+      277,
+      278,
+      279
+    ],
+    "341": [
+      280,
+      279,
+      281,
+      282
+    ],
+    "342": [
+      283,
+      282,
+      284,
+      285,
+      286
+    ],
+    "343": [
+      286
+    ],
+    "344": [
+      286
+    ],
+    "350": [
+      287
+    ],
+    "351": [
+      287
+    ],
+    "352": [
+      287
+    ],
+    "353": [
+      287,
+      288
+    ],
+    "354": [
+      288
+    ],
+    "355": [
+      288,
+      289
+    ],
+    "356": [
+      289
+    ],
+    "357": [
+      289
+    ],
+    "358": [
+      290,
+      289
+    ],
+    "359": [
+      290
+    ],
+    "360": [
+      290,
+      291
+    ],
+    "361": [
+      291
+    ],
+    "362": [
+      292
+    ],
+    "363": [
+      292
+    ],
+    "364": [
+      293,
+      292
+    ],
+    "365": [
+      293
+    ],
+    "366": [
+      293
+    ],
+    "367": [
+      294
+    ],
+    "368": [
+      294
+    ],
+    "369": [
+      295,
+      294,
+      296
+    ],
+    "370": [
+      296
+    ],
+    "371": [
+      296
+    ],
+    "372": [
+      297
+    ],
+    "373": [
+      297
+    ],
+    "374": [
+      297
+    ],
+    "375": [
+      298
+    ],
+    "380": [
+      298
+    ],
+    "390": [
+      298,
+      299
+    ],
+    "391": [
+      299
+    ],
+    "395": [
+      300
+    ],
+    "396": [
+      300
+    ],
+    "397": [
+      301
+    ],
+    "398": [
+      301
+    ],
+    "410": [
+      301,
+      302,
+      303,
+      304
+    ],
+    "411": [
+      305,
+      306
+    ],
+    "412": [
+      307,
+      306,
+      308
+    ],
+    "413": [
+      308,
+      309,
+      310
+    ],
+    "414": [
+      310,
+      311
+    ],
+    "415": [
+      311,
+      312
+    ],
+    "416": [
+      312
+    ],
+    "417": [
+      312,
+      313,
+      314
+    ],
+    "420": [
+      315,
+      314,
+      316,
+      317
+    ],
+    "430": [
+      317,
+      318,
+      319,
+      320,
+      321,
+      322,
+      323,
+      324
+    ],
+    "431": [
+      324
+    ],
+    "432": [
+      324,
+      325,
+      326
+    ],
+    "433": [
+      326
+    ],
+    "434": [
+      326,
+      327
+    ],
+    "480": [
+      327
+    ],
+    "481": [
+      328,
+      327
+    ],
+    "482": [
+      328
+    ],
+    "601": [
+      328,
+      329,
+      330,
+      331
+    ],
+    "602": [
+      332,
+      333,
+      334
+    ],
+    "603": [
+      334
+    ],
+    "604": [
+      334
+    ],
+    "605": [
+      335,
+      334,
+      336
+    ],
+    "606": [
+      336,
+      337
+    ],
+    "607": [
+      338
+    ],
+    "608": [
+      338
+    ],
+    "650": [
+      338
+    ],
+    "660": [
+      338
+    ],
+    "697": [
+      338
+    ],
+    "698": [
+      339
+    ],
+    "699": [
+      339
+    ],
+    "701": [
+      340
+    ],
+    "702": [
+      341,
+      340
+    ],
+    "703": [
+      341
+    ],
+    "704": [
+      341
+    ],
+    "705": [
+      341
+    ],
+    "706": [
+      342
+    ],
+    "707": [
+      342
+    ],
+    "708": [
+      343,
+      342
+    ],
+    "710": [
+      343
+    ],
+    "711": [
+      343
+    ],
+    "712": [
+      343,
+      344
+    ],
+    "713": [
+      344
+    ],
+    "714": [
+      344
+    ],
+    "715": [
+      344
+    ],
+    "716": [
+      344
+    ],
+    "717": [
+      345
+    ],
+    "718": [
+      345
+    ],
+    "720": [
+      345
+    ],
+    "721": [
+      345
+    ],
+    "722": [
+      346
+    ],
+    "723": [
+      346
+    ],
+    "724": [
+      347
+    ],
+    "725": [
+      347
+    ],
+    "726": [
+      347
+    ],
+    "727": [
+      348,
+      347
+    ],
+    "728": [
+      348
+    ],
+    "731": [
+      348,
+      349
+    ],
+    "732": [
+      349
+    ],
+    "733": [
+      350,
+      351
+    ],
+    "734": [
+      351
+    ],
+    "735": [
+      351
+    ],
+    "736": [
+      352,
+      351
+    ],
+    "737": [
+      352
+    ],
+    "738": [
+      352
+    ],
+    "741": [
+      352
+    ],
+    "742": [
+      352,
+      353
+    ],
+    "743": [
+      353
+    ],
+    "744": [
+      353
+    ],
+    "745": [
+      353
+    ],
+    "746": [
+      353
+    ],
+    "747": [
+      353
+    ],
+    "748": [
+      354
+    ],
+    "751": [
+      354
+    ],
+    "752": [
+      354,
+      355
+    ],
+    "753": [
+      355
+    ],
+    "754": [
+      355
+    ],
+    "755": [
+      356
+    ],
+    "756": [
+      356
+    ],
+    "757": [
+      356
+    ],
+    "758": [
+      356
+    ],
+    "761": [
+      357
+    ],
+    "762": [
+      357
+    ],
+    "763": [
+      358
+    ],
+    "764": [
+      358
+    ],
+    "768": [
+      358
+    ],
+    "769": [
+      359
+    ],
+    "770": [
+      359
+    ],
+    "771": [
+      359,
+      360
+    ],
+    "772": [
+      360
+    ],
+    "773": [
+      360,
+      361
+    ],
+    "774": [
+      361
+    ],
+    "775": [
+      361
+    ],
+    "776": [
+      361
+    ],
+    "777": [
+      361
+    ],
+    "778": [
+      362
+    ],
+    "779": [
+      362
+    ],
+    "780": [
+      362,
+      363
+    ],
+    "781": [
+      363
+    ],
+    "782": [
+      364
+    ],
+    "789": [
+      364
+    ],
+    "790": [
+      364,
+      365
+    ],
+    "791": [
+      366,
+      365
+    ],
+    "792": [
+      366
+    ],
+    "793": [
+      367,
+      366
+    ],
+    "794": [
+      367
+    ],
+    "798": [
+      368
+    ],
+    "799": [
+      368
+    ],
+    "801": [
+      368
+    ],
+    "802": [
+      368
+    ],
+    "803": [
+      369
+    ],
+    "804": [
+      369
+    ],
+    "805": [
+      369
+    ],
+    "806": [
+      369
+    ],
+    "807": [
+      370,
+      369
+    ],
+    "808": [
+      370
+    ],
+    "809": [
+      370
+    ],
+    "810": [
+      371,
+      370
+    ],
+    "811": [
+      371
+    ],
+    "812": [
+      371
+    ],
+    "813": [
+      371
+    ],
+    "814": [
+      371
+    ],
+    "815": [
+      372,
+      371
+    ],
+    "820": [
+      372
+    ],
+    "850": [
+      372
+    ],
+    "860": [
+      373,
+      372,
+      374,
+      375,
+      376
+    ],
+    "868": [
+      377,
+      376
+    ],
+    "869": [
+      378,
+      379
+    ],
+    "870": [
+      379,
+      380
+    ],
+    "871": [
+      380
+    ],
+    "872": [
+      380
+    ],
+    "880": [
+      380,
+      381
+    ],
+    "881": [
+      381
+    ],
+    "882": [
+      382,
+      381
+    ],
+    "883": [
+      382
+    ],
+    "898": [
+      382
+    ],
+    "899": [
+      382
+    ],
+    "900": [
+      382
+    ],
+    "901": [
+      383,
+      382
+    ],
+    "902": [
+      383
+    ],
+    "903": [
+      383
+    ],
+    "904": [
+      384,
+      383
+    ],
+    "905": [
+      384
+    ],
+    "906": [
+      385,
+      387
+    ],
+    "907": [
+      390
+    ],
+    "908": [
+      391
+    ],
+    "909": [
+      391
+    ],
+    "910": [
+      391,
+      392,
+      394,
+      395,
+      396
+    ],
+    "911": [
+      397,
+      398,
+      399,
+      400
+    ],
+    "912": [
+      403,
+      404
+    ],
+    "913": [
+      404,
+      405
+    ],
+    "914": [
+      406
+    ],
+    "915": [
+      406
+    ],
+    "916": [
+      408
+    ],
+    "917": [
+      408
+    ],
+    "918": [
+      408,
+      409
+    ],
+    "919": [
+      410,
+      409
+    ],
+    "920": [
+      411,
+      410
+    ],
+    "921": [
+      411
+    ],
+    "922": [
+      411,
+      412
+    ],
+    "923": [
+      412
+    ],
+    "924": [
+      412
+    ],
+    "925": [
+      413
+    ],
+    "926": [
+      414,
+      413
+    ],
+    "927": [
+      414
+    ],
+    "928": [
+      415
+    ],
+    "929": [
+      416
+    ],
+    "930": [
+      416,
+      417
+    ],
+    "931": [
+      417
+    ],
+    "933": [
+      417,
+      418
+    ],
+    "934": [
+      418,
+      420
+    ],
+    "935": [
+      422
+    ],
+    "936": [
+      422
+    ],
+    "937": [
+      422
+    ],
+    "939": [
+      423
+    ],
+    "940": [
+      423,
+      424
+    ],
+    "941": [
+      424
+    ],
+    "949": [
+      424
+    ],
+    "950": [
+      424
+    ],
+    "951": [
+      425,
+      424
+    ],
+    "952": [
+      425
+    ],
+    "953": [
+      425
+    ],
+    "954": [
+      425
+    ],
+    "955": [
+      425
+    ],
+    "956": [
+      426
+    ],
+    "957": [
+      426
+    ],
+    "958": [
+      426
+    ],
+    "960": [
+      426
+    ],
+    "961": [
+      427
+    ],
+    "962": [
+      427,
+      428
+    ],
+    "963": [
+      428
+    ],
+    "964": [
+      428
+    ],
+    "965": [
+      428
+    ],
+    "970": [
+      428
+    ],
+    "971": [
+      429,
+      428,
+      432,
+      433,
+      434,
+      435,
+      436,
+      437
+    ],
+    "972": [
+      438,
+      437,
+      440,
+      441,
+      442
+    ],
+    "973": [
+      443,
+      444,
+      445,
+      446
+    ],
+    "974": [
+      446,
+      447
+    ],
+    "975": [
+      447,
+      448,
+      449,
+      450
+    ],
+    "976": [
+      450,
+      451
+    ],
+    "977": [
+      452,
+      454
+    ],
+    "978": [
+      455,
+      456
+    ],
+    "980": [
+      458
+    ],
+    "981": [
+      458
+    ],
+    "982": [
+      458
+    ],
+    "983": [
+      458
+    ],
+    "984": [
+      458,
+      459
+    ],
+    "985": [
+      459
+    ],
+    "986": [
+      459
+    ],
+    "987": [
+      459,
+      460
+    ],
+    "988": [
+      460
+    ],
+    "989": [
+      461
+    ],
+    "990": [
+      461
+    ],
+    "991": [
+      462
+    ],
+    "992": [
+      462
+    ],
+    "993": [
+      462
+    ],
+    "994": [
+      463,
+      462
+    ],
+    "996": [
+      463
+    ],
+    "997": [
+      463
+    ],
+    "998": [
+      463
+    ],
+    "999": [
+      463
+    ],
+    "ABSTY01": [
+      17,
+      16
+    ],
+    "ABSTY02": [
+      18,
+      17
+    ],
+    "ABSTY03": [
+      19,
+      18
+    ],
+    "CELLK01": [
+      21,
+      22
+    ],
+    "CELLT01": [
+      22
+    ],
+    "CELLV01": [
+      23
+    ],
+    "CELLV02": [
+      24,
+      23,
+      25
+    ],
+    "CELLZ01": [
+      27,
+      25,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33
+    ],
+    "CHEMS01": [
+      34,
+      35
+    ],
+    "CHEMS02": [
+      35
+    ],
+    "CHEMW01": [
+      36,
+      37,
+      38
+    ],
+    "CHEMW03": [
+      39,
+      38,
+      40,
+      42,
+      44
+    ],
+    "CRYSC01": [
+      47,
+      46
+    ],
+    "CRYSR01": [
+      48,
+      47
+    ],
+    "CRYSS01": [
+      48
+    ],
+    "CRYSS02": [
+      49
+    ],
+    "DENSD01": [
+      50,
+      49,
+      51
+    ],
+    "DENSX01": [
+      51,
+      52
+    ],
+    "DIFMN01": [
+      56
+    ],
+    "DIFMN02": [
+      57,
+      58,
+      59
+    ],
+    "DIFMN03": [
+      59,
+      60
+    ],
+    "DIFMX01": [
+      60,
+      61,
+      62
+    ],
+    "DIFMX02": [
+      62,
+      63
+    ],
+    "FCOEF01": [
+      66
+    ],
+    "FORMU01": [
+      68,
+      67,
+      69,
+      70,
+      71,
+      72
+    ],
+    "GOODF01": [
+      74,
+      73,
+      75
+    ],
+    "HYDTR01": [
+      76,
+      75
+    ],
+    "101": [
+      157
+    ],
+    "102": [
+      157
+    ],
+    "103": [
+      157
+    ],
+    "260": [
+      252,
+      253,
+      254
+    ],
+    "760": [
+      357,
+      356
+    ],
+    "RADNT01": [
+      464,
+      465
+    ],
+    "RADNW01": [
+      466,
+      467
+    ],
+    "REFLE01": [
+      472,
+      471
+    ],
+    "REFLG01": [
+      473
+    ],
+    "REFLL01": [
+      474,
+      473
+    ],
+    "REFLT01": [
+      474,
+      475
+    ],
+    "REFLT02": [
+      475
+    ],
+    "REFLT03": [
+      478,
+      476,
+      480
+    ],
+    "REFNR01": [
+      482,
+      481,
+      483,
+      484
+    ],
+    "RFACG01": [
+      485,
+      484,
+      486
+    ],
+    "RFACR01": [
+      488,
+      489,
+      490
+    ],
+    "RINTA01": [
+      492,
+      493,
+      494,
+      495,
+      496
+    ],
+    "SHFSU01": [
+      497,
+      496,
+      498,
+      499,
+      500,
+      501
+    ],
+    "STRDE01": [
+      502
+    ],
+    "SYMMG01": [
+      509,
+      508
+    ],
+    "SYMMG02": [
+      511,
+      510,
+      512
+    ],
+    "SYMMS01": [
+      513,
+      512
+    ],
+    "SYMMS02": [
+      515,
+      513,
+      516
+    ],
+    "SYMOP01": [
+      517,
+      516
+    ],
+    "THETM01": [
+      518,
+      519,
+      520,
+      521,
+      522
+    ],
+    "WEIGH01": [
+      523
+    ],
+    "ABSMU01": [
+      14,
+      15
+    ],
+    "ABSTM02": [
+      15
+    ],
+    "ATOM007": [
+      20,
+      21
+    ],
+    "CELL003": [
+      21
+    ],
+    "CELL004": [
+      21
+    ],
+    "CELL005": [
+      21
+    ],
+    "DIFF003": [
+      52,
+      53
+    ],
+    "DIFF005": [
+      53
+    ],
+    "DIFF019": [
+      55
+    ],
+    "DIFF020": [
+      55
+    ],
+    "DIFF022": [
+      56
+    ],
+    "EXPT005": [
+      64
+    ],
+    "EXPT108": [
+      64
+    ],
+    "EXPT009": [
+      65
+    ],
+    "EXPT010": [
+      65
+    ],
+    "GEOM001": [
+      72
+    ],
+    "GEOM002": [
+      72
+    ],
+    "GEOM003": [
+      72,
+      73
+    ],
+    "GEOM006": [
+      73
+    ],
+    "GEOM007": [
+      73
+    ],
+    "LABEL01": [
+      75
+    ],
+    "LAT075": [
+      130
+    ],
+    "LAT201": [
+      198
+    ],
+    "LAT602": [
+      333
+    ],
+    "REFI015": [
+      469,
+      470
+    ],
+    "SYMM001": [
+      508,
+      513
+    ],
+    "TYPE031": [
+      522
+    ]
+  },
+  "release": "five_tools_20261106_01",
+  "route_library_origin_release": "checkcif_strategy_tools_20261106_01"
+}

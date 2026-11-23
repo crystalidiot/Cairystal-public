@@ -1,0 +1,71 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Cairystal · 一次填写晶体信息</title>
+<style>[hidden]{display:none!important}body{font:16px/1.6 system-ui,"Microsoft YaHei";background:#f3f6fa;color:#19334a;margin:0}main{max-width:960px;margin:auto;padding:28px 22px}header{display:flex;gap:22px;align-items:center}header img{width:150px}h1{font-size:29px;margin:0}h2{font-size:21px}fieldset{border:1px solid #cddbe7;border-radius:12px;background:white;padding:22px;margin:22px 0}legend{font-weight:700;padding:0 9px}label{display:block;margin-bottom:16px}input:not([type=checkbox]),select,textarea{box-sizing:border-box;display:block;width:100%;font:inherit;padding:9px;border:1px solid #aebfd1;border-radius:6px;background:#fff}textarea{min-height:85px}small,.hint{color:#587087;font-size:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}.wide{grid-column:1/-1}.notice{background:#eaf2ff;padding:14px 18px;border-radius:8px}.actions{display:flex;gap:16px;flex-wrap:wrap}button{font:inherit;padding:11px 18px;background:#1168c7;color:white;border:0;border-radius:7px;cursor:pointer}button.secondary{background:#e0e9f3;color:#174165}#status{white-space:pre-wrap;color:#8a3d00}#preview{min-height:200px;font:13px monospace}details{margin:18px 0}.check{display:flex;align-items:start;gap:8px}.check input{margin-top:7px}footer{font-size:13px;color:#657789;margin:24px 0}@media(max-width:650px){.grid{grid-template-columns:1fr}header img{width:110px}h1{font-size:23px}}</style>
+<main><header><img src="Cairystal-logo.png" alt="Cairystal"><div><h1>开始解析：一次填写信息</h1><p class="hint">能填多少填多少。不清楚的项目可以留空，后续不会为同一项反复提问。</p></div></header>
+<p class="notice">已有实验文件会先由程序检查。这里补充你的化学背景、样品外观和处理偏好。全部内容只在本地生成；填写或保存表单不会上传晶体数据。</p>
+<section id="known_info" class="notice" hidden><strong>已有信息，无需重复填写</strong><p id="known_text" style="white-space:pre-wrap"></p><button type="button" class="secondary" id="edit_known">展开字段以更正记录</button></section><form id="intake"><fieldset id="appearance"><legend>1 · 晶体颜色、形状和尺寸</legend><p class="notice">填写示例：<strong>绿色，块状，0.050 × 0.051 × 0.052 mm</strong><br><small>这里只展示填写格式，请填写这颗晶体的实际信息；不清楚的项目可留空，示例不会自动填入。</small></p><div class="grid">
+<label>颜色<input id="colour" list="colours" placeholder="例如：绿色（可选或自行输入）"><small>常见颜色：无色、黄色、红色、绿色、蓝色、棕色等；不清楚可留空。</small><datalist id="colours"><option>无色</option><option>黄色</option><option>红色</option><option>橙色</option><option>绿色</option><option>蓝色</option><option>紫色</option><option>棕色</option><option>黑色</option><option>白色</option></datalist></label>
+<label>外形<input id="habit" list="habits" placeholder="例如：块状（可选或自行输入）"><small>常见外形：块状、针状、片状、柱状；填写实际晶体外形，不清楚可留空。</small><datalist id="habits"><option>块状</option><option>针状</option><option>片状</option><option>柱状</option><option>球状</option></datalist></label>
+<label>透明度<select id="transparency"><option value="">不清楚 / 未提供</option><option>透明</option><option>半透明</option><option>不透明</option></select></label>
+<label>三维尺寸，单位 mm<input id="dimensions_mm" placeholder="例如：0.050 × 0.051 × 0.052"><small>填写三个长度，例如 0.050 × 0.051 × 0.052 mm；支持 *、×、x 或空格分隔，顺序不限。不是体积，不清楚可留空，不要填 0。</small></label>
+<label>衍射实验温度（文件中已有可留空）<input id="temperature_value" type="number" step="any" placeholder="例如 100"></label>
+<label>温度单位<select id="temperature_unit"><option value="K">K（开尔文）</option><option value="C">°C（摄氏度）</option></select></label>
+<label>仪器具体型号<input id="instrument" list="instruments" placeholder="可选择、输入型号或留空"><datalist id="instruments"><option>Bruker D8</option><option>Bruker D8 VENTURE</option><option>Bruker D8 QUEST</option><option>Rigaku XtaLAB Synergy</option><option>Rigaku XtaLAB PRO</option></datalist></label>
+<label>辐射源（文件中已有可留空）<input id="radiation" list="radiations" placeholder="未知可留空"><datalist id="radiations"><option>Mo Kα</option><option>Cu Kα</option><option>Ag Kα</option><option>同步辐射，波长见实验记录</option></datalist></label>
+<label class="wide check"><input id="observations_confirmed" type="checkbox"><span>我确认本栏填写的外观、尺寸、温度和仪器信息属于这颗晶体；留空表示不清楚。</span></label>
+</div><p class="hint">未知外观可在草稿中注明项目默认值“无色、块状、0.120 × 0.122 × 0.125 mm”，但不会把默认值冒充实测值写入官网验证 CIF。</p></fieldset>
+<fieldset><legend>2 · 可能元素和预期结构</legend><div class="grid">
+<label class="wide">原始数据文件夹<input id="data_dir" placeholder="例如 D:\晶体数据\sample01" required></label>
+<label class="wide">所有可能元素，包括氢、溶剂和反离子<input id="elements" placeholder="例如 C H N O Cl" required><small>只表示可能的元素种类，不需要猜原子数。不确定时写明疑问。</small></label>
+<label class="wide">预期主体、分子式、原料或化学背景<textarea id="chemistry" placeholder="不知道可留空；不要根据文件夹名称强行认定结构"></textarea></label>
+<label>结晶及合成中可能存在的溶剂<input id="solvents" placeholder="例如 水、甲醇、乙醚；不清楚可留空"></label>
+<label class="wide">选择二维结构图片（可选）<input type="file" id="diagram_file" accept="image/png,image/jpeg,image/webp"><small>支持 PNG、JPEG、WebP，最大 8 MiB。图片保存在本地问卷 JSON 内，不会自动上传；识别结果需核对。也可以填写下方本地路径，二选一。</small></label>
+<label>二维结构图片或文件的本地路径<input id="diagram_path" placeholder="有则填写，没有可留空"></label>
+<label class="wide">SMILES / 结构式文本（可选）<input id="smiles" placeholder="没有就留空，图片也可以交给助手识别"></label>
+<label>已知构型信息<select id="absolute_configuration"><option value="">不清楚 / 未提供</option><option>外消旋</option><option>可能为单一对映体，绝对构型未确认</option><option>有独立证据确定绝对构型，见化学背景说明</option></select></label>
+</div></fieldset>
+<fieldset><legend>其他处理偏好与官网上传授权</legend><div class="grid">
+<label>本次主要目标<select id="purpose"><option value="host_priority">主体分子结构优先</option><option value="full_composition">需要完整组成、溶剂及相互作用信息</option></select></label>
+<label>难处理溶剂的 SQUEEZE 方案<select id="squeeze"><option value="allow_if_justified">允许：条件合适时保留对照并尝试</option><option value="never">不使用，保留显式原子模型路线</option><option value="undecided">暂未决定，先继续其它步骤</option></select></label>
+<label class="wide">是否允许将本次 CIF 和结构因子上传 IUCr 官网生成 checkCIF？<select id="iucr_upload"><option value="not_answered">暂不决定，只先做本地处理</option><option value="allow">允许上传本次数据进行官网验证</option><option value="deny">不允许上传，仅生成本地结果</option></select></label>
+</div><p class="hint">SQUEEZE 用于有证据支持的难建模溶剂贡献。主体、必要反离子和与主体耦合的无序仍需正确处理。选择“允许尝试”后，不会在每一步重复索取同类授权。</p></fieldset>
+<div class="actions"><button type="submit">保存填写结果 JSON</button><button type="button" class="secondary" id="copy">复制填写结果</button><button type="button" class="secondary" id="load">载入已填 JSON</button><input type="file" accept=".json" id="import" hidden></div>
+<p class="hint">把保存的 cairystal-intake.json 放入本次任务目录，或交给助手。已有回答可载入复用；请勿把另一颗晶体的外观和尺寸沿用过来。</p><p id="status" role="status"></p><details><summary>查看本地保存内容</summary><textarea id="preview" readonly></textarea></details></form><footer>Cairystal · 不调用 AI、不联网提交；正式解析仍须精修、AB 检查、已授权的官网验证和中英文 Word。</footer></main>
+<script type="application/json" id="prefill">INTAKE_PREFILL_JSON</script><script>
+'use strict';const ids=['data_dir','elements','chemistry','solvents','diagram_path','smiles','colour','transparency','habit','dimensions_mm','instrument','radiation','absolute_configuration','purpose','squeeze','iucr_upload'];const $=id=>document.getElementById(id);
+function parseDimensions(value){let s=value.normalize('NFKC').trim();if(['','不清楚','未知','不知道','unknown','?'].includes(s.toLowerCase()))return null;s=s.replace(/\s*(mm|毫米)\s*$/i,'');const tokens=s.split(/[\sxX×*,，]+/).filter(Boolean);const numeric=/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;if(tokens.length!==3||tokens.some(x=>!numeric.test(x)))throw Error('尺寸请填三个长度，例如 0.050 × 0.051 × 0.052 mm；不清楚可留空。');const result=tokens.map(Number);if(result.some(x=>!Number.isFinite(x)||x<=0))throw Error('尺寸请填三个正数，单位 mm。');return result;}
+function readForm(){const d={schema:1};for(const k of ids)d[k]=$(k).value.trim();d.elements=d.elements.split(/[\s,，;；/]+/).filter(Boolean);d.dimensions_mm=parseDimensions(d.dimensions_mm);d.temperature=$('temperature_value').value?{value:Number($('temperature_value').value),unit:$('temperature_unit').value}:null;d.observations_confirmed=$('observations_confirmed').checked;d.submitted_at=new Date().toISOString();if(window.cairystalMetadataLedger)d.metadata_ledger=window.cairystalMetadataLedger;if(window.cairystalQuestionPlan)d.question_plan=window.cairystalQuestionPlan;const sizes=Array.from(document.querySelectorAll('[data-size-part]'));if(sizes.length){const values=sizes.map(el=>el.value.trim());d.dimensions_mm=values.every(Boolean)?parseDimensions(values.join(' ')):null;}return d;}
+function fill(d){if(d.data)d=d.data;window.cairystalDiagramData=d.diagram_image_data_url||'';$('intake').reset();for(const k of ids)$(k).value='';$('purpose').value='host_priority';$('squeeze').value='undecided';$('iucr_upload').value='not_answered';for(const k of ids){if(d[k]!==undefined&&d[k]!==null){const v=Array.isArray(d[k])?d[k].join(k==='elements'?' ':' × '):String(d[k]);if($(k).tagName==='SELECT'&&!Array.from($(k).options).some(o=>o.value===v))$(k).add(new Option(v,v));$(k).value=v;}}if(d.temperature){$('temperature_value').value=d.temperature.value??'';$('temperature_unit').value=d.temperature.unit||'K';}$('observations_confirmed').checked=d.observations_confirmed===true;applyQuestionPlan(d);}
+
+function applyQuestionPlan(d){
+ window.cairystalMetadataLedger=d.metadata_ledger||null;window.cairystalQuestionPlan=d.question_plan||null;
+ const en=document.documentElement.lang==='en',p=d.question_plan||{},known=p.known_fields||{},conflicts=p.conflicts||{};
+ const names=en?{colour:'Colour',habit:'Shape',dimensions_mm:'Dimensions (mm)',temperature:'Temperature',instrument:'Instrument',radiation:'Radiation'}:{colour:'颜色',habit:'形状',dimensions_mm:'尺寸（mm）',temperature:'温度',instrument:'仪器',radiation:'辐射源'};
+ $('appearance').hidden=false;document.querySelectorAll('#appearance label').forEach(el=>el.hidden=false);
+ const old=$('partial_sizes');if(old)old.remove();const lines=[];
+ for(const [k,v] of Object.entries(known)){
+  const display=Array.isArray(v)?v.join(' × '):k==='temperature'?`${v.value} ${v.unit}`:String(v);
+  lines.push(`${names[k]||k}: ${display}`);
+  const el=$(k==='temperature'?'temperature_value':k);if(el)el.closest('label').hidden=true;
+  if(k==='temperature')$('temperature_unit').closest('label').hidden=true;
+ }
+ for(const k of p.answered_unknown_fields||[]){const el=$(k);if(el&&el.closest('label'))el.closest('label').hidden=true;}
+ const partial=p.known_dimensions_mm||{};
+ if(Object.keys(partial).length&&Object.keys(partial).length<3&&!conflicts.dimensions_mm){
+  $('dimensions_mm').closest('label').hidden=true;
+  const box=document.createElement('div');box.id='partial_sizes';box.className='wide';
+  ['min','mid','max'].forEach((k,i)=>{const lab=document.createElement('label');lab.textContent=(en?['Minimum','Middle','Maximum']:['最小尺寸','中间尺寸','最大尺寸'])[i]+' (mm)';const input=document.createElement('input');input.dataset.sizePart=k;input.type='number';input.step='any';input.min='0';
+   if(partial[k]!==undefined){input.value=partial[k];input.readOnly=true;lab.hidden=true;lines.push(lab.textContent+': '+partial[k]);}else input.placeholder=en?'Missing length only':'仅补充缺少的长度';lab.append(input);box.append(lab);});
+  $('dimensions_mm').closest('label').after(box);
+ }
+ if(d.metadata_ledger)lines.push((en?'Source ledger: ':'来源记录：')+d.metadata_ledger.path);
+ for(const [k,v] of Object.entries(conflicts))lines.push((en?'Conflicting record — ':'存在不一致记录 — ')+(names[k]||k)+': '+JSON.stringify(v));
+ $('known_text').textContent=lines.join('\n');$('known_info').hidden=!lines.length;
+ if(p.ask_appearance===false)$('appearance').hidden=true;
+ $('edit_known').onclick=()=>{$('appearance').hidden=false;document.querySelectorAll('#appearance label').forEach(el=>el.hidden=false);};
+}
+
+async function serialized(){const d=readForm();const f=$('diagram_file').files[0];if(f&&d.diagram_path)throw Error('Choose an image file or local image path, not both / 图片文件和本地路径二选一。');if(f){if(f.size>8*1024*1024||!['image/png','image/jpeg','image/webp'].includes(f.type))throw Error('PNG/JPEG/WebP only, maximum 8 MiB / 图片须为 PNG、JPEG 或 WebP，最大 8 MiB。');d.diagram_image_data_url=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('Cannot read image / 无法读取图片。'));reader.readAsDataURL(f);});}else if(window.cairystalDiagramData){d.diagram_image_data_url=window.cairystalDiagramData;}if(!d.data_dir||!d.elements.length)throw Error('请一次补充数据目录与所有可能元素；其它项目可留空。');const s=JSON.stringify(d,null,2);$('preview').value=s;return s;}
+$('intake').addEventListener('submit',async e=>{e.preventDefault();try{const s=await serialized();const blob=new Blob([s],{type:'application/json;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cairystal-intake.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);$('status').textContent='已生成本地填写结果。请交给助手；数据尚未上传。';}catch(e){$('status').textContent=e.message;}});
+$('copy').onclick=async()=>{try{const s=await serialized();await navigator.clipboard.writeText(s);$('status').textContent='已复制，可粘贴给助手。';}catch(e){$('preview').value=$('preview').value||'';$('preview').closest('details').open=true;$('status').textContent='请在展开的文本框中手动复制。'+e.message;}};
+$('load').onclick=()=>$('import').click();$('import').onchange=async()=>{try{const f=$('import').files[0];if(f.size>12*1024*1024)throw Error('填写记录超过 12 MiB，未载入。');fill(JSON.parse(await f.text()));$('status').textContent='已载入；请确认这些信息属于当前晶体。';}catch(e){$('status').textContent=e.message;}};fill(JSON.parse($('prefill').textContent));
+</script></html>
