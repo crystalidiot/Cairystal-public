@@ -1,23 +1,28 @@
 {
   "schema": 1,
-  "release_id": "usage_optimization_20261123_01",
-  "previous_release": "chemistry_first_20261123_01",
-  "tools": 62,
-  "status": "tested_preview",
-  "stable_release_unchanged": "workflow_reliability_20261103_01",
+  "release_id": "chemistry_handoff_20261125_01",
+  "previous_release": "fast_model_20261125_01",
+  "tools": 66,
+  "status": "tested_opt_in_fast_preview",
+  "default_skill_route": "fast",
+  "standard_mode_preserved": true,
   "scientific_acceptance": "not_automatic",
   "changes": [
-    "Verified metadata-only A/B takes a non-model route; pairing, native checks and unresolved alerts retained.",
-    "Same-job continuation reuses matching bilingual rendered pages; exact document/PDF/PNG hashes, renderer context and full layout QA retained.",
-    "Portable tests propagate UTF-8 to child CLI JSON; no historical model/data deletion."
+    "Batched current-run element contrasts with equal-cycle reference",
+    "Automatic short-label remapping before graph-based HFIX, native H/UNIT checks",
+    "Shared report QA/export continuation for manual/automatic chemistry",
+    "Explicit inferred versus independently supplied graph provenance"
   ],
   "verification": {
-    "unique_regression_checks": 1179,
-    "new_usage_checks": 17,
-    "offline_suite_passed": true,
-    "new_crystal_solution_claimed": false,
-    "new_official_upload": false,
-    "actual_report_render_and_full_page_qa": true,
-    "actual_read_only_AB_route_comparison": true
-  }
+    "regression_tests": 98,
+    "wall_seconds": 219.191909,
+    "official_AB": [
+      0,
+      0
+    ],
+    "delivery_four_files_verified": true,
+    "single_case_not_general_accuracy_validation": true
+  },
+  "distribution_version": "0.3.3-preview",
+  "distribution_note": "Public preview; specimen identifiers omitted from release metadata; Python source unchanged."
 }

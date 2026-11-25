@@ -80,9 +80,12 @@ def capture(root,state,source,role):
     state['bindings'][role]=item;return str(target)
 
 
-def create(config,output):
+def create(config,output,execution_mode=None):
     config=regular(unlinked(config));cfg=read(config)
-    allowed={'schema','case_id','data_dir','profile','elements','stem','specimen','graph','donor_basis','deliver','authorize_iucr_upload','prior_conversation_exposure','max_candidates','max_weight_updates','timeout','intake_state','ab_policy','solver_fallback'}
+    if execution_mode is not None:cfg['execution_mode']=execution_mode
+    allowed={'schema','case_id','data_dir','profile','elements','stem','specimen','graph','donor_basis','deliver','authorize_iucr_upload','prior_conversation_exposure','max_candidates','max_weight_updates','timeout','intake_state','ab_policy','solver_fallback','execution_mode'}
+    from execution_mode import options
+    cfg=options(cfg)
     if set(cfg)-allowed:raise ValueError('Unknown config keys: '+str(sorted(set(cfg)-allowed)))
     if 'case_id' in cfg and (not isinstance(cfg['case_id'],str) or not cfg['case_id'].strip() or len(cfg['case_id'])>160):
         raise ValueError('case_id must be a nonempty specimen label of at most 160 characters')
@@ -203,7 +206,8 @@ def first_model_handoff(root,candidates):
             data=read(path)
             findings=data.get('findings',[])
             entry.update(status=data['status'],review=str(path),finding_count=len(findings),
-                         first_findings=findings[:3])
+                         first_findings=findings[:3],review_sha256=review['sha256'],
+                         decision_queue=data.get('decision_queue',[]))
         entries.append(entry)
     return entries
 
@@ -248,6 +252,8 @@ def stop(root,state,category,reason,ps=None):
         packet['solvent_branch_guidance']={'script':'squeeze_request.py','when':'Only after current-run review establishes a reliable host and separate challenging solvent; not inferred from AB counts alone.','actions':['prepare a model-specific request, reusing current-specimen intake','record a real customer choice once','execute the preserved comparison after consent'],'reference':'references/squeeze-workflow.md','automatic_scientific_approval':False}
     from customer_status import next_step
     state['next_step'] = packet['next_step'] = next_step(category, upload_choice)
+    from workflow_observability import record_wait
+    packet['wait_episode']=record_wait(state,packet)
     from support_report import try_record
     state['support_report']=try_record(root,category,reason,state['actions'][-1]['action'] if state['actions'] else 'autorun')
     packet['support_report']=state['support_report']
@@ -274,6 +280,7 @@ def arguments(root,state,action,source=None):
         if cfg.get('donor_basis'):cmd+=['--donor-basis',cfg['donor_basis']]
     elif action=='finish':
         cmd+=['autofinish','--run',str(root/'pipeline'),'--source',source,'--name','auto_finish','--max-weight-updates',str(cfg['max_weight_updates']),'--timeout',str(cfg['timeout'])]
+        if cfg.get('execution_mode')=='fast':cmd+=['--execution-mode','fast']
         if cfg.get('ab_policy'):cmd+=['--ab-policy',cfg['ab_policy']]
         if not cfg['deliver']:cmd+=['--local-only']
         if cfg['deliver'] and cfg['authorize_iucr_upload']:
@@ -290,6 +297,8 @@ def arguments(root,state,action,source=None):
 def execute(root,state,action,runner,source=None):
     if action in [a['action'] for a in state['actions']]:raise ValueError('Action already attempted; preserve it instead of retrying under the same name')
     cmd=arguments(root,state,action,source);log=root/'logs'/(action+'.log')
+    from workflow_observability import close_wait
+    close_wait(state,action)
     event={'action':action,'command':cmd,'log':str(log),'started_at':utc_now(),'status':'running'}
     state['actions'].append(event);state.update(status='running',pending=action);save(root,state)
     print(json.dumps({'event':'stage_started','stage':action,'log':str(log)},ensure_ascii=False),flush=True)
@@ -353,12 +362,14 @@ def drive(root,state,runner=default_runner):
         result=execute(root,state,'finish',runner,identifier(finish_source))
         if result:return result
         ps=read(root/'pipeline/pipeline.json')
+    if ps.get('fast_preview'):state['fast_preview']=ps['fast_preview'];save(root,state)
     if cfg['deliver'] and ps.get('status') in {'ready_for_official_delivery','official_upload_not_authorized'}:
         if not cfg['authorize_iucr_upload']:
             return stop(root,state,'upload_authorization_required','Local refinement, weights and AB checks are complete; official upload awaits authorization. Resume reuses this checkpoint.',ps)
         result=execute(root,state,'deliver',runner)
         if result:return result
         ps=read(root/'pipeline/pipeline.json')
+    if ps.get('fast_preview'):state['fast_preview']=ps['fast_preview'];save(root,state)
     if cfg['deliver'] and ps.get('status')=='complete':
         for key in ['reason','category','stopped_at']:state.pop(key,None)
         state.update(status='complete',finished_at=utc_now(),delivery=ps.get('delivery'),customer_delivery=ps.get('customer_delivery'),customer_notice=ps.get('customer_notice'),zip=ps.get('zip'),official_counts=ps.get('official_counts'))
@@ -370,6 +381,8 @@ def drive(root,state,runner=default_runner):
         category='report_review' if ps.get('status') in {'awaiting_visual_review','needs_report_review'} else 'scientific_decision'
         return stop(root,state,category,'Automatic scientific/alert/weight/report checks need review.',ps)
     state.pop('next_step', None)
+    from workflow_observability import close_wait
+    close_wait(state,state['status'])
     save(root,state);return state
 
 
@@ -460,7 +473,11 @@ def local_report_at_checkpoint(root,state):
 
 def summary(root,state):
     from customer_status import describe
+    from workflow_observability import summarize_waits
+    from execution_mode import live_preview
+    preview=live_preview(root) if state.get('options',{}).get('execution_mode')=='fast' else None
     return {'run':str(root),'specimen':specimen_identity(root,state),'status':state['status'],'completed_actions':state['completed_actions'],
+            'execution_mode':state.get('options',{}).get('execution_mode','standard'),'fast_preview':preview,
             'customer_summary':describe(state),'support_report':state.get('support_report'),
             'next_step':state.get('next_step') if state['status']=='needs_attention' else None,
             'reason':state.get('reason'),'category':state.get('category'),'ai_calls':0,
@@ -468,6 +485,7 @@ def summary(root,state):
             'delivery':state.get('delivery'),'customer_delivery':state.get('customer_delivery'),'customer_notice':state.get('customer_notice'),'zip':state.get('zip'),'official_counts':state.get('official_counts'),
             'local_validation':local_report_at_checkpoint(root,state),
             'action_seconds':{a['action']:a.get('seconds') for a in state['actions']},
+            'handoff_timing':summarize_waits(state),
             'token_usage':{'exact_total':None,'exact_saving':None}}
 
 
@@ -500,7 +518,7 @@ def publish(root,state):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);sub=p.add_subparsers(dest='cmd',required=True)
-    a=sub.add_parser('run');a.add_argument('--config',required=True);a.add_argument('--output',required=True)
+    a=sub.add_parser('run');a.add_argument('--config',required=True);a.add_argument('--output',required=True);a.add_argument('--execution-mode',choices=['standard','fast'])
     a=sub.add_parser('resume');a.add_argument('--run',required=True);a.add_argument('--graph');a.add_argument('--donor-basis');a.add_argument('--source');a.add_argument('--basis');a.add_argument('--authorize-iucr-upload',action='store_true')
     a=sub.add_parser('status');a.add_argument('--run',required=True)
     a=sub.add_parser('review',help='Finalize after actual report review');a.add_argument('--run',required=True);a.add_argument('--review-note',required=True)
@@ -509,7 +527,7 @@ def main():
         sub.choices[mode].add_argument('--expected-hkl',help='Original HKL of the requested specimen; reject a different checkpoint')
     args=p.parse_args()
     try:
-        if args.cmd=='run':root,state=create(args.config,args.output)
+        if args.cmd=='run':root,state=create(args.config,args.output,args.execution_mode)
         else:
             root=unlinked(args.run);state=read(root/'autorun.json')
             if args.expected_hkl:check_expected(root,state,args.expected_hkl)

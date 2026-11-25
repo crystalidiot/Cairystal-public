@@ -179,11 +179,13 @@ def short_trial(base,out,plan,software,resources):
         if not gate['execution_complete']:raise ValueError('Incomplete native short refinement: '+str(gate['failures']))
         _,cell,_,atoms,_=structure(out/'case.cif',out/'case.res');amap={a['label'].upper():a for a in atoms};split=next((e['split_fragment'] for e in edits if 'split_fragment' in e),None)
         if split:
-            selected=[amap[n] for m in split['mapping'].values() for n in m.values() if n in amap and amap[n]['element']!='H']
+            missing=[n for m in split['mapping'].values() for n in m.values() if n.upper() not in amap]
+            selected=[amap[n.upper()] for m in split['mapping'].values() for n in m.values() if n.upper() in amap and amap[n.upper()]['element']!='H']
             populations=[a['occupancy'] for a in selected]
-            good=bool(populations) and all(isinstance(p,(float,int)) and math.isfinite(p) and .01<=p<=.99 for p in populations)
+            good=not missing and bool(populations) and all(isinstance(p,(float,int)) and math.isfinite(p) and .01<=p<=.99 for p in populations)
+            result['missing_split_atoms']=missing
             result['population_range']=[min(populations),max(populations)] if good else None
-            if not good:result['screen_reason']='population_outside_physical_interior'
+            if not good:result['screen_reason']='native_split_atoms_missing' if missing else 'population_outside_physical_interior'
             else:result['status']='screen_complete'
         else:result['status']='screen_complete'
         from disorder_bond_review import trial_review
@@ -195,11 +197,30 @@ def short_trial(base,out,plan,software,resources):
     result['elapsed_s']=time.perf_counter()-start;write_json(out/'screen.json',result);return result
 
 def choose_screens(screens,limit):
-    eligible=[s for s in screens if s['status']=='screen_complete' and isinstance(s.get('metrics',{}).get('R1_observed'),(float,int))]
-    # Ranking schedules expensive evaluation; it is not chemical acceptance.
-    return sorted(eligible,key=lambda x:(x['metrics'].get('NPD_atoms') or 0,
-        bool(x.get('bond_review',{}).get('findings')) or x.get('bond_review',{}).get('status')=='unavailable',
-        x['metrics']['R1_observed'],x['name']))[:limit]
+    return screen_decisions(screens,limit)[0]
+
+def screen_decisions(screens,limit):
+    """Explain every promotion/pruning decision; missing/nonfinite metrics never rank."""
+    eligible=[];decisions=[]
+    for s in screens:
+        reason=[];metric=s.get('metrics') or {};r=metric.get('R1_observed')
+        if s.get('status')!='screen_complete':reason.append(s.get('screen_reason') or s.get('status','missing_status'))
+        if isinstance(r,bool) or not isinstance(r,(int,float)) or not math.isfinite(r) or r<0:reason.append('R1_missing_or_nonfinite')
+        if reason:decisions.append({'name':s['name'],'decision':'not_eligible','reasons':reason,'AB':None})
+        else:eligible.append(s)
+    def key(s):
+        metric=s.get('metrics') or {};bond=s.get('bond_review') or {}
+        # Known chemistry conflicts are considered before numerical fit; unknowns remain visible.
+        npd=metric.get('NPD_atoms')
+        return (bool(bond.get('findings')),npd is not None and npd>0,
+                bond.get('status')=='unavailable',metric['R1_observed'],s['name'])
+    ranked=sorted(eligible,key=key);chosen=ranked[:limit]
+    for rank,s in enumerate(ranked):
+        decisions.append({'name':s['name'],'decision':'promoted' if rank<limit else 'deferred_budget',
+            'reasons':['Full comparison scheduled; not model acceptance'] if rank<limit else ['finalists_per_site_budget'],
+            'rank':rank+1,'bond_findings':(s.get('bond_review') or {}).get('findings'),
+            'NPD_atoms':(s.get('metrics') or {}).get('NPD_atoms'),'AB':None})
+    return chosen,decisions
 
 
 def split_special_sites(cell,ops,atoms,labels):
@@ -245,7 +266,7 @@ def quality_review(control,trial):
             cell=gemmi.UnitCell(*diag['cell']);dist=[]
             for m in mapping.values():
                 a,b=[amap[m[s].upper()] for s in 'AB']
-                if a['element']!='H':dist.append(float(np.linalg.norm(np.array(pos(cell,a))-np.array(pos(cell,b)))))
+                if a['element']!='H':dist.append(cell.find_nearest_pbc_image(gemmi.Fractional(*a['xyz']),gemmi.Fractional(*b['xyz']),0).dist())
             item['max_branch_atom_separation_A']=max(dist) if dist else None
             if not dist or max(dist)<.2:item['flags'].append('alternate_components_collapsed')
     item['flags']=sorted(set(item['flags']))
@@ -264,7 +285,8 @@ def prepare(base,output,software,possible_solvents=(),settings=None,site_ids=Non
             if screened_sites>=cfg['max_sites']:
                 deferred.append(dict(site,deferred_reason='site_budget_reached',AB=None));continue
             screened_sites+=1
-        generated=propose(frozen,site,cfg);sites.append(dict(site,proposal_result=generated))
+        proposal_start=time.perf_counter()
+        generated=propose(frozen,site,cfg);sites.append(dict(site,proposal_result=generated,proposal_seconds=time.perf_counter()-proposal_start))
         for i,pose in enumerate(generated['poses']):
             hypothesis=dict(pose['config'],adp=cfg['short_adp'],basis={'site':site['id'],'current_density_evidence':pose['peak_support'],'source_hashes':generated['source_hashes']})
             proposals.append({'site_id':site['id'],'density_score':pose['score'],'plan':{'name':f's{len(sites)}p{i+1}','kind':'diagnostic_refinement','cycles':cfg['short_cycles'],
@@ -286,9 +308,19 @@ def run(path):
     for proposal in plan['proposals']:
         result=short_trial(base,short/proposal['plan']['name'],proposal['plan'],plan['software'],plan['native_resources']);result['site_id']=proposal['site_id'];screens.append(result)
         write_json(out/'screen_progress.json',{'completed':screens,'pending':len(plan['proposals'])-len(screens)})
-    finalists=[]
+    finalists=[];promotion_decisions=[]
     for site in plan['sites']:
-        finalists.extend(choose_screens([s for s in screens if s['site_id']==site['id']],cfg['finalists_per_site']))
+        selected,decisions=screen_decisions([s for s in screens if s['site_id']==site['id']],cfg['finalists_per_site'])
+        finalists.extend(selected)
+        promotion_decisions.extend(dict(d,site_id=site['id']) for d in decisions)
+    if not finalists:
+        report={'status':'no_supported_finalists','screen_count':len(screens),'full_count':0,'promoted':[],
+                'not_promoted':[s['name'] for s in screens],'screens':screens,'results':[],'comparisons':[],
+                'promotion_decisions':promotion_decisions,'sites':plan['sites'],'deferred_sites':plan.get('deferred_sites',[]),
+                'preparation_seconds':plan['preparation_seconds'],'run_seconds':time.perf_counter()-start,
+                'model_adopted':False,'AB':None,'source_unchanged':all(digest(base/f)==h for f,h in plan['input_hashes'].items()),
+                'next_action':'Inspect site review reasons/density evidence; unchanged baseline retained, no redundant full control run.'}
+        write_json(out/'comparison.json',report);return report
     full=[{'name':'control','kind':'baseline','cycles':cfg['full_cycles'],'reason':'Unchanged same-cycle baseline','evidence':'Same HKL, model and refinement controls'}]
     for screen in finalists:
         for adp in ['ISO','ANI','MAJOR_ANI']:
@@ -299,6 +331,8 @@ def run(path):
     comparisons=[quality_review(results[0],v) for v in results[1:]] if results and results[0]['status']=='completed' else []
     report={'status':'completed_diagnostic_comparison' if results and results[0]['status']=='completed' else 'control_failed','screen_count':len(screens),'full_count':len(results),'promoted':[x['name'] for x in finalists],
             'not_promoted':[x['name'] for x in screens if x not in finalists],'screens':screens,'results':results,'comparisons':comparisons,
+            'promotion_decisions':promotion_decisions,'sites':plan['sites'],
+            'stage_seconds':{'proposal':plan['preparation_seconds'],'short_native':sum(x['elapsed_s'] for x in screens),'full_comparison':sum(x.get('elapsed_s',0) for x in results)},
             'preparation_seconds':plan['preparation_seconds'],'run_seconds':time.perf_counter()-start,'model_adopted':False,'deferred_sites':plan.get('deferred_sites',[]),
             'scope':'Short screens have AB=null, not zero. Full finalists restart from identical baseline; no automatic final model acceptance.',
             'source_unchanged':all(digest(base/f)==h for f,h in plan['input_hashes'].items())}

@@ -3,6 +3,14 @@ name: small-molecule-crystal
 description: Cairystal 小分子单晶解析工具箱：调用本机 SHELX/PLATON，完成解析精修、A/B 诊断、IUCr 官网 checkCIF 和中英文 Word；常规步骤脚本执行，科学歧义再交 AI/专业人员。
 ---
 
+<!-- fast_model_20261125_01 -->
+## 快速版入口 / Fast edition
+
+本副本用于尽快获得可查看的合理候选模型，默认用工具 `fast`（显式 execution_mode=fast）；先阅读 [快速模式](references/fast-mode.md)。减少试探轮数、先出模型，保留本地AB检查及已授权的官网/中英文Word。快速模式不要求AB清零，报告标为临时模型；明确的化学、占有率或数据配对错误仍需解决。下文通用主线与快速模式冲突时，以快速模式的试修预算和停止规则为准；未变化的科学/权限规则继续适用。
+
+This opt-in copy uses the `fast` tool by default. Read [Fast mode](references/fast-mode.md). Bound trial budgets and publish a provisional local model before authorized official reports. Do not chase zero AB automatically; retain chemistry, occupancy and data-pairing checks. Fast-mode budgets take precedence over the general workflow below. The previous standard release stays unchanged.
+
+
 # Cairystal 小分子单晶解析
 
 客户给出路径即可开始。由助手操作本机程序、记录证据并说明结果。用户可直接说“帮我解这颗晶体”“看一下这两条警告”或“模型已经有了，接着出报告”。[English](SKILL.en.md)
@@ -34,7 +42,9 @@ PLAT919/934 出现时，走[固定清单 OMIT 分支](references/automatic-ab-ma
 已给完整二维结构时，只有图上的 N–H/O–H 需要提供质子化依据。普通 C–H 按图匹配后加氢，并核对 SHELXL 实际生成的氢数与 UNIT。图中无氢时沿用已精修的重原子模型进入复核。详见[图匹配与加氢](references/graph-matching.md)。
 
 
-按本例证据调用工具，不例行跑遍工具箱。已核验的纯实验参数缺项直接列出来源与缺项；同任务报告续跑可复用未变的页面，仍做全部排版和文件检查。见[减少重复工作](references/usage-and-cost.md)。
+每轮集中比较候选，先核对完整片段几何，再固定模型、验证并生成报告；只重做变化影响的部分。现有工具优先，未变页面按指纹复用，科学与交付检查保留。见[减少重复工作](references/usage-and-cost.md)。
+
+初解后的 `decision_queue` 给出逐原子证据和工具入口；可运行有界 C/N/O 对照。autorun 记录停顿原因，常见无序保留分级入选/暂缓依据。见[初解决策与停顿诊断](references/decision-flow.md)。
 
 ## 助手入口
 
@@ -51,3 +61,12 @@ PLAT919/934 出现时，走[固定清单 OMIT 分支](references/automatic-ab-ma
 补报告先用 `recover-checkcif --directory OFFICIAL --cif FINAL_CIF --check-only` 做本地核对。指纹一致且回执完整时复用官网结果；下载中断时，用同一命令去掉 `--check-only` 续取报告。
 
 从本地封存点续接时，常规报告检查通过后自动完成打包和客户目录交付。遇到工具返回时按[主线与工具衔接](references/flow-handoffs.md)继续，核对选定版本，不重复求解或提交。
+
+孪晶迹象出现时，主线先走 [twin-quick](references/quick-twin.md)：有界 PLATON 检查，检出可用法则后自动在新 INS 加 TWIN/BASF 并作原生精修对照；取得模型比较再决定采用。该检查先于 OMIT，无迹象不额外运行。
+
+
+## 连续化学处理 / Continuous chemistry workflow
+
+使用 [chemistry-screen / hydrogen-continue](references/chemistry-handoff.md) 集中比较本轮元素候选，并在有依据的化学图确认后自动重编号、加氢、复核和交付。只把未解决的科学歧义交给 AI；当前推断图不能写成客户已提供的二维式。
+
+Use the linked tools for current-run element contrasts and reviewed-graph H/refinement/report continuation. Inferred chemistry is not an independently supplied 2D prior.

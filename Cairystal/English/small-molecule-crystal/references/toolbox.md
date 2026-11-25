@@ -78,3 +78,5 @@ deliver run 核对配对原生文件，进行官网验证并生成两版 Word，
 - [对称构型与占有率](symmetry-configurations.md)
 - [统一入口、版本与新增自动分支](unified-mainline.md)
 - [耗时诊断](speed-diagnostics.md)
+
+- `twin-quick`: [快速孪晶检查与对照精修](quick-twin.md)。

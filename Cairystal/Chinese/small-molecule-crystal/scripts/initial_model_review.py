@@ -141,7 +141,10 @@ def review(directory, stem, allowed_elements):
             if norm > 0:
                 angles.append({'neighbors': [a, b], 'angle_deg': round(math.degrees(math.acos(max(-1, min(1, sum(x*y for x,y in zip(v,w))/norm)))), 2)})
         site['contact_angles_not_bond_orders'] = angles
+    result['stem'] = stem
     result['elapsed_s'] = round(time.perf_counter() - start, 4)
+    from initial_decisions import decision_queue
+    result['decision_queue'] = decision_queue(result)
     return result
 
 def save_review(directory, stem, elements, output):
@@ -169,8 +172,30 @@ def main():
     p.add_argument('--stem', default='model')
     p.add_argument('--elements', nargs='+', required=True)
     p.add_argument('--output', type=Path, required=True)
+    p.add_argument('--trial-output', type=Path, help='Optional NEW directory for bounded C/N/O contrasts; requires a complete paired bundle')
+    p.add_argument('--profile', type=Path)
+    p.add_argument('--max-sites', type=int, default=2)
+    p.add_argument('--max-trials', type=int, default=4)
+    p.add_argument('--run-trials', action='store_true', help='Run prepared baseline/contrasts and local validation; never adopt a model or upload')
     a = p.parse_args()
+    if a.trial_output and not a.profile:
+        p.error('--trial-output requires --profile')
+    if a.run_trials and not a.trial_output:
+        p.error('--run-trials requires --trial-output')
     result = save_review(a.directory, a.stem, a.elements, a.output)
+    if a.trial_output and result['status'] != 'review_unavailable':
+        from initial_decisions import prepare_element_trials
+        from crystal_runtime import write_json
+        reviewed=json.loads(a.output.read_text('utf-8'))
+        result['element_trials']=prepare_element_trials(a.directory,a.stem,reviewed,a.trial_output,a.profile,a.max_sites,a.max_trials)
+        if a.run_trials and result['element_trials']['status']=='prepared':
+            from candidate_trials import run_plan
+            from compare_diagnostic_trials import compare
+            trials=run_plan(result['element_trials']['plan'])
+            comparisons=[compare(trials[0],t) for t in trials[1:]] if trials and trials[0]['status']=='completed' else []
+            write_json(a.trial_output/'comparison.json',{'results':trials,'comparisons':comparisons,
+                'model_adopted':False,'next_action':'Review chemistry, density, H and charge before selecting; do not choose by R/AB alone.'})
+            result['element_trials']['comparison']=str(a.trial_output/'comparison.json')
     print(json.dumps(result, ensure_ascii=False))
     return 2 if result['status'] == 'review_unavailable' else 0
 

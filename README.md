@@ -4,11 +4,11 @@
 
 Cairystal 为具备本地文件和程序执行能力的 AI 助手提供小分子单晶结构求解、精修、checkCIF 验证及中英文报告工作流。可交给 ChatGPT/Codex、WorkBuddy 或连接 Windows 执行端的助手使用；第三方晶体学软件需另行安装。
 
-**当前版本：0.3.2-preview（2026-11-23）。** 本仓库公开提供完整 skill，采用[非商业学术使用许可 1.1](LICENSE)，不是允许自由商用、修改和再分发的开源许可证。平台和第三方许可例外仍适用。
+**当前版本：0.3.3-preview（2026-11-25）。** 本仓库公开提供完整 skill，采用[非商业学术使用许可 1.1](LICENSE)，不是允许自由商用、修改和再分发的开源许可证。平台和第三方许可例外仍适用。
 
 ## 下载与安装
 
-- [完整安装与分享包](downloads/Cairystal-20261123-public-academic.zip) · [版本下载页](https://github.com/crystalidiot/Cairystal-public/releases/tag/v0.3.2-preview)
+- [完整安装与分享包](downloads/Cairystal-20261125-public-academic.zip) · [版本下载页](https://github.com/crystalidiot/Cairystal-public/releases/tag/v0.3.3-preview)
 - [中文技能导入 ZIP](downloads/Cairystal-zh-CN.skill.zip) · [English import ZIP](downloads/Cairystal-en.skill.zip)
 - [安装指南](Cairystal/INSTALL.md) · [中文交接](Cairystal/交接说明.md) · [平台能力要求](Cairystal/跨平台使用.md) · [SHA256](downloads/SHA256.json)
 
@@ -26,12 +26,16 @@ python -B cairystal.py guide
 python -B cairystal.py list
 ```
 
-62 个工具按证据调用。化学合理性和当前衍射证据优先，不能用低 R 或零 A/B 代替科学判断。新任务记录原始数据目录，报告续接可自动 QA 并发布客户文件夹。同任务报表复用仍核对全部页面与数值；官网报告须匹配最终 CIF。
+66 个工具按证据调用。化学合理性和当前衍射证据优先，不能用低 R 或零 A/B 代替科学判断。新任务记录原始数据目录，报告续接可自动 QA 并发布客户文件夹。同任务报表复用仍核对全部页面与数值；官网报告须匹配最终 CIF。
 
-上游通过 1179 项离线回归；测试条数不是晶体数或正确率。WorkBuddy、飞书尚未完成端到端认证。[验证范围](Cairystal/VALIDATION.md) · [本次分发核查](docs/PUBLIC_REVIEW.md)
+本版是快速流程预览版，默认使用 fast 入口；标准模式仍可显式选择，旧版下载保留。新增元素候选集中比较、经复核化学图的自动加氢续接，以及有界孪晶检查。回归测试不等于真实晶体正确率。WorkBuddy、飞书尚未完成端到端认证。[验证范围](Cairystal/VALIDATION.md) · [本次分发核查](docs/PUBLIC_REVIEW.md)
 
 ## 许可与反馈
 
 仅在许可证允许范围内使用。商业使用、修改和再分发须另获授权，第三方组件保留各自权利。[第三方声明](THIRD_PARTY_NOTICES.md) · [隐私说明](PRIVACY.md)
 
 本项目含 AI 辅助编写的代码与文档。反馈前请移除未公开晶体数据和凭据。联系：caizhuoerr@qq.com；微信 crystal-idiot。
+
+## 本次更新
+
+[更新记录](CHANGELOG.md)：当前数据元素比较、加氢前自动短标签映射、报告续接与快速模式。保留精修、AB 检查及经授权的 IUCr 验证；快速得到工作模型不等于已经达到发表标准。安装后先生成本机 profile，不复用作者电脑配置。

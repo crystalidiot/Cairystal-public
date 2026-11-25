@@ -9,6 +9,10 @@ import time
 import unittest
 
 MODULES = [
+    'test_chemistry_handoff',
+    'test_fast_mode',
+    'test_twin_quick',
+    'test_decision_flow',
     'test_usage_optimization',
     'test_chemistry_first',
     'test_flow_handoffs',

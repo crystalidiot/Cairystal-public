@@ -1,6 +1,6 @@
 # Cairystal · 从这里开始 / Start here
 
-版本 / Release: `usage_optimization_20261123_01`。
+版本 / Release: `chemistry_handoff_20261125_01`。
 
 1. 解压整个包，在 Windows 上先读 [INSTALL.md](INSTALL.md)，运行 `python -B verify_package.py` 校验文件。
 2. 选 [中文](Chinese/small-molecule-crystal/SKILL.md) 或 [English](English/small-molecule-crystal/SKILL.md) 一套 skill；外部软件另行合法安装，按指南生成本机配置。
@@ -14,3 +14,6 @@
 English: Extract everything, read INSTALL.md, verify the package, select one language and create a machine-specific profile. Give HANDOFF.en.md to an agent with local Windows filesystem and command execution. Single-language import ZIPs are included. Native crystallographic software is installed separately. This is a tested preview, not universal host certification.
 
 使用条款 / Terms: [LICENSE](LICENSE)。联系 / Contact: caizhuoerr@qq.com · 微信 / WeChat: crystal-idiot。
+
+
+2026-11-25 / 0.3.3-preview: this distribution defaults to fast mode; explicitly select standard for the standard workflow. Read CHANGELOG.md and VALIDATION.md. Work-model convergence alone does not establish correctness.

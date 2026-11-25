@@ -64,16 +64,28 @@ def model_signature(text):
         key=r[0].upper()
         if key in ignored:continue
         if key=='FVAR':controls.append(['FVAR_COUNT',len(r)-1]);continue
+        if key=='BASF':controls.append(['BASF_COUNT',len(r)-1]);continue
         if key=='EXTI':controls.append(['EXTI_REFINED_SCALAR']);continue
         if key not in CARDS and len(r)>=7:
             atoms.append([r[0].upper(),r[1],r[5],len(r)]);continue
         controls.append([v.upper() for v in r])
     return {'controls':controls,'atoms':atoms}
 
-def movement_review(before,after,before_gate,after_gate):
+def movement_review(before,after,before_gate,after_gate,execution_mode='standard'):
     from audit_occupancy import audit
     btext=before.read_text(encoding='latin1');atext=after.read_text(encoding='latin1')
     if model_signature(btext)!=model_signature(atext):raise ValueError('Weight trial changed model parameterization or other controls')
+    def basf(text):
+        cards=[r[1:] for r in records(text) if r[0].upper()=='BASF']
+        if not cards:return []
+        if len(cards)!=1 or not cards[0]:raise ValueError('Ambiguous BASF controls')
+        values=list(map(float,cards[0]))
+        if any(not math.isfinite(v) or v<0 or v>1 for v in values) or sum(values)>1:
+            raise ValueError('Nonphysical BASF after weight trial')
+        return values
+    bf,af=basf(btext),basf(atext)
+    if len(bf)!=len(af) or any(abs(x-y)>.02 for x,y in zip(bf,af)):
+        raise ValueError('Weight trial changed twin fractions materially; inspect before adoption')
     b=audit(before,gemmi);a=audit(after,gemmi)
     if a['unit_discrepancies'] or a['overlapping_orbit_groups']:raise ValueError('Weight trial occupancy/orbit accounting needs review')
     previous={x['label']:x for x in b['atoms']};cell=gemmi.UnitCell(*map(float,next(r[2:] for r in records(atext) if r[0].upper()=='CELL')))
@@ -97,11 +109,13 @@ def movement_review(before,after,before_gate,after_gate):
     if max(population,default=0)>.02:
         i=max(range(len(population)),key=population.__getitem__)
         raise ValueError(f'Weight trial moved coordinates/populations materially: {labels[i]} population changed {population[i]:.6f} (limit 0.02); inspect before adoption')
-    if after_gate['review_reasons'] or not after_gate['execution_complete']:raise ValueError('Weight trial numerical/control gate needs review')
+    from execution_mode import gate_reasons
+    if gate_reasons(after_gate,execution_mode) or not after_gate['execution_complete']:raise ValueError('Weight trial numerical/control gate needs review')
     bm=before_gate['metrics'];am=after_gate['metrics']
     if am['unique']!=bm['unique']:raise ValueError('Reflection count changed during weight-only trial')
     if am['R1_observed']>bm['R1_observed']+.001:raise ValueError('R1 worsened materially during weight trial')
     return {'max_cartesian_shift_A':max(distances,default=0),'max_occupancy_change':max(population,default=0),'max_adp_component_change_A2':max(adp_change,default=0),'parameterization_unchanged':True,
+            'BASF_before':bf,'BASF_after':af,
             'EXTI_before':extinction_value(btext),'EXTI_after':extinction_value(atext),
             'EXTI_note':'Presence retained; refined scalar may change. This does not establish a physical extinction diagnosis.'}
 
@@ -212,7 +226,9 @@ def factual_notes(cif,state,review):
             en['methods']=en['methods'].replace('The weight coefficients were already stable; no further iteration was performed.','The two refinements used identical weighting coefficients.')
         zh['methods']+=' '+description['zh']
         en['methods']+=' '+description['en']
-    return {'zh':zh,'en':en,'audit_records':{'source_narratives':digest['original_records'],'review':review,'weight_trials':state['weight_trials'],'events':state.get('events',[]),'source_hashes':state.get('source_hashes',{})},'generation':{'source_cif_sha256':data['cif_sha256'],'ai_calls':0,'factual_template':True,'hydrogen_method_evidence':method_evidence['evidence'] if method_evidence else None,'narrative_digest':digest['evidence']}}
+    from execution_mode import annotate_notes
+    result={'zh':zh,'en':en,'audit_records':{'source_narratives':digest['original_records'],'review':review,'weight_trials':state['weight_trials'],'events':state.get('events',[]),'source_hashes':state.get('source_hashes',{})},'generation':{'source_cif_sha256':data['cif_sha256'],'ai_calls':0,'factual_template':True,'hydrogen_method_evidence':method_evidence['evidence'] if method_evidence else None,'narrative_digest':digest['evidence']}}
+    return annotate_notes(result,state)
 
 def freeze_for_validation(audit, destination, credit_audit):
     """Embed structure factors before credit/hash validation; serialization drops comments."""
@@ -229,8 +245,13 @@ def report_alert_policy(local,collect_reports):
 
 def finish(config,output,deliver=False,authorize=False,official_cache=None):
     from refinement_gate import assess
+    from execution_mode import options,gate_reasons,weight_stop_blocks,automatic_repairs,preview_record
+    started_clock=time.perf_counter()
     root=new_directory(output);config_path=regular(config);cfg=json.loads(config_path.read_text(encoding='utf-8'));shutil.copy2(config_path,root/'config.json')
     state={'started_at':utc_now(),'status':'running','phase':'input','weight_trials':[],'events':[],'scientific_acceptance':'requires_review','ai_calls':0,'code_sha256':{p.name:sha(p) for p in Path(__file__).parent.glob('*.py')}};write_json(root/'state.json',state)
+    cfg=options(cfg);selected_mode=cfg['execution_mode']
+    state['execution_mode']=selected_mode
+    write_json(root/'effective_config.json',cfg)
     def save():write_json(root/'state.json',state)
     def step(name,fn):
         state['phase']=name;event={'name':name,'started_at':utc_now()};state['events'].append(event);save();t=time.perf_counter()
@@ -249,7 +270,7 @@ def finish(config,output,deliver=False,authorize=False,official_cache=None):
         write_json(root/'routine_consistency.json',audit['routine_checks'])
         state['routine_consistency']=consistency_summary(audit['routine_checks'])
         step('routine_consistency_gate',lambda:require_consistency(audit['routine_checks'],automatic=review.get('review_mode')=='bounded_automatic_rules'))
-        if audit['gate']['review_reasons']:raise ValueError('Initial convergence/parameter controls require review: '+str(audit['gate']['review_reasons']))
+        if gate_reasons(audit['gate'],selected_mode):raise ValueError('Initial convergence/parameter controls require review: '+str(audit['gate']['review_reasons']))
         state['solvent_mask']=audit.get('solvent_mask')
         if state['solvent_mask']:
             if state['solvent_mask']['quality_flags']:raise ValueError('SQUEEZE quality flags require model/mask review')
@@ -267,7 +288,7 @@ def finish(config,output,deliver=False,authorize=False,official_cache=None):
             with contextlib.redirect_stdout(io.StringIO()):rc=native_run(args)
             if rc:raise ValueError('Numbered native continuation failed; original model retained: '+str(destination/'attempt.json'))
             gate=assess(destination,'model')
-            plan['continuation_stability']=movement_review(before,destination/'model.res',current_gate,gate)
+            plan['continuation_stability']=movement_review(before,destination/'model.res',current_gate,gate,selected_mode)
             if sha(destination/'model.hkl')!=audit['source_sha256']['hkl']:raise ValueError('HKL changed during numbering')
             require_normalized((destination/'model.res').read_text('latin1'))
             plan['result_res_sha256']=sha(destination/'model.res');write_json(root/'atom_label_map.json',plan)
@@ -289,7 +310,7 @@ def finish(config,output,deliver=False,authorize=False,official_cache=None):
                 if rc:raise ValueError('Native weighting job failed; see '+str(destination/'attempt.json'))
                 from convergence_trend import analyse as trend
                 candidate=destination;gate=assess(candidate,'model');continuations=[]
-                for extra in range(2):
+                for extra in range(0 if selected_mode=='fast' else 2):
                     evidence=trend((candidate/'model.lst').read_text('latin1'),gate,(candidate/'model.ins').read_text('latin1'))
                     write_json(root/f'weight_{index+1:02d}_trend_{extra+1:02d}.json',evidence)
                     if not evidence['eligible']:break
@@ -305,13 +326,13 @@ def finish(config,output,deliver=False,authorize=False,official_cache=None):
                     if read_weights((more/'model.ins').read_text('latin1'))[0]!=suggested:raise ValueError('Weight changed during unchanged continuation')
                     if sha(more/'model.hkl')!=audit['source_sha256']['hkl']:raise ValueError('Measured HKL changed during continuation')
                     candidate=more;gate=assess(candidate,'model')
-                check=movement_review(current/'model.res',candidate/'model.res',current_gate,gate)
+                check=movement_review(current/'model.res',candidate/'model.res',current_gate,gate,selected_mode)
                 if sha(candidate/'model.hkl')!=audit['source_sha256']['hkl']:raise ValueError('Measured HKL changed')
                 return gate,check,candidate,continuations
             new_gate,check,destination,continuations=step('weight_'+str(index+1),run_trial)
             state['weight_trials'].append({'source':str(current),'output':str(destination),'active_before':active,'applied':suggested,'metrics':new_gate['metrics'],'stability':check,'unchanged_continuations':continuations});current=destination;current_gate=new_gate;save()
         state['weights']={'active':active,'suggested':suggested,'status':stop,'max_updates':max_updates};save()
-        if stop!='coefficients_stable':
+        if weight_stop_blocks(stop,selected_mode):
             state['status']='needs_weight_review';decision_packet([],root,'Weight iteration stopped: '+stop);save();return state,root
         selected=new_directory(root/'selected')
         for ext in ['ins','res','hkl','cif','fcf','lst']+(['fab'] if audit.get('solvent_mask') else []):shutil.copy2(current/f'model.{ext}',selected/f'model.{ext}')
@@ -350,10 +371,16 @@ def finish(config,output,deliver=False,authorize=False,official_cache=None):
                 [a['code'] for a in (local.get('alerts') or {}).get('alerts',[])])
             state['twin_review_policy']['local_validation_available']=state['local_validation_available']
             save()
-        pending,stop=report_alert_policy(local,cfg.get('collect_reports_with_alerts',False))
+        pending,stop=report_alert_policy(local,True if selected_mode=='fast' else cfg.get('collect_reports_with_alerts',False))
+        if selected_mode=='fast':
+            state['fast_preview']=preview_record(frozen,local,state,started_clock)
+            write_json(root/'fast_preview.json',state['fast_preview'])
+            state['automatic_AB']={'status':'deferred_by_fast_mode','executed':False,'AB_alerts':pending,'reason':'Local AB checks retained; no automatic repair search in fast mode.'}
+            save()
         state['pending_alert_review']=pending
         if pending:decision_packet(pending,root,'Unresolved validation findings retained; diagnostic reports are not scientific acceptance')
-        if any(a['level'] in 'AB' for a in pending) and local.get('available',True):
+        from twin_quick import SIGNALS as twin_signals
+        if automatic_repairs(selected_mode) and (any(a['level'] in 'AB' for a in pending) or any(str(a['code']) in twin_signals for a in (local.get('alerts') or {}).get('alerts',[]))) and local.get('available',True):
             from ab_auto import from_finish
             state['automatic_AB']=step('automatic_AB_tool_trials',lambda:from_finish(cfg,frozen,root/'local_validation',root/'automatic_AB'))
             write_json(root/'automatic_AB_handoff.json',state['automatic_AB'])
@@ -384,7 +411,7 @@ def finish(config,output,deliver=False,authorize=False,official_cache=None):
                 write_json(branch/'paired_audit.json',updated_audit)
                 # The baseline packet remains in automatic_AB. The top-level decision refers to the selected files.
                 decision_packet(pending,root,'Working OMIT selection; see working_omit/selection.json and the unchanged baseline')
-            elif state['automatic_AB'].get('recommended_for_review') or state['automatic_AB'].get('sensitivity_trials_for_review'):
+            elif state['automatic_AB'].get('recommended_for_review') or state['automatic_AB'].get('sensitivity_trials_for_review') or state['automatic_AB'].get('twin_quick',{}).get('defer_omit'):
                 # Review the supported improvement before uploading the older model.
                 stop=True
             save()

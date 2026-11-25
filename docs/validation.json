@@ -1,52 +1,53 @@
 {
-  "date": "2026-11-23",
-  "release_id": "0.3.2-preview",
-  "engine_release": "usage_optimization_20261123_01",
-  "distribution_revision": "public-1",
-  "upstream_regressions": {
-    "modules": 86,
-    "tests": 1179,
-    "errors": 0,
-    "failures": 0,
-    "skipped": 0,
-    "success": true,
-    "seconds": 101.85,
-    "scope": "Offline regression fixtures. No new crystal solution, scientific correctness or new IUCr receipt is claimed."
-  },
-  "local_distribution_tests": {
+  "date": "2026-11-25",
+  "release": "0.3.3-preview",
+  "engine": "chemistry_handoff_20261125_01",
+  "distribution_tests": {
     "Chinese": {
-      "tests": 38,
-      "success": true,
+      "tests": 1255,
       "failures": 0,
       "errors": 0,
       "skipped": 0,
-      "seconds": 63.599
+      "seconds": 130.505,
+      "success": true,
+      "module_count": 90,
+      "initial_run_errors": 5,
+      "environment_retry": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "success": true,
+        "seconds": 0.828,
+        "reason": "Initial run blocked localhost connections with WinError 10013; exact five HTTP checks rerun with loopback permission. No scientific code modified."
+      }
     },
     "English": {
-      "tests": 38,
-      "success": true,
+      "tests": 1255,
       "failures": 0,
       "errors": 0,
       "skipped": 0,
-      "seconds": 64.414
+      "seconds": 130.488,
+      "success": true,
+      "module_count": 90,
+      "initial_run_errors": 5,
+      "environment_retry": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "success": true,
+        "seconds": 0.783,
+        "reason": "Initial run blocked localhost connections with WinError 10013; exact five HTTP checks rerun with loopback permission. No scientific code modified."
+      }
     }
   },
-  "package_integrity": {
-    "status": "integrity_verified",
-    "files": 801,
-    "publisher_authenticated": false
+  "source_files": {
+    "Chinese": 406,
+    "English": 406
   },
-  "all_python_source_matches_upstream": true,
+  "python_source_matches_upstream": true,
   "licence_1_1_unchanged": true,
-  "console_licences_verified": 17,
-  "no_new_crystal_or_IUCr_work": true,
-  "content_audit": {
-    "schema": 1,
-    "files_checked": 819,
-    "relative_links_checked": 891,
-    "findings": [],
-    "passed": true,
-    "scope": "Bounded source/archive checks only; not legal clearance, originality proof, remote-history review or complete secret detection."
-  },
-  "scope": "Bounded distribution, licence and file checks; not a legal guarantee or scientific accuracy certification."
+  "third_party_assets_and_licences_unchanged": true,
+  "official_submission_this_sync": false,
+  "native_crystal_calculation_this_sync": false,
+  "scope": "Software regression and packaging checks only; not crystal correctness, token measurement or cross-agent certification."
 }

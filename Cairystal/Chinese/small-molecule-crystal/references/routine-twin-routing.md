@@ -28,3 +28,7 @@ SHELXL documents the different BASF meanings for batch scaling and twin fraction
 ## Test boundary
 
 Offline regressions cover routing and format rejection. Native SHELXL 2018/3 experiments use fictional HKL generated from a synthetic model, not customer data. Ordinary, batch-scale, inversion and non-inversion two-domain outputs all pass file pairing; altered BASF/HKL, missing FCF, LIST 8 and HKLF 5 controls remain rejected. This establishes the tested file-handling path, not successful solution of real twinned crystals or a new IUCr validation result. SQUEEZE/twin combinations and the narrow automatic chemical-review scope are not expanded by this change.
+
+## Current automated detection branch
+
+See [quick-twin](quick-twin.md). The existing delivery checker remains unchanged; the new tool handles short detection and isolated native trials before final selection.

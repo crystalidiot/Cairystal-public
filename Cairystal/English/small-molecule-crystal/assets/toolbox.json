@@ -1250,8 +1250,8 @@
         "en": "Recorded tool output; see --help"
       },
       "effects": {
-        "zh-CN": "只读当前候选配套文件，写新的诊断 JSON；不修改模型、不上传。",
-        "en": "See native help; local records only unless the underlying action has explicit existing upload authorization."
+        "zh-CN": "默认只读诊断；可选 --trial-output 准备 C/N/O 对照，--run-trials 调用 SHELXL/PLATON；不采纳模型、不上传。",
+        "en": "Read-only by default; optional --trial-output prepares C/N/O contrasts and --run-trials executes native validation; no adoption/upload."
       },
       "requires": {
         "zh-CN": "使用本机配置的 Python 和工具依赖；检索工具仅需标准库。",
@@ -1263,7 +1263,9 @@
       },
       "references": [
         "references/initial-model-review.md",
-        "references/initial-model-review.en.md"
+        "references/initial-model-review.en.md",
+        "references/decision-flow.md",
+        "references/decision-flow.en.md"
       ],
       "example": "--directory CURRENT_CANDIDATE --stem model --elements C N O Cl --output NEW_REVIEW.json"
     },
@@ -2104,8 +2106,8 @@
         "en": "Timing diagnostics"
       },
       "inputs": {
-        "zh-CN": "--run 明确的交付运行目录；可选 --output 新 JSON",
-        "en": "--run explicit delivery-run directory; optional --output new JSON"
+        "zh-CN": "--run 交付目录 或 --workflow-run autorun目录；可选 --output 新JSON",
+        "en": "--run DELIVERY_DIR or --workflow-run AUTORUN_DIR; optional --output NEW_JSON"
       },
       "outputs": {
         "zh-CN": "阶段耗时排序、官网/渲染明细及独立报表复核时间",
@@ -2124,7 +2126,9 @@
         "en": "Unrecorded timing/token values remain null; stage savings are not total-workflow savings."
       },
       "references": [
-        "references/speed-diagnostics.md"
+        "references/speed-diagnostics.md",
+        "references/decision-flow.md",
+        "references/decision-flow.en.md"
       ],
       "example": "--run DELIVERY_RUN --output NEW_TIMING.json"
     },
@@ -2163,6 +2167,151 @@
         "references/one-time-intake.md"
       ],
       "example": "--config PAIRED_SOURCES.json --output NEW_LEDGER"
+    },
+    {
+      "id": "twin-quick",
+      "group": "model",
+      "script": "twin_quick.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "快速孪晶检查及 TWIN/BASF 对照",
+        "en": "Quick twin detection and TWIN/BASF contrast"
+      },
+      "inputs": {
+        "zh-CN": "--directory PAIRED --stem model --profile MACHINE.json --output NEW_DIR [--alerts ALERTS.json | --reason EVIDENCE]",
+        "en": "--directory PAIRED --stem model --profile MACHINE.json --output NEW_DIR [--alerts ALERTS.json | --reason EVIDENCE]"
+      },
+      "outputs": {
+        "zh-CN": "PLATON 原始矩阵证据、对照与孪晶 INS/RES/CIF/FCF、本地验证和比较 JSON。",
+        "en": "Native PLATON matrix evidence, control/twin INS/RES/CIF/FCF, local validation and comparison JSON."
+      },
+      "effects": {
+        "zh-CN": "有信号才查；默认最多20秒搜索，取得完整候选即可提前结束；1个法则与未加孪晶模型各精修20轮。保留原始数据，不上传。",
+        "en": "Search only on evidence, up to 20 s with early stop on a complete candidate; 20 cycles each for one law and control. Preserve source; no upload."
+      },
+      "requires": {
+        "zh-CN": "配对的当前 HKLF4 模型和 LIST4；gemmi、本机 SHELXL/PLATON。",
+        "en": "Paired current HKLF4 model and LIST4; gemmi, native SHELXL/PLATON."
+      },
+      "boundary": {
+        "zh-CN": "仅全重叠、整数双组分法则；HKLF5/部分重叠等保留证据交专门分支。低R不等于模型正确，不自动采纳。",
+        "en": "Full-overlap integer two-domain laws only; dedicated route for partial overlap/HKLF5. Lower R alone is not correctness; no automatic adoption."
+      },
+      "references": [
+        "references/quick-twin.md",
+        "references/routine-twin-routing.md"
+      ],
+      "example": "--directory PAIRED --stem model --profile MACHINE.json --reason \"Current diffraction evidence\" --output NEW_TWIN"
+    },
+    {
+      "id": "fast",
+      "group": "model",
+      "script": "crystal_autorun.py",
+      "prefix": [
+        "run",
+        "--execution-mode",
+        "fast"
+      ],
+      "title": {
+        "zh-CN": "快速模型主线（先出模型，保留验证）",
+        "en": "Fast working-model pipeline"
+      },
+      "inputs": {
+        "zh-CN": "--config CONFIG.json --output 新运行目录",
+        "en": "--config CONFIG.json --output NEW_RUN"
+      },
+      "outputs": {
+        "zh-CN": "本地模型回执、AB清单；已授权时继续官网PDF和中英文Word",
+        "en": "Local model receipt and AB list; authorized official PDF and bilingual Word"
+      },
+      "effects": {
+        "zh-CN": "新目录内调用原生程序，保留输入；不自行授予上传权限",
+        "en": "Run native programs in a new directory; preserve inputs, no implied upload permission"
+      },
+      "requires": {
+        "zh-CN": "配置中的运行环境；二维图缺失或科学歧义交助手处理",
+        "en": "Configured runtime; agent review for missing graph or scientific ambiguity"
+      },
+      "boundary": {
+        "zh-CN": "临时模型，不保证正确；不为零AB反复试修",
+        "en": "Provisional model, no accuracy guarantee or exhaustive AB repair"
+      },
+      "references": [
+        "references/fast-mode.md"
+      ],
+      "example": "--config CONFIG.json --output NEW_RUN"
+    },
+    {
+      "id": "chemistry-screen",
+      "group": "model",
+      "script": "chemistry_handoff.py",
+      "prefix": [
+        "screen"
+      ],
+      "title": {
+        "zh-CN": "本轮元素候选集中比较",
+        "en": "Current-run element contrast batch"
+      },
+      "inputs": {
+        "zh-CN": "--run PIPELINE --source STAGE --name NEW；其余见 --help",
+        "en": "--run PIPELINE --source STAGE --name NEW; see --help"
+      },
+      "outputs": {
+        "zh-CN": "本次候选或加氢记录、实际原生文件、阶段耗时",
+        "en": "Current candidate/H records, native artifacts and timings"
+      },
+      "effects": {
+        "zh-CN": "仅新阶段写入；不读参考答案",
+        "en": "New stages only; no reference structures"
+      },
+      "requires": {
+        "zh-CN": "固定版本的本次运行；元素来自输入，化学图需有依据",
+        "en": "Fixed-version current run, allowed elements and evidenced chemical graph"
+      },
+      "boundary": {
+        "zh-CN": "不以最低 R 自动确认化学；官网上传使用本例授权",
+        "en": "Lowest R does not accept chemistry; official upload requires authorization"
+      },
+      "references": [
+        "references/chemistry-handoff.md"
+      ],
+      "example": "--run PIPELINE --source STAGE --name NEW"
+    },
+    {
+      "id": "hydrogen-continue",
+      "group": "model",
+      "script": "chemistry_handoff.py",
+      "prefix": [
+        "hydrogen"
+      ],
+      "title": {
+        "zh-CN": "重编号加氢与连续交付",
+        "en": "Normalize labels, add H and continue delivery"
+      },
+      "inputs": {
+        "zh-CN": "--run PIPELINE --source STAGE --name NEW；其余见 --help",
+        "en": "--run PIPELINE --source STAGE --name NEW; see --help"
+      },
+      "outputs": {
+        "zh-CN": "本次候选或加氢记录、实际原生文件、阶段耗时",
+        "en": "Current candidate/H records, native artifacts and timings"
+      },
+      "effects": {
+        "zh-CN": "仅新阶段写入；不读参考答案",
+        "en": "New stages only; no reference structures"
+      },
+      "requires": {
+        "zh-CN": "固定版本的本次运行；元素来自输入，化学图需有依据",
+        "en": "Fixed-version current run, allowed elements and evidenced chemical graph"
+      },
+      "boundary": {
+        "zh-CN": "不以最低 R 自动确认化学；官网上传使用本例授权",
+        "en": "Lowest R does not accept chemistry; official upload requires authorization"
+      },
+      "references": [
+        "references/chemistry-handoff.md"
+      ],
+      "example": "--run PIPELINE --source STAGE --name NEW"
     }
   ]
 }

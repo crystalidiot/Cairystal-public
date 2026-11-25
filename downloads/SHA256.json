@@ -1,24 +1,24 @@
 {
-  "release_id": "0.3.2-preview",
+  "release_id": "0.3.3-preview",
   "distribution_revision": "public-1",
   "archives": [
     {
-      "file": "Cairystal-20261123-public-academic.zip",
-      "sha256": "f7e843a9fa1b8bc6e50da5af6027357e2a1bf3eaea2fad0c4942b7c1d0d9792c",
-      "bytes": 5588833,
-      "members": 802
+      "file": "Cairystal-20261125-public-academic.zip",
+      "sha256": "407680be75a02082ac6ce0ec45c38511bc57481f125004600de5b97759df1465",
+      "bytes": 5800335,
+      "members": 831
     },
     {
       "file": "Cairystal-zh-CN.skill.zip",
-      "sha256": "712771e24210372dda60a999d132500044cd07aeb35ce9c598846139c10de549",
-      "bytes": 1403350,
-      "members": 392
+      "sha256": "6489afd1a6e019aaf37a4111d402772c84f5cf45004c4d780d017e25cbb0ca83",
+      "bytes": 1456272,
+      "members": 406
     },
     {
       "file": "Cairystal-en.skill.zip",
-      "sha256": "17c454de036ff188f7c7c4a74e62f0c24eac5de4b485168d784eec1705bca89f",
-      "bytes": 1402611,
-      "members": 392
+      "sha256": "e3c79bccd783bfd68eb209d6d91587f4bbcebbc6a7d9407960621e8c4c152f05",
+      "bytes": 1455689,
+      "members": 406
     }
   ]
 }

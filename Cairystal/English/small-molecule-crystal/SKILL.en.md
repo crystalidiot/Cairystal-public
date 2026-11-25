@@ -3,6 +3,14 @@ name: small-molecule-crystal
 description: Cairystal small-molecule crystallography toolbox. Run local SHELX/PLATON for solution, refinement, A/B diagnosis, official IUCr checkCIF and bilingual Word reports. Script routine operations; refer scientific ambiguity to an agent or specialist.
 ---
 
+<!-- fast_model_20261125_01 -->
+## 快速版入口 / Fast edition
+
+本副本用于尽快获得可查看的合理候选模型，默认用工具 `fast`（显式 execution_mode=fast）；先阅读 [快速模式](references/fast-mode.md)。减少试探轮数、先出模型，保留本地AB检查及已授权的官网/中英文Word。快速模式不要求AB清零，报告标为临时模型；明确的化学、占有率或数据配对错误仍需解决。下文通用主线与快速模式冲突时，以快速模式的试修预算和停止规则为准；未变化的科学/权限规则继续适用。
+
+This opt-in copy uses the `fast` tool by default. Read [Fast mode](references/fast-mode.md). Bound trial budgets and publish a provisional local model before authorized official reports. Do not chase zero AB automatically; retain chemistry, occupancy and data-pairing checks. Fast-mode budgets take precedence over the general workflow below. The previous standard release stays unchanged.
+
+
 # Cairystal small-molecule structure determination
 
 Customers can give the agent a data folder, paste checkCIF alerts, or ask it to finish an existing report. The agent operates the local tools, records evidence and explains the result. [中文](SKILL.zh-CN.md)
@@ -33,7 +41,9 @@ For a declared primitive orthorhombic indexing, autorun tests observed intensity
 
 With a complete chemical graph, document the protonation evidence for N–H or O–H using the current sample records or density. Routine C–H uses graph valence and checks the generated H sites against UNIT. A checked H-free graph proceeds with the selected heavy-atom refinement. See [graph matching](references/graph-matching.md).
 
-Invoke tools for the current evidence, not a routine tour of the toolbox. Verified metadata-only alerts skip unused structural trial planning. Same-job report continuation can reuse unchanged pages while retaining complete layout/file checks. See [avoiding repeated work](references/usage-and-cost.en.md).
+Compare candidates once per round; review complete-fragment geometry before fixing the model, validating and building reports. Reuse existing tools and fingerprint-matched artifacts; rerun only affected outputs while retaining scientific and delivery checks. See [avoiding repeated work](references/usage-and-cost.en.md).
+
+Initial decision queues provide evidence-linked tools and bounded C/N/O contrasts. Autorun records reason-coded handoffs; staged disorder records promotions and deferrals. See [decision flow](references/decision-flow.en.md).
 
 ## Agent entry
 
@@ -50,3 +60,12 @@ For an explicitly paired instrument record, run `intake-form --hkl A.hkl --paire
 For an existing model run `recover-checkcif --directory OFFICIAL --cif FINAL_CIF --check-only` first. Reuse completed results for the exact CIF. For an interrupted download, remove `--check-only` to recover the reports.
 
 Checkpoint continuation includes automatic report QA and publishing when supported. Use [the mainline/tool continuation contract](references/flow-handoffs.md) to resume the selected model without repeating phasing or uploads.
+
+On concrete twin evidence, use [twin-quick](references/quick-twin.md) before OMIT: bounded PLATON search, then native control vs TWIN/BASF refinement from a detected compatible law. No extra search without evidence; review before adopting the model.
+
+
+## 连续化学处理 / Continuous chemistry workflow
+
+使用 [chemistry-screen / hydrogen-continue](references/chemistry-handoff.md) 集中比较本轮元素候选，并在有依据的化学图确认后自动重编号、加氢、复核和交付。只把未解决的科学歧义交给 AI；当前推断图不能写成客户已提供的二维式。
+
+Use the linked tools for current-run element contrasts and reviewed-graph H/refinement/report continuation. Inferred chemistry is not an independently supplied 2D prior.

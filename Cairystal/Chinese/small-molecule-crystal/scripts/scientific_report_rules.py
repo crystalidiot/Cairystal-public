@@ -30,12 +30,15 @@ def moiety(graph):
     values=Counter(parts)
     return ', '.join((f'{n}({f})' if n>1 else f) for f,n in sorted(values.items(),key=lambda p:(not p[0].startswith('C'),p[0])))
 
-def basic_findings(metrics,packet,graph):
+def basic_findings(metrics,packet,graph,execution_mode='standard'):
     findings=[]
     if type(metrics.get('NPD_atoms')) is not int or metrics['NPD_atoms']!=0:findings.append('NPD count missing or nonzero')
+    from execution_mode import mode, FAST_SHIFT_LIMIT
+    selected=mode(execution_mode)
+    shift_limit=FAST_SHIFT_LIMIT if selected=='fast' else .01
     shift=metrics.get('last_abs_max_shift_esd')
-    if type(shift) not in (float,int) or not math.isfinite(shift) or not 0<=shift<=.01:
-        findings.append('Maximum absolute shift/esd missing, invalid or above 0.01')
+    if type(shift) not in (float,int) or not math.isfinite(shift) or not 0<=shift<=shift_limit:
+        findings.append('Maximum absolute shift/esd missing, invalid or above '+str(shift_limit))
     for key,low,high in [('R1_observed',0,.10),('GooF',.5,2)]:
         value=metrics.get(key)
         if type(value) not in (float,int) or not math.isfinite(value) or not low<=value<=high:findings.append(key+' outside bounded review range')
@@ -52,14 +55,14 @@ def basic_findings(metrics,packet,graph):
     if sum(a['formal_charge'] for a in graph['atoms'])!=0:findings.append('Supplied complete graph has nonzero total charge')
     return findings
 
-def review_current(root,state,source,output):
+def review_current(root,state,source,output,execution_mode='standard'):
     import gemmi
     from audit_occupancy import audit
     from refinement_gate import assess
     from candidate_packet import make_packet
     from report_method_templates import hydrogen_method_notes
     read=lambda p:json.loads(Path(p).read_text('utf-8-sig'))
-    gm=state.get('graph_matching',{});finding=[]
+    gm=state.get('hydrogen_workflow') or state.get('graph_matching',{});finding=[]
     if gm.get('status')!='ready_for_model_review':raise ValueError('No unambiguous graph-match result in this run')
     folder=Path(gm['record']).parent;graph=read(folder/'chemical_graph.json');mapping=read(folder/'mapping.json')
     if gm.get('hydrogen_handling')=='none_in_complete_graph':
@@ -71,8 +74,10 @@ def review_current(root,state,source,output):
     start=read(root/'session/start_summary.json')
     if len(start['candidates'])!=1:finding.append('Multiple native space-group candidates need comparison')
     if not gate['execution_complete']:finding.extend(gate['failures'])
-    finding.extend(gate['review_reasons']);packet=make_packet(root/'session',{'candidates':[{'stage':str(stage),'review':view,'metrics':gate['metrics']}]})['candidates'][0]
-    finding+=basic_findings(gate['metrics'],packet,graph)
+    from execution_mode import gate_reasons,mode
+    selected_mode=mode(execution_mode)
+    finding.extend(gate_reasons(gate,selected_mode));packet=make_packet(root/'session',{'candidates':[{'stage':str(stage),'review':view,'metrics':gate['metrics']}]})['candidates'][0]
+    finding+=basic_findings(gate['metrics'],packet,graph,selected_mode)
     from routine_consistency import audit_files
     routine_checks=audit_files(stage/'model.cif',model)
     write_json(output/'routine_consistency.json',routine_checks)
@@ -110,10 +115,23 @@ def review_current(root,state,source,output):
     hn=hydrogen_method_notes(text)
     if hn['evidence']['unsupported']:finding.append('Unsupported H controls: '+str(hn['evidence']['unsupported']))
     evidence={'status':'needs_review' if finding else 'bounded_rules_passed','findings':finding,'metrics':gate['metrics'],'bond_distances':bonds,'H_counts_by_parent':dict(hcounts),'model_sha256':sha(model),'graph_sha256':sha(folder/'chemical_graph.json'),'mapping_sha256':sha(folder/'mapping.json'),'AI_calls':0,'not_established':['independent chemical identity','correctness of supplied chemical prior','complete absence of unmodelled disorder','original absorption processing validity']}
+    evidence['execution_mode']=selected_mode
+    evidence['original_gate_review_reasons']=gate['review_reasons']
+    evidence['convergence_threshold']=.1 if selected_mode=='fast' else .01
     evidence.update(rule_version='20261028-01',implementation_sha256=sha(__file__),routine_checks=routine_checks)
     write_json(output/'scientific_rules.json',evidence)
     if finding:return evidence,None
     notes={'zh':{'summary':'二维图与本次新模型的连接、元素、氢数及常规精修指标通过限定范围的自动一致性检查。','limitations':'化学身份以所给二维图为前提，未经独立鉴定；自动规则通过不证明结构正确，也不证明不存在未建模无序。供氢接触由几何规则生成，较弱接触不单独证明质子化。'},
            'en':{'summary':'Connectivity, element assignments, H counts and routine refinement metrics passed bounded automatic consistency checks against the supplied graph.','limitations':'Chemical identity is conditional on the supplied 2D graph and lacks independent confirmation. Passing rules proves neither structural correctness nor absence of unmodelled disorder. Geometric donor contacts, including weak contacts, do not independently establish protonation.'}}
     review={'chemistry_and_h_reviewed':True,'review_mode':'bounded_automatic_rules','basis':'Bounded automated consistency review of the current-run graph/H stage: same graph connectivity and elemental/H counts, neutral complete graph, regular full populations, converged light-element model, positive ADPs and bounded residual density. No manual review claimed. Structural correctness and original processing validity are not established. See scientific_rules.json.','annotations':{'_chemical_formula_moiety':moiety(graph)},'bilingual_notes':notes}
+    if gm.get('graph_origin')=='current_run_inferred':
+        review['basis']+=' The chemical graph was inferred and reviewed by the assistant from this run, not supplied as independent 2D evidence. Basis: '+gm.get('chemical_basis','')
+        notes['zh']['summary']='本次衍射模型推断的化学图与新模型的连接、元素、氢数及常规指标通过限定范围的一致性检查。'
+        notes['zh']['limitations']='化学图依据本次衍射证据推断，未提供独立二维结构或化学身份鉴定。自动一致性检查不能独立证明化学身份，也不排除未建模无序；氢键几何不能单独证明质子化。'
+        notes['en']['summary']='Connectivity, element assignments, H counts and routine metrics passed bounded consistency checks against a chemical graph inferred from this diffraction run.'
+        notes['en']['limitations']='The chemical graph was inferred from the current diffraction data, without an independent supplied 2D structure or chemical identification. Consistency checks do not independently establish chemical identity or exclude unmodelled disorder; hydrogen-bond geometry alone does not prove protonation.'
+    if selected_mode=='fast':
+        review['basis']=review['basis'].replace('converged light-element model','light-element provisional model with max shift/s.u. <= 0.1')
+        review['bilingual_notes']['zh']['limitations']+=' 本次为快速模式，仅按临时模型标准停止精修，不代表充分收敛或正式定稿。'
+        review['bilingual_notes']['en']['limitations']+=' Fast-mode stopping criteria apply to a provisional model, not a fully converged publication model.'
     write_json(output/'review.json',review);return evidence,output/'review.json'

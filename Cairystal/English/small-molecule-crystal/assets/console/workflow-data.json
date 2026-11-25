@@ -1042,16 +1042,25 @@
       "alerts": [
         "112",
         "113",
-        "931"
+        "931",
+        "033",
+        "107",
+        "108",
+        "109",
+        "850",
+        "930",
+        "987"
       ],
       "trigger": "空间群候选不唯一、ADDSYM 提示、已有 TWIN/HKLF5 或其他具体模型/数据矛盾。",
       "actions": [
         "对照本次消光、衍射对称性和候选骨架；坐标拟合本身不能证明更高对称性。",
         "常规 PLATON 无相关提示且无其他证据时按普通路线，不主动穷举孪晶律。",
-        "确需改变设置时记录矩阵及原点，配套变换 HKL/坐标；已有特殊模型使用支持的专门配套流程。"
+        "确需改变设置时记录矩阵及原点，配套变换 HKL/坐标；已有特殊模型使用支持的专门配套流程。",
+        "有孪晶趋势时在OMIT前自动快速检查；PLATON检出全重叠双组分法则后生成TWIN/BASF对照并精修。"
       ],
       "validation": "变换、反射设置、模型计数和验证配套；没有提示不能写成已证明不存在孪晶。",
       "tools": [
+        "twin-quick",
         "platon",
         "stage",
         "diagnose",
@@ -1059,7 +1068,8 @@
       ],
       "references": [
         "references/routine-twin-routing.md",
-        "references/symmetry-and-twins.md"
+        "references/symmetry-and-twins.md",
+        "references/quick-twin.md"
       ],
       "availability": "已有诊断/执行工具；具体方案需根据证据选择",
       "missing": "此条提供处理规则和工具入口，不等于已实现自动修复与自动接受。",

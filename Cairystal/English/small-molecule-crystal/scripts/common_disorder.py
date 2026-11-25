@@ -86,7 +86,7 @@ def detect(directory,stem='case',possible_solvents=()):
     def add(family,keys,axis=None,solvent=None):
         keys=sorted(keys);identifier=family+'_'+('_'.join(axis) if axis else keys[0])
         if identifier in used:return
-        used.add(identifier);holds=[]
+        used.add(identifier);holds=[];symmetry_sites=[]
         for k in sorted(set(keys)|set(axis or [])):
             a=heavy[k]
             if a['part']!=0 or a['residue']!='0' or a['afix']!=0 or a['encoded_sof']!=11 or a['occupancy']!=1:
@@ -94,6 +94,10 @@ def detect(directory,stem='case',possible_solvents=()):
             if k in periodic:holds.append('fragment_needs_periodic_assembly:'+k)
             count=sum(cell.find_nearest_pbc_image(gemmi.Fractional(*a['xyz']),gemmi.Fractional(*op.apply_to_xyz(a['xyz'])),0).dist()<.001 for op in ops)
             if count!=1:holds.append('special_position:'+k)
+            if count!=1:
+                symmetry_sites.append({'atom':k,'stabilizer_order':count,'physical_occupancy':a['occupancy'],
+                    'encoded_SHELX_sof':a['encoded_sof'],
+                    'operators':[op.triplet() for op in ops if cell.find_nearest_pbc_image(gemmi.Fractional(*a['xyz']),gemmi.Fractional(*op.apply_to_xyz(a['xyz'])),0).dist()<.001]})
             if a['Ueq'] is None or not finite(a['Ueq']) or a['Ueq']<=0:holds.append('invalid_Ueq:'+k)
         for k in unsupported:
             a=next(v for v in parsed['atoms'] if v['label'].upper()==k)
@@ -107,6 +111,8 @@ def detect(directory,stem='case',possible_solvents=()):
         if solvent and solvent not in known:holds.append('solvent_identity_not_supplied:'+solvent)
         sites.append({'id':identifier,'family':family,'atoms':keys,'axis':axis,'solvent':solvent,
             'status':'screenable' if not holds else 'needs_review','review_reasons':sorted(set(holds)),
+            'special_position_evidence':symmetry_sites,
+            'next_tool':'occupancy' if symmetry_sites else ('density-disorder' if not holds else 'initial-review'),
             'chemistry':'Current-model topology hypothesis; not independent atom typing or solvent identification.'})
     for k,a in heavy.items():
         if a['element'].upper()!='C':continue
@@ -117,7 +123,8 @@ def detect(directory,stem='case',possible_solvents=()):
         ends=[v for v in cs if len(g[v])==1]
         anchors=sorted(g[k]-set(ends))
         if len(ends)==3 and len(anchors)==1 and len(g[k])==4:add('tert_butyl',ends,[anchors[0],k])
-    # Keep only the maximal eligible distal path for a given terminal carbon.
+    # A chain may rotate about an internal bond rather than only its longest tail.
+    # Retain up to three nested distal paths per end; each trial still changes one torsion.
     chains={}
     for k,a in heavy.items():
         for v in sorted(g[k]):
@@ -126,8 +133,10 @@ def detect(directory,stem='case',possible_solvents=()):
             if any(heavy[t]['element'].upper()!='C' or len(g[t])>2 for t in tail):continue
             end=sorted(t for t in tail if len(g[t])==1)
             if len(end)!=1:continue
-            if len(tail)>len(chains.get(end[0],(set(),None))[0]):chains[end[0]]=(tail,[k,v])
-    for tail,axis in chains.values():add('alkyl_chain',tail,axis)
+            chains.setdefault(end[0],[]).append((tail,[k,v]))
+    for alternatives in chains.values():
+        for tail,axis in sorted(alternatives,key=lambda x:(-len(x[0]),x[1]))[:3]:
+            add('alkyl_chain',tail,axis)
     visited=set()
     for k in heavy:
         if k in visited:continue

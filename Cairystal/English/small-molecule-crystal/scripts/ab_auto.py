@@ -218,6 +218,20 @@ def resolve(directory,stem,validation,output,software,policy=None,execute=True):
         if stem+'.chk' not in log.get('artifact_sha256',{}):raise ValueError('Validation CHK hash missing')
         checked=parse((v/(stem+'.chk')).read_text('latin1'))
         if checked['warnings'] or not checked['report_footer_present']:raise ValueError('Incomplete/inconsistent PLATON alert report')
+        # Twin evidence takes precedence over discarding large positive outliers.
+        # Include C/G twin notices: the A/B-only lightweight route must not hide them.
+        from twin_quick import SIGNALS,run as quick_twin
+        if {str(a['code']) for a in checked['alerts']} & (SIGNALS|{'934','939'}):
+            twin=quick_twin(directory,stem,out/'twin_quick',
+                {k:str(Path(software[k]).resolve()) for k in ['shelxl','platon']},checked['alerts'],
+                execute=execute and policy['automatic_candidates'])
+            result['twin_quick']=twin
+            if twin.get('defer_omit'):
+                result.update(status=twin['status'],source_unchanged=twin.get('source_unchanged'),
+                    next=twin['next'],seconds=round(time.perf_counter()-start,3),
+                    release=json.loads((ROOT/'release_info.json').read_text('utf-8'))['release_id'])
+                write_json(out/'result.json',result)
+                return result
         lightweight=non_model_alert_route(checked,policy)
         if lightweight is not None:
             result.update(lightweight)

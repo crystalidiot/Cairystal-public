@@ -20,17 +20,20 @@ IMMUTABLE={'CELL','LATT','SYMM','HKLF','WGHT','OMIT','SHEL','MERG','TWIN','BASF'
 def controls(text,keys):return [r for r in records(text) if r[0].upper() in keys]
 def build(base,plan,workspace):
  base=Path(base);workspace=Path(workspace);source=(base/'case.res').read_text(encoding='latin1')
- allowed={'name','kind','reason','evidence','expected','focus','cycles','element_changes','rename','isotropic','omit_atoms','add_restraints','remove_restraints','geometry_checks','expected_unresolved','split_fragment','common_disorder','hydrogen_riding','water_orientation','reflection_omit','control_change','occupancy_start'}
+ allowed={'name','kind','reason','evidence','expected','focus','cycles','element_changes','rename','isotropic','omit_atoms','add_restraints','remove_restraints','geometry_checks','expected_unresolved','split_fragment','common_disorder','hydrogen_riding','water_orientation','reflection_omit','control_change','occupancy_start','twin_law'}
  if set(plan)-allowed:raise ValueError('Unknown plan fields: '+str(set(plan)-allowed))
  if not re.fullmatch(r'[A-Za-z0-9_-]{1,60}',plan.get('name','')):raise ValueError('Safe unique name required')
  if not plan.get('reason') or not plan.get('evidence'):raise ValueError('Explicit hypothesis and evidence required')
  kind=plan.get('kind','diagnostic_refinement');cycles=plan.get('cycles',20)
  if kind not in {'baseline','diagnostic_refinement','omit_map'}:raise ValueError('Unsupported kind')
  h_edits=[]
- special=[k for k in ['hydrogen_riding','water_orientation','reflection_omit','control_change','occupancy_start'] if plan.get(k)]
+ special=[k for k in ['hydrogen_riding','water_orientation','reflection_omit','control_change','occupancy_start','twin_law'] if plan.get(k)]
  if special:
   if len(special)!=1 or kind!='diagnostic_refinement' or any(plan.get(k) for k in ['element_changes','rename','isotropic','omit_atoms','add_restraints','remove_restraints','split_fragment','common_disorder']):raise ValueError('One isolated special trial operation required')
-  if special[0]=='occupancy_start':
+  if special[0]=='twin_law':
+   from twin_quick import edit as twin_edit
+   source,h_edits=twin_edit(base,plan['twin_law'])
+  elif special[0]=='occupancy_start':
    from population_stability import edit as population_edit
    source,h_edits=population_edit(base,plan['occupancy_start'])
   elif special[0]=='control_change':
@@ -195,6 +198,9 @@ def execute(base,output,plan,software,baseline_diag=None,dedup=None,resources=No
    implementation['common_disorder_solvents.json']=digest(CATALOG)
   if plan.get('hydrogen_riding'):implementation['hydrogen_riding_trial.py']=digest(Path(__file__).with_name('hydrogen_riding_trial.py'))
   if plan.get('occupancy_start'):implementation['population_stability.py']=digest(Path(__file__).with_name('population_stability.py'))
+  if plan.get('twin_law'):
+   implementation['twin_quick.py']=digest(Path(__file__).with_name('twin_quick.py'))
+   implementation['twin_evidence']=digest(Path(plan['twin_law']['evidence']))
   if plan.get('water_orientation'):
    for n in ['water_h_trial.py','donor_audit.py']:implementation[n]=digest(Path(__file__).with_name(n))
   if plan.get('reflection_omit'):

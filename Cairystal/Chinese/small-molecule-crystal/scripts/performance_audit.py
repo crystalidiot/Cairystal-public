@@ -66,11 +66,23 @@ def inspect_run(directory):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--run',required=True,help='Exact delivery-run directory, not an input dataset')
+    group=p.add_mutually_exclusive_group(required=True)
+    group.add_argument('--run',help='Exact delivery-run directory, not an input dataset')
+    group.add_argument('--workflow-run',help='Exact autorun directory: reason-coded handoffs plus top-level action time')
     p.add_argument('--output',help='New JSON path; omit for stdout only')
     args=p.parse_args()
     try:
-        result=inspect_run(args.run)
+        if args.workflow_run:
+            from workflow_observability import summarize_waits
+            from pipeline_intake import unlinked
+            from crystal_runtime import regular,sha
+            path=regular(unlinked(Path(args.workflow_run)/'autorun.json'))
+            state=json.loads(path.read_text('utf-8-sig'))
+            result=summarize_waits(state)
+            result.update(run=str(path.parent),source_sha256=sha(path),
+                actions=[{k:a.get(k) for k in ['action','status','seconds','log']} for a in state.get('actions',[])])
+        else:
+            result=inspect_run(args.run)
         if args.output:
             from pipeline_intake import unlinked
             path=unlinked(args.output)

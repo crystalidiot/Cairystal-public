@@ -110,7 +110,7 @@ def autofinish(root,state,a):
     from scientific_report_rules import review_current
     from report_autoqa import run as automated_qa
     checked(root,state);folder=root/(identifier(a.name)+'_rules');folder.mkdir(exist_ok=False)
-    evidence,path=timed(root,state,'scientific_rules',lambda:review_current(root,state,a.source,folder),{'source':a.source})
+    evidence,path=timed(root,state,'scientific_rules',lambda:review_current(root,state,a.source,folder,execution_mode=getattr(a,'execution_mode','standard')),{'source':a.source})
     state['rule_review']={'status':evidence['status'],'record':str(folder/'scientific_rules.json'),'findings':evidence['findings']}
     if path is None:state['status']='needs_scientific_review';save(root,state);return
     a.review=str(path);finish(root,state,a)
@@ -157,7 +157,7 @@ def finish(root,state,a):
         en+=' Scientific statements use bounded rules and report layout uses automatic checks; no manual page-by-page inspection is claimed.'
     if state['prior_conversation_exposure']:
         zh+=' 存在先前聊天信息，不属于完全未知样品盲测。';en+=' Prior conversational exposure prevents describing this as a fully naive blind test.'
-    config={'collect_reports_with_alerts':True,'candidate':str(root/'session'/args.name),'stem':'model',**tools,'renderer':profile['renderer'],'timeout':a.timeout,'max_weight_updates':a.max_weight_updates,
+    config={'collect_reports_with_alerts':True,'candidate':str(root/'session'/args.name),'stem':'model',**tools,'renderer':profile['renderer'],'timeout':a.timeout,'max_weight_updates':a.max_weight_updates,'execution_mode':getattr(a,'execution_mode','standard'),
             'review':{'chemistry_and_h_reviewed':True,'basis':review['basis'],'review_mode':review.get('review_mode'),'bilingual_notes':{'zh':{'provenance':zh},'en':{'provenance':en}}}}
     raw_hkl=state.get('intake',{}).get('inputs',{}).get('hkl',{}).get('path')
     data_dir=state.get('data_directory') or (str(Path(raw_hkl).parent) if raw_hkl else None)
@@ -185,10 +185,15 @@ def finish(root,state,a):
         return result
     result=timed(root,state,'finish_'+name,invoke,{'config':str(config_path),'deliver':a.deliver,'upload_authorized':a.authorize_iucr_upload})
     state.update(status=result['status'],finish_root=str(root/name),metrics=result.get('metrics'),official_counts=result.get('official_counts'),local_counts=result.get('local_counts'),AB_alerts=result.get('AB_alerts') or result.get('pending_alert_review'),automatic_AB=result.get('automatic_AB'))
+    if result.get('fast_preview'):state['fast_preview']=result['fast_preview']
     if (root/name/'decision_packet.json').exists():shutil.copy2(root/name/'decision_packet.json',root/'decision_packet.json')
     if result.get('render_manifest'):state['render_manifest']=result['render_manifest'];state['official_pages_manifest']=result['official_pages_manifest']
     if result.get('delivery'):state.update(delivery=result['delivery'],completion=result.get('completion'),structure_viewer=result.get('structure_viewer'))
     save(root,state)
+
+    # Reviewed manual and automatic chemistry enter the same exact-file report
+    # QA/export path. AB or layout findings still stop this continuation.
+    complete_report_qa(root,state,a)
 
 def deliver(root,state,a):
     checked(root,state)
@@ -202,7 +207,7 @@ def deliver(root,state,a):
         if result.get(key):state[key]=result[key]
     save(root,state)
     if result['status']=='failed':raise ValueError(result.get('failure','Delivery failed'))
-    if result.get('review',{}).get('review_mode')=='bounded_automatic_rules':complete_report_qa(root,state,a)
+    complete_report_qa(root,state,a)
 
 
 def finalize(root,state,a):
@@ -221,7 +226,7 @@ def finalize(root,state,a):
     from crystal_delivery import finalize as seal
     args=SimpleNamespace(run=str(delivery),data_dir=state.get('data_directory') or str(Path(state['intake']['inputs']['hkl']['path']).parent),reviewed_zh=a.reviewed_zh,reviewed_en=a.reviewed_en,reviewed_official=a.reviewed_official,review_note=a.review_note,automatic_qa=automatic)
     timed(root,state,'seal_delivery',lambda:seal(args),vars(args))
-    result=read(delivery/'result.json');state.update(status='complete',finished_at=utc_now(),delivery=result['customer_delivery']['directory'],working_delivery=str(delivery/'delivery'),customer_delivery=result['customer_delivery'],customer_notice=result['customer_notice'],zip=result['zip'],baseline_seconds=a.baseline_seconds)
+    result=read(delivery/'result.json');state.update(status='complete',finished_at=utc_now(),delivery=result['customer_delivery']['directory'],working_delivery=str(delivery/'delivery'),customer_delivery=result['customer_delivery'],customer_notice=result['customer_notice'],zip=result['zip'],baseline_seconds=getattr(a,'baseline_seconds',None))
     state['original_inputs_unchanged']=True;state['skill_unchanged']=True
     f=read(finish_root/'state.json');f.update(status=result['status'],review_record='delivery_run/'+('automatic_review.json' if automatic else 'visual_review.json'),finalized_at=result['finalized_at']);write_json(finish_root/'state.json',f)
     save(root,state)
@@ -297,11 +302,11 @@ def main():
     s=sub.add_parser('finish')
     for k in ['run','source','review']:s.add_argument('--'+k,required=True)
     s.add_argument('--name',default='finish_01');s.add_argument('--deliver',action='store_true',default=True);s.add_argument('--local-only',dest='deliver',action='store_false');s.add_argument('--authorize-iucr-upload',action='store_true');s.add_argument('--timeout',type=float,default=180);s.add_argument('--max-weight-updates',type=int,default=4)
-    s.add_argument('--ab-policy')
+    s.add_argument('--ab-policy');s.add_argument('--execution-mode',choices=['standard','fast'],default='standard')
     s=sub.add_parser('autofinish')
     for k in ['run','source']:s.add_argument('--'+k,required=True)
     s.add_argument('--name',default='finish_01');s.add_argument('--deliver',action='store_true',default=True);s.add_argument('--local-only',dest='deliver',action='store_false');s.add_argument('--authorize-iucr-upload',action='store_true');s.add_argument('--timeout',type=float,default=180);s.add_argument('--max-weight-updates',type=int,default=4);s.add_argument('--baseline-seconds',type=float)
-    s.add_argument('--ab-policy')
+    s.add_argument('--ab-policy');s.add_argument('--execution-mode',choices=['standard','fast'],default='standard')
     s=sub.add_parser('deliver');s.add_argument('--run',required=True);s.add_argument('--authorize-iucr-upload',action='store_true');s.add_argument('--baseline-seconds',type=float)
     s=sub.add_parser('finalize');s.add_argument('--run',required=True);s.add_argument('--review-note',required=True);s.add_argument('--baseline-seconds',type=float)
     for k in ['zh','en','official']:s.add_argument('--reviewed-'+k,action='store_true')
