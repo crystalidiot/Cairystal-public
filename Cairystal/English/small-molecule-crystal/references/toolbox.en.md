@@ -2,21 +2,21 @@
 
 The standard-library router selects existing reusable tools; it does not reimplement crystallographic algorithms. Humans or agents with local file and terminal access can call it. Inputs are paths and explicit configurations, not cached atom assignments or coordinates.
 
-Run from the skill directory or use the absolute path to toolbox.py. Quote paths with spaces. Replace uppercase placeholders.
+Run from the skill directory or use the absolute path to cairystal.py. Quote paths with spaces. Replace uppercase placeholders.
 
-    python -B scripts/toolbox.py --language en list
-    python -B scripts/toolbox.py --language en describe complete
-    python -B scripts/toolbox.py run complete -- --help
-    python -B scripts/toolbox.py plan complete -- --input CANDIDATE --profile PROFILE.json --review REVIEW.json --output NEW_OUTPUT --data-dir ORIGINAL_DATA
+    python -B cairystal.py --language en list
+    python -B cairystal.py --language en describe complete
+    python -B cairystal.py run complete -- --help
+    python -B cairystal.py plan complete -- --input CANDIDATE --profile PROFILE.json --review REVIEW.json --output NEW_OUTPUT --data-dir ORIGINAL_DATA
 
 list --json and describe TOOL --json expose contracts from assets/toolbox.json. **plan only previews argv; it does not validate scientific inputs, grant authorization or execute.** run TOOL -- arguments forwards arguments without a shell, implicit profile injection, permission injection, retry or success reinterpretation. It preserves stdout, stderr and the underlying exit code. Router errors return 2. Business output schemas remain tool-specific.
 
 ## Routine route
 
-    python -B scripts/toolbox.py run doctor -- --profile PROFILE.json
-    python -B scripts/toolbox.py run intake-form -- --language en --output NEW_FORM
-    python -B scripts/toolbox.py run intake-accept -- --input ANSWERS.json --profile PROFILE.json --output NEW_INTAKE
-    python -B scripts/toolbox.py run autorun -- run --config NEW_INTAKE/autorun_config.json --output NEW_RUN
+    python -B cairystal.py run doctor -- --profile PROFILE.json
+    python -B cairystal.py run intake-form -- --language en --output NEW_FORM
+    python -B cairystal.py run intake-accept -- --input ANSWERS.json --profile PROFILE.json --output NEW_INTAKE
+    python -B cairystal.py run autorun -- run --config NEW_INTAKE/autorun_config.json --output NEW_RUN
 
 The existing dispatcher continues routine steps. On needs_review, blocked or nonzero exit, read the compact handoff/decision packet and evidence; do not restart the entire workflow to bypass a gate. Automatic initialization currently supports HKL/P4P; other inputs use inspect/setup/stage and the [workflow](workflow.md). Native tool arguments and schemas remain unchanged.
 

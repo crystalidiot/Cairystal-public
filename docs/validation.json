@@ -1,53 +1,55 @@
 {
-  "date": "2026-11-25",
-  "release": "0.3.3-preview",
-  "engine": "chemistry_handoff_20261125_01",
+  "date": "2026-11-26",
+  "release": "0.3.4-preview",
+  "engine": "unified_entry_20261126_01",
   "distribution_tests": {
     "Chinese": {
-      "tests": 1255,
+      "tests": 1263,
       "failures": 0,
       "errors": 0,
       "skipped": 0,
-      "seconds": 130.505,
+      "seconds": 142.19899999999998,
+      "initial_loopback_restrictions": 5,
+      "loopback_retested": true,
       "success": true,
-      "module_count": 90,
-      "initial_run_errors": 5,
-      "environment_retry": {
-        "tests": 5,
-        "failures": 0,
-        "errors": 0,
-        "success": true,
-        "seconds": 0.828,
-        "reason": "Initial run blocked localhost connections with WinError 10013; exact five HTTP checks rerun with loopback permission. No scientific code modified."
-      }
+      "scope": "Full offline suite executed on identical upstream Python code; distribution byte equality separately verified."
     },
     "English": {
-      "tests": 1255,
+      "tests": 1263,
       "failures": 0,
       "errors": 0,
       "skipped": 0,
-      "seconds": 130.488,
+      "seconds": 129.198,
+      "initial_loopback_restrictions": 5,
+      "loopback_retested": true,
       "success": true,
-      "module_count": 90,
-      "initial_run_errors": 5,
-      "environment_retry": {
-        "tests": 5,
-        "failures": 0,
-        "errors": 0,
-        "success": true,
-        "seconds": 0.783,
-        "reason": "Initial run blocked localhost connections with WinError 10013; exact five HTTP checks rerun with loopback permission. No scientific code modified."
-      }
+      "scope": "Full offline suite executed on identical upstream Python code; distribution byte equality separately verified."
     }
   },
   "source_files": {
-    "Chinese": 406,
-    "English": 406
+    "Chinese": 408,
+    "English": 408
   },
   "python_source_matches_upstream": true,
   "licence_1_1_unchanged": true,
   "third_party_assets_and_licences_unchanged": true,
-  "official_submission_this_sync": false,
-  "native_crystal_calculation_this_sync": false,
-  "scope": "Software regression and packaging checks only; not crystal correctness, token measurement or cross-agent certification."
+  "official_submission_this_validation": true,
+  "native_crystal_calculation_this_validation": true,
+  "fresh_case": {
+    "R1": 0.0481,
+    "wR2": 0.13,
+    "GoF": 1.087,
+    "official_counts": {
+      "A": 0,
+      "B": 0,
+      "C": 3,
+      "G": 10
+    },
+    "wall_seconds": 204.072803,
+    "CIF_and_official_PDF_and_bilingual_Word_verified": true,
+    "raw_inputs_unchanged": true,
+    "prior_conversation_exposure": true,
+    "not_independent_structure_accuracy_test": true
+  },
+  "scope": "Offline software tests, one known-simple-case fresh workflow and public-package checks; not general structure accuracy, token measurement or cross-agent certification."
 }

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "scope": "Read-only route library plus automatic initial-model screening in the new preview; selecting a UI route never executes a repair.",
+  "scope": "Shared read-only mainline/exception map. Autorun executes supported transitions; routes shown here do not grant permission or imply automatic scientific selection.",
   "steps": [
     {
       "id": "intake",
@@ -13,7 +13,8 @@
         "intake-accept",
         "inspect",
         "project-metadata",
-        "setup"
+        "setup",
+        "metadata-ledger"
       ],
       "source": [
         "scripts/pipeline_intake.py",
@@ -23,7 +24,8 @@
         "input",
         "metadata",
         "temperature"
-      ]
+      ],
+      "name_en": "Intake and input audit"
     },
     {
       "id": "solve",
@@ -35,7 +37,8 @@
         "stage",
         "autorun",
         "initial-review",
-        "route-problem"
+        "route-problem",
+        "solve-cascade"
       ],
       "source": [
         "scripts/crystal_session.py",
@@ -49,7 +52,8 @@
         "solve_d",
         "missing_atoms",
         "symmetry"
-      ]
+      ],
+      "name_en": "Solve and initial screening"
     },
     {
       "id": "chemistry",
@@ -60,7 +64,9 @@
       "tools": [
         "match",
         "hydrogen-plan",
-        "occupancy"
+        "occupancy",
+        "chemistry-screen",
+        "hydrogen-continue"
       ],
       "source": [
         "scripts/graph_assignment.py",
@@ -73,7 +79,8 @@
         "oh",
         "hydrogen_missing",
         "water"
-      ]
+      ],
+      "name_en": "Element identity and hydrogens"
     },
     {
       "id": "refine",
@@ -95,7 +102,8 @@
         "adp_shape",
         "adp_magnitude",
         "weights"
-      ]
+      ],
+      "name_en": "Refinement and weights"
     },
     {
       "id": "validate",
@@ -106,7 +114,12 @@
       "tools": [
         "platon",
         "diagnose",
-        "compare-ab"
+        "compare-ab",
+        "ab-auto",
+        "twin-quick",
+        "density-disorder",
+        "fragment-orbits",
+        "reflection-omit"
       ],
       "source": [
         "scripts/structure_diagnostics.py",
@@ -127,7 +140,8 @@
         "outliers",
         "absolute",
         "systematic"
-      ]
+      ],
+      "name_en": "Local validation and evidence-based trials"
     },
     {
       "id": "official",
@@ -148,7 +162,8 @@
         "official_ab",
         "network",
         "pairing"
-      ]
+      ],
+      "name_en": "Official IUCr checkCIF"
     },
     {
       "id": "deliver",
@@ -160,7 +175,8 @@
         "deliver",
         "report-qa",
         "check-delivery",
-        "viewer"
+        "viewer",
+        "resume-delivery"
       ],
       "source": [
         "scripts/crystal_delivery.py",
@@ -169,7 +185,8 @@
       ],
       "branches": [
         "reports"
-      ]
+      ],
+      "name_en": "Bilingual reports and delivery"
     }
   ],
   "branches": [
@@ -5166,6 +5183,5 @@
       522
     ]
   },
-  "release": "five_tools_20261106_01",
   "route_library_origin_release": "checkcif_strategy_tools_20261106_01"
 }

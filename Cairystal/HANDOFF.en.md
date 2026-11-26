@@ -1,6 +1,6 @@
 # Cairystal handoff
 
-Release: `chemistry_handoff_20261125_01`. No conversation history is required. Choose English/small-molecule-crystal or Chinese/small-molecule-crystal, read INSTALL.md, verify_package.py and the chosen SKILL.md, configure this computer, and run doctor and offline acceptance before a real sample.
+Release: `unified_entry_20261126_01`. No conversation history is required. Choose English/small-molecule-crystal or Chinese/small-molecule-crystal, read INSTALL.md, verify_package.py and the chosen SKILL.md, configure this computer, and run doctor and offline acceptance before a real sample.
 
 This is a Windows x64 / Python 3.12 workflow. It calls the user's authorized SHELX and PLATON installations and needs Word or LibreOffice plus Poppler for report rendering. Programs, model weights, scientific datasets and account credentials are not distributed in this archive.
 
@@ -18,4 +18,4 @@ The existing noncommercial academic license and third-party notices remain appli
 2026-11-23 update: chemistry and current diffraction evidence take priority over alert counts. Reuse report rendering only within the same task when content and environment match; full QA remains required. Verified experimental-metadata-only alerts use a short path; structural or uncertain alerts retain full diagnosis. All 66 tools remain available.
 
 
-2026-11-25 / 0.3.3-preview: this distribution defaults to fast mode; explicitly select standard for the standard workflow. Read CHANGELOG.md and VALIDATION.md. Work-model convergence alone does not establish correctness.
+2026-11-26 / 0.3.4-preview: one cairystal.py entry; use version --json and workflow. Standard autorun is the default, fast is explicit. Read CHANGELOG.md and VALIDATION.md. Work-model convergence alone does not establish correctness.

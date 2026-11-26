@@ -66,6 +66,48 @@ def default_language():
     except (OSError, ValueError, KeyError):
         return "zh-CN"
 
+
+def release_identity(root=ROOT):
+    """release_info.json is the authority; runtime paths are observations, not versions."""
+    root = Path(root).resolve()
+    info = json.loads((root / 'release_info.json').read_text('utf-8'))
+    return {**info, 'skill_root': str(root), 'entry': str(root / 'cairystal.py'),
+            'python': sys.executable}
+
+
+def workflow_map(catalog, root=ROOT):
+    """Share the console's existing route definition; never execute a suggested branch."""
+    root = Path(root)
+    data = json.loads((root / 'assets/console/workflow-data.json').read_text('utf-8'))
+    ids = {x['id'] for x in catalog['tools']}
+    stages = {x['id'] for x in data['steps']}
+    branches = data['branches']
+    if len(stages) != len(data['steps']):
+        raise ValueError('Duplicate workflow stage')
+    for row in [*data['steps'], *branches]:
+        if not set(row.get('tools', [])) <= ids:
+            raise ValueError('Workflow references an unregistered tool: ' + row['id'])
+    for row in branches:
+        if row.get('return_to') not in stages:
+            raise ValueError('Unknown workflow return stage: ' + row['id'])
+    return {**data, 'release': catalog['release'], 'executed': False,
+            'automatic_repairs_performed': False}
+
+
+def show_workflow(catalog, language, json_output):
+    data = workflow_map(catalog)
+    if json_output:
+        print(json.dumps(data, ensure_ascii=False, indent=2))
+        return
+    print('Cairystal ' + catalog['release'])
+    for n, step in enumerate(data['steps'], 1):
+        print(f"{n:02d} {step.get('name_en', step['id']) if language == 'en' else step['name']}")
+        print('   ' + ', '.join(step['tools']))
+    print('\n' + ('遇到异常按 route-problem 查工具；模型改变回到精修，网络/报告故障从交付断点续接。'
+                      if language == 'zh-CN' else
+                      'Use route-problem for exceptions. Model changes return to refinement; delivery failures resume the selected model.'))
+    print('python -B cairystal.py describe TOOL --json')
+
 def show_guide(catalog, language, topic, json_output):
     data = json.loads((ROOT / 'assets/user_guide.json').read_text('utf-8'))
     result = {'schema': 1, 'release': catalog['release'], 'language': language,
@@ -107,6 +149,8 @@ def main(argv=None):
     guide.add_argument('--json', action='store_true')
     version = sub.add_parser('version', help='Show authoritative release identity')
     version.add_argument('--json', action='store_true')
+    workflow = sub.add_parser('workflow', help='Show the shared mainline and exception routes; no execution')
+    workflow.add_argument('--json', action='store_true')
     listing = sub.add_parser("list", help="List tools; no execution")
     listing.add_argument("--group")
     listing.add_argument("--json", action="store_true")
@@ -125,8 +169,11 @@ def main(argv=None):
             show_guide(catalog, lang, getattr(args,'topic',None), getattr(args,'json',False))
             return 0
         if args.action == 'version':
-            info = json.loads((ROOT/'release_info.json').read_text('utf-8'))
+            info = release_identity()
             print(json.dumps(info, ensure_ascii=False, indent=2) if args.json else info['release_id'])
+            return 0
+        if args.action == 'workflow':
+            show_workflow(catalog, lang, args.json)
             return 0
         if args.action == "list":
             groups = catalog["groups"]
@@ -147,6 +194,8 @@ def main(argv=None):
             return 0
         item = selected_tool(catalog, args.tool)
         if args.action == "describe":
+            item = {**item, 'release': catalog['release'],
+                    'mainline_stages': [s['id'] for s in workflow_map(catalog)['steps'] if item['id'] in s['tools']]}
             if args.json:
                 print(json.dumps(item, ensure_ascii=False, indent=2))
             else:

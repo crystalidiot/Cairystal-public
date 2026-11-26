@@ -2,22 +2,22 @@
 
 入口只负责选择工具，不重新实现精修、加氢或验证算法。具有本地文件及终端权限的 agent 或人均可调用。同一套参数适用于不同样品，不硬编码某颗晶体的原子坐标、指认或答案。
 
-在 skill 目录中执行；其他工作目录使用 toolbox.py 的绝对路径。路径含空格或中文时加引号。大写路径是占位符，须替换成本机路径。
+在 skill 目录中执行；其他工作目录使用 cairystal.py 的绝对路径。路径含空格或中文时加引号。大写路径是占位符，须替换成本机路径。
 
-    python -B scripts/toolbox.py list
-    python -B scripts/toolbox.py list --group validation
-    python -B scripts/toolbox.py describe complete
-    python -B scripts/toolbox.py run complete -- --help
-    python -B scripts/toolbox.py plan complete -- --input CANDIDATE --profile PROFILE.json --review REVIEW.json --output NEW_OUTPUT --data-dir ORIGINAL_DATA
+    python -B cairystal.py list
+    python -B cairystal.py list --group validation
+    python -B cairystal.py describe complete
+    python -B cairystal.py run complete -- --help
+    python -B cairystal.py plan complete -- --input CANDIDATE --profile PROFILE.json --review REVIEW.json --output NEW_OUTPUT --data-dir ORIGINAL_DATA
 
 list --json / describe TOOL --json 提供机器可读目录：输入、输出、依赖、文件或联网影响、适用边界及参考资料。目录真源为 assets/toolbox.json。**plan 只显示将执行的 argv，不校验科学输入、不授权、不运行**。run 后须用 -- 分开原工具参数；原样转发，不使用 shell、不增加上传同意、不隐式换 profile、不把工具失败解释为成功。退出码来自实际工具；工具箱自身参数错误为 2。
 
 ## 完整任务的最短路线
 
-    python -B scripts/toolbox.py run doctor -- --profile PROFILE.json
-    python -B scripts/toolbox.py run intake-form -- --language zh-CN --output NEW_FORM
-    python -B scripts/toolbox.py run intake-accept -- --input ANSWERS.json --profile PROFILE.json --output NEW_INTAKE
-    python -B scripts/toolbox.py run autorun -- run --config NEW_INTAKE/autorun_config.json --output NEW_RUN
+    python -B cairystal.py run doctor -- --profile PROFILE.json
+    python -B cairystal.py run intake-form -- --language zh-CN --output NEW_FORM
+    python -B cairystal.py run intake-accept -- --input ANSWERS.json --profile PROFILE.json --output NEW_INTAKE
+    python -B cairystal.py run autorun -- run --config NEW_INTAKE/autorun_config.json --output NEW_RUN
 
 正常步骤由已有调度器继续。needs_review、blocked 或非零退出时读取 handoff.json / decision_packet.json 和对应日志，按具体原因选择工具，不重启整条任务来躲避检查。自动初始化当前有 HKL/P4P 范围限制；其他格式用 inspect、setup、stage 及 [原有流程](workflow.md)。原工具参数和配置 schema 没有改变。
 
@@ -39,9 +39,9 @@ list --json / describe TOOL --json 提供机器可读目录：输入、输出、
 
 例：只核查占有率、读取参数或比较警告，不重跑整个解析：
 
-    python -B scripts/toolbox.py run occupancy -- "CURRENT/model.res"
-    python -B scripts/toolbox.py run metadata -- "ALLOWED_SAMPLE/model.pcf"
-    python -B scripts/toolbox.py run compare-ab -- --before BEFORE.ckf --after AFTER.ckf --output NEW_COMPARE
+    python -B cairystal.py run occupancy -- "CURRENT/model.res"
+    python -B cairystal.py run metadata -- "ALLOWED_SAMPLE/model.pcf"
+    python -B cairystal.py run compare-ab -- --before BEFORE.ckf --after AFTER.ckf --output NEW_COMPARE
 
 每个工具的 describe 与原生 --help 定义实际输入输出。metadata 读取一个明确授权文件；盲测对 project-metadata 显式指定允许的 --source。工具箱不是文件访问沙箱，不能用自动发现功能越过输入范围。
 

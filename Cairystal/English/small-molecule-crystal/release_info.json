@@ -1,21 +1,26 @@
 {
   "schema": 1,
-  "release_id": "chemistry_handoff_20261125_01",
-  "previous_release": "fast_model_20261125_01",
+  "release_id": "unified_entry_20261126_01",
+  "previous_release": "chemistry_handoff_20261125_01",
   "tools": 66,
-  "status": "tested_opt_in_fast_preview",
-  "default_skill_route": "fast",
+  "status": "tested_preview",
+  "default_skill_route": "autorun",
   "standard_mode_preserved": true,
   "scientific_acceptance": "not_automatic",
   "changes": [
-    "Batched current-run element contrasts with equal-cycle reference",
-    "Automatic short-label remapping before graph-based HFIX, native H/UNIT checks",
-    "Shared report QA/export continuation for manual/automatic chemistry",
-    "Explicit inferred versus independently supplied graph provenance"
+    "One portable CLI and shared deployment adapter; legacy commands retained",
+    "CLI and console use the same mainline/tool route map",
+    "Consolidated bilingual SOP and removed stale version claims"
   ],
+  "available_modes": [
+    "standard",
+    "fast"
+  ],
+  "version_source": "release_info.json",
+  "workflow_source": "assets/console/workflow-data.json",
   "verification": {
-    "regression_tests": 98,
-    "wall_seconds": 219.191909,
+    "regression_tests_per_language": 1263,
+    "wall_seconds": 204.072803,
     "official_AB": [
       0,
       0
@@ -23,6 +28,6 @@
     "delivery_four_files_verified": true,
     "single_case_not_general_accuracy_validation": true
   },
-  "distribution_version": "0.3.3-preview",
-  "distribution_note": "Public preview; specimen identifiers omitted from release metadata; Python source unchanged."
+  "distribution_version": "0.3.4-preview",
+  "distribution_note": "Public preview; specimen identifiers excluded. Runtime Python code matches the tested source."
 }
