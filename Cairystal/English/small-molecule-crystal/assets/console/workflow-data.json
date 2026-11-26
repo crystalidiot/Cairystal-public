@@ -58,7 +58,7 @@
     {
       "id": "chemistry",
       "name": "核对元素 · 添加氢",
-      "action": "结合当前密度、键连和已知二维式核对元素与质子化，再按合适的几何模型加氢。",
+      "action": "化学与本次衍射证据优先。普通有机图适用时自动匹配/加氢；模板不适用或方案改变时，原生 INS 对照并以 autorun continue-native 接回本任务，不重做求解。",
       "output": "元素与氢有依据，能够进入整体精修。",
       "availability": "有已审核化学图时可自动；未知组成仍需判断",
       "tools": [
@@ -66,7 +66,8 @@
         "hydrogen-plan",
         "occupancy",
         "chemistry-screen",
-        "hydrogen-continue"
+        "hydrogen-continue",
+        "model-strategy"
       ],
       "source": [
         "scripts/graph_assignment.py",

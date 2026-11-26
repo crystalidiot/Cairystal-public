@@ -29,6 +29,10 @@ def decision_queue(review):
     if outside:
         add('element_outside_input','initial-review',[f['atom'] for f in outside],{'findings':outside},False,
             'Resolve the supplied element list versus current scattering types; do not infer stoichiometry.')
+    strategy=review.get('model_strategy',{})
+    if strategy.get('route')=='native_candidate_comparison':
+        add('chemistry_outside_organic_template','model-strategy',strategy.get('possible_cage_sites',[]),strategy,False,
+            'Continue with current-data native INS/SHELXL comparisons; a complete ordinary organic graph is optional. See adaptive-science.md and the stage/complete tools.')
     for site in review.get('sites',[]):
         flags=set(site.get('flags',[]));label=site['label']
         evidence={k:site.get(k) for k in ['scattering_element','relative_Ueq','occupancy','part','flags']}
@@ -90,6 +94,10 @@ def element_options(review, parsed, max_sites=2, max_trials=4):
             holds.append('connectivity_or_ADP_must_be_resolved_first')
         if any(r[0].upper() in {'EXYZ','EADP'} and label.upper() in [s.upper() for s in r[1:]] for r in parsed['rows']):
             holds.append('constrained_target')
+        # Ordinary one-site C/N/O screening must not silently reinterpret cage
+        # vertices. The native branch can compare evidence-based B/C hypotheses.
+        if site.get('chemical_context')=='possible_multicenter_cage':
+            holds.append('cage_B_C_requires_fragment_context_use_native_branch')
         candidates=[e for e in review['allowed_elements'] if e in {'C','N','O'} and e!=site['scattering_element'] and e.upper() in [s.upper() for s in parsed['sfac']]]
         if not candidates:holds.append('no_alternative_in_allowed_SFAC')
         if sites>=max_sites:holds.append('site_budget')

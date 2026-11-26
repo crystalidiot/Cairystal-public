@@ -67,6 +67,20 @@ def check_expected(root,state,expected):
         raise WrongSpecimen('Selected checkpoint does not confirm the expected specimen HKL. Check the run path.')
 
 
+def selected_raw_hkl(directory,stem=None):
+    """Bind specimen identity without requiring a particular vendor's cell file.
+
+    Only immediate filenames and the selected HKL are read. This does not
+    infer cell/space group or certify readiness of a raw-data solve helper.
+    """
+    folder=unlinked(directory)
+    if stem and (Path(stem).name!=stem or '/' in stem or '\\' in stem):
+        raise ValueError('Stem must be a basename')
+    candidates=[p for p in folder.iterdir() if p.is_file() and p.suffix.lower()=='.hkl'
+                and (not stem or p.stem.lower()==stem.lower())]
+    return regular(unlinked(candidates[0])) if len(candidates)==1 else None
+
+
 def capture(root,state,source,role):
     source=regular(unlinked(source))
     if role=='graph':
@@ -157,8 +171,11 @@ def create(config,output,execution_mode=None):
         from pipeline_intake import discover
         try:
             paths,_=discover(cfg['data_dir'],cfg.get('stem'))
-        except (OSError,ValueError):
+        except (OSError,ValueError) as exc:
             paths={}
+            hkl=selected_raw_hkl(cfg['data_dir'],cfg.get('stem'))
+            if hkl:paths['hkl']=hkl
+            state['raw_helper_note']={'message':str(exc),'meaning':'This vendor-specific raw helper is unavailable; a reviewed same-HKL native candidate can still continue. No cell or experimental fields were invented.'}
         if 'hkl' in paths:
             state['source_hkl']={'path':str(paths['hkl']),'sha256':sha(paths['hkl'])}
     for role in ['profile','specimen','graph','intake_state','ab_policy','solver_fallback']:
@@ -167,15 +184,15 @@ def create(config,output,execution_mode=None):
     state['options']=cfg;save(root,state);return root,state
 
 
-def verify(root,state):
-    if state['skill_sha256']!=stamp():raise ValueError('Skill code changed; start a new fixed-version run')
+def verify(root,state,check_pipeline=True,check_version=True):
+    if check_version and state['skill_sha256']!=stamp():raise ValueError('Skill code changed; start a new fixed-version run')
     for role,item in state['bindings'].items():
         for kind in ['source','copy']:
             if sha(regular(unlinked(item[kind])))!=item['sha256']:raise ValueError('Frozen input changed: '+role+' / '+kind)
     if 'graph' in state['bindings']:
         from local_assist import verify_reviewed_graph
         verify_reviewed_graph(state['bindings']['graph']['source'])
-    if state.get('pipeline_seal') and seal(root/'pipeline')!=state['pipeline_seal']:
+    if check_pipeline and state.get('pipeline_seal') and seal(root/'pipeline')!=state['pipeline_seal']:
         raise ValueError('Checkpoint files changed; do not silently adopt outside model edits')
     p=root/'pipeline/pipeline.json'
     target=state.get('intake_hkl') or state.get('source_hkl')
@@ -207,7 +224,7 @@ def first_model_handoff(root,candidates):
             findings=data.get('findings',[])
             entry.update(status=data['status'],review=str(path),finding_count=len(findings),
                          first_findings=findings[:3],review_sha256=review['sha256'],
-                         decision_queue=data.get('decision_queue',[]))
+                         decision_queue=data.get('decision_queue',[]),model_strategy=data.get('model_strategy'))
         entries.append(entry)
     return entries
 
@@ -220,10 +237,11 @@ def stop(root,state,category,reason,ps=None):
             'rule_review':ps.get('rule_review'),'automatic_report_qa':ps.get('automatic_report_qa'),
             'AB_alerts':ps.get('AB_alerts'),'automatic_AB':ps.get('automatic_AB'),'pipeline_failure':ps.get('failure') or ps.get('last_command_error'),
             'last_action':state['actions'][-1] if state['actions'] else None,
+            'native_branch':state.get('native_branch'),'native_completion':state.get('native_completion'),
             'evidence':{'coordinator':str(root/'autorun.json'),'pipeline':str(root/'pipeline/pipeline.json'),
                         'decision_packet':str(root/'pipeline/decision_packet.json') if (root/'pipeline/decision_packet.json').is_file() else None},
-            'boundary':'Inspect current-run evidence. Do not relax checks, read reference answers, repeat uncertain uploads, or invent a model to continue.'}
-    if category in {'chemical_graph_required','scientific_decision'} and ps.get('candidates') and not ps.get('finish'):
+            'boundary':'Preserve current data, provenance and reported uncertainty. A script applicability limit is not a structural failure: use native candidate comparisons when templates do not apply. Never invent measurements or imply unsupported chemical certainty.'}
+    if category in {'chemical_graph_required','scientific_decision','initial_model_review_unavailable'} and ps.get('candidates') and not ps.get('finish'):
         try:
             packet['first_models']=first_model_handoff(root,ps['candidates'])
         except (ValueError,KeyError,OSError) as exc:
@@ -252,6 +270,14 @@ def stop(root,state,category,reason,ps=None):
         packet['solvent_branch_guidance']={'script':'squeeze_request.py','when':'Only after current-run review establishes a reliable host and separate challenging solvent; not inferred from AB counts alone.','actions':['prepare a model-specific request, reusing current-specimen intake','record a real customer choice once','execute the preserved comparison after consent'],'reference':'references/squeeze-workflow.md','automatic_scientific_approval':False}
     from customer_status import next_step
     state['next_step'] = packet['next_step'] = next_step(category, upload_choice)
+    from model_strategy import handoff_routes
+    native_routes=handoff_routes(root,category,packet.get('first_models'))
+    if native_routes:
+        for candidate in native_routes['candidates']:
+            args=candidate['finish']['arguments']
+            args[args.index('--profile')+1]=str(state.get('options',{}).get('profile','CURRENT_PROFILE.json'))
+            candidate['finish'].pop('profile_lookup',None)
+        packet['native_continuation']=native_routes
     from workflow_observability import record_wait
     packet['wait_episode']=record_wait(state,packet)
     from support_report import try_record
@@ -319,8 +345,15 @@ def execute(root,state,action,runner,source=None):
 
 def drive(root,state,runner=default_runner):
     if state.get('pending'):return stop(root,state,'interrupted_action','A previously started action has no recorded completion; do not replay it.')
+    from coordinator_completion import reconcile
+    try:
+        if reconcile(root,state):return state
+    except Exception as exc:return stop(root,state,'delivery_integrity_error',str(exc))
     try:verify(root,state)
     except Exception as exc:return stop(root,state,'integrity_error',str(exc))
+    if state.get('native_branch'):
+        from native_continuation import refresh_native
+        return refresh_native(root,state,runner,allow_delivery=True)
     if state['status'] in {'complete','local_ready'}:return state
     if any(a['status']!='checkpointed' for a in state['actions']):
         return stop(root,state,'execution_error','An earlier attempted action requires inspection; automatic repetition is disabled.')
@@ -342,7 +375,7 @@ def drive(root,state,runner=default_runner):
         selected=next(c for c in candidates if c['stage']==source)
         if selected.get('initial_review',{}).get('status')=='review_unavailable':
             return stop(root,state,'initial_model_review_unavailable','Post-solution screening failed; inspect the recorded diagnostic rather than treating it as checked.',ps)
-        if not cfg.get('graph'):return stop(root,state,'chemical_graph_required','No explicit complete chemical graph was supplied; use the initial-model review to inspect C/N/O, connectivity and density before choosing an assignment.',ps)
+        if not cfg.get('graph'):return stop(root,state,'chemical_graph_required','No complete graph supplied. Continue current-model chemistry review; choose graph-based tools when applicable or the native stage/complete route for clusters, coordination, disorder or unknown chemistry. Do not ask the user to invent a graph.',ps)
         if not isinstance(cfg.get('donor_basis'),str) or not cfg['donor_basis'].strip():
             from hydrogen_plan import hydrogen_scope
             try:
@@ -371,8 +404,8 @@ def drive(root,state,runner=default_runner):
         ps=read(root/'pipeline/pipeline.json')
     if ps.get('fast_preview'):state['fast_preview']=ps['fast_preview'];save(root,state)
     if cfg['deliver'] and ps.get('status')=='complete':
-        for key in ['reason','category','stopped_at']:state.pop(key,None)
-        state.update(status='complete',finished_at=utc_now(),delivery=ps.get('delivery'),customer_delivery=ps.get('customer_delivery'),customer_notice=ps.get('customer_notice'),zip=ps.get('zip'),official_counts=ps.get('official_counts'))
+        try:reconcile(root,state)
+        except Exception as exc:return stop(root,state,'delivery_integrity_error',str(exc))
     elif not cfg['deliver'] and ps.get('status')=='ready_for_official_delivery':
         for key in ['category','stopped_at']:state.pop(key,None)
         state.update(status='local_ready',finished_at=utc_now(),reason='Local preparation finished; official checkCIF and Word delivery were not requested.')
@@ -429,6 +462,9 @@ def review_reports(root,state,args,runner=default_runner):
 
 def local_report_at_checkpoint(root,state):
     """Summarize the local validation paired to the CIF/FCF in the recorded checkpoint."""
+    if state.get('native_branch'):
+        from native_continuation import local_report
+        return local_report(root,state)
     frozen=state.get('pipeline_seal') or {}
     if not any(k.endswith('/local_validation/local_validation.json') for k in frozen):
         return None
@@ -486,6 +522,7 @@ def summary(root,state):
             'local_validation':local_report_at_checkpoint(root,state),
             'action_seconds':{a['action']:a.get('seconds') for a in state['actions']},
             'handoff_timing':summarize_waits(state),
+            'native_branch':state.get('native_branch'),'native_completion':state.get('native_completion'),
             'token_usage':{'exact_total':None,'exact_saving':None}}
 
 
@@ -521,9 +558,14 @@ def main():
     a=sub.add_parser('run');a.add_argument('--config',required=True);a.add_argument('--output',required=True);a.add_argument('--execution-mode',choices=['standard','fast'])
     a=sub.add_parser('resume');a.add_argument('--run',required=True);a.add_argument('--graph');a.add_argument('--donor-basis');a.add_argument('--source');a.add_argument('--basis');a.add_argument('--authorize-iucr-upload',action='store_true')
     a=sub.add_parser('status');a.add_argument('--run',required=True)
+    a=sub.add_parser('sync-delivery',help='Verify an already completed child delivery and repair coordinator state, including older jobs; no computation or upload')
+    a.add_argument('--run',required=True)
+    a=sub.add_parser('continue-native',help='Continue a reviewed current candidate without replaying graph matching or solution')
+    for name in ('run','candidate','review','name'):a.add_argument('--'+name,required=True)
+    a.add_argument('--stem',default='model');a.add_argument('--authorize-iucr-upload',action='store_true')
     a=sub.add_parser('review',help='Finalize after actual report review');a.add_argument('--run',required=True);a.add_argument('--review-note',required=True)
     for lang in ('zh','en','official'):a.add_argument('--reviewed-'+lang,action='store_true',required=True)
-    for mode in ('resume','status','review'):
+    for mode in ('resume','status','review','continue-native','sync-delivery'):
         sub.choices[mode].add_argument('--expected-hkl',help='Original HKL of the requested specimen; reject a different checkpoint')
     args=p.parse_args()
     try:
@@ -535,12 +577,30 @@ def main():
             with lock(root):
                 state=read(root/'autorun.json')
                 if getattr(args,'expected_hkl',None):check_expected(root,state,args.expected_hkl)
-                if args.cmd=='resume' and any([args.graph,args.donor_basis is not None,args.source,args.authorize_iucr_upload]):
+                from coordinator_completion import reconcile
+                synchronized=reconcile(root,state,explicit=args.cmd=='sync-delivery')
+                if args.cmd=='sync-delivery' and not synchronized:raise ValueError('No completed child delivery is available; no computation was started')
+                if not synchronized and args.cmd=='resume' and any([args.graph,args.donor_basis is not None,args.source,args.authorize_iucr_upload]):
                     amend(root,state,args.graph,args.donor_basis,args.source,args.basis,args.authorize_iucr_upload)
-                if args.cmd=='review':review_reports(root,state,args)
+                if synchronized:pass
+                elif args.cmd=='continue-native':
+                    if args.authorize_iucr_upload:amend(root,state,authorize=True)
+                    from native_continuation import continue_native
+                    continue_native(root,state,args.candidate,args.review,args.name,args.stem)
+                elif args.cmd=='review':
+                    if state.get('native_branch'):raise ValueError('Review/finalize the recorded native delivery_run, then resume this coordinator; do not review the earlier graph branch')
+                    review_reports(root,state,args)
                 else:drive(root,state)
                 result=publish(root,state)
-        else:result=summary(root,state)
+        else:
+            from coordinator_completion import reconcile
+            if (root/'autorun.lock').exists() or (root/'pipeline/pipeline.lock').exists():result=summary(root,state)
+            else:
+                with lock(root):
+                    state=read(root/'autorun.json')
+                    if args.expected_hkl:check_expected(root,state,args.expected_hkl)
+                    if reconcile(root,state):result=publish(root,state)
+                    else:result=summary(root,state)
         print(json.dumps(result,ensure_ascii=False),flush=True)
         return 0 if state['status'] in {'complete','local_ready'} else 2
     except WrongSpecimen as exc:

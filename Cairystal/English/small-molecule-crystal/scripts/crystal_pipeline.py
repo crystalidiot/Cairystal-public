@@ -26,6 +26,9 @@ def run_lock(root):
     try:yield
     finally:
         if path.exists() and sha(path)==digest:path.unlink()
+        if (root/'pipeline.json').is_file() and read(root/'pipeline.json').get('status')=='complete':
+            from coordinator_completion import notify_parent
+            notify_parent(root)
 
 def checked(root,state):
     if state['skill_sha256']!=stamp():raise ValueError('Skill scripts changed during this run; preserve it and create a new fixed-version run')

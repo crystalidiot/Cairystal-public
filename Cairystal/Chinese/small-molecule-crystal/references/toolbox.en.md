@@ -62,3 +62,5 @@ Special-site solvent disorder: `fragment-orbits` audits complete molecules, shar
 - [symmetry configurations](symmetry-configurations.en.md)
 - [Unified entry, release identity and new automatic branches](unified-mainline.md)
 - [speed diagnostics](speed-diagnostics.md)
+
+[model-strategy: graph/native applicability and continuation](adaptive-science.md)

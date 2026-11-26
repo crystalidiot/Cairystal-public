@@ -25,6 +25,10 @@ class AutorunTests(unittest.TestCase):
         self.cfg={'data_dir':str(self.data),'profile':str(self.profile),'elements':['C','H','N','O','Cl'],
                   'graph':str(self.graph),'donor_basis':'explicit synthetic test prior','authorize_iucr_upload':True}
         self.candidates=[{'stage':'solution_a'}];self.match_status='ready_for_model_review';self.finish_status='complete'
+        # This suite checks dispatch only. Exact delivery validation has its own
+        # negative-path tests and a real-package replay; never invoke it on mocks.
+        self.delivery_check=patch('coordinator_completion.verified_pipeline_delivery',side_effect=lambda root,state,ps:ar.read(Path(ps['finish_root'])/'delivery_run/result.json'))
+        self.delivery_check.start();self.addCleanup(self.delivery_check.stop)
     def create(self,**options):
         cfg=dict(self.cfg,**options)
         write_json(self.config,cfg);self.root,self.state=ar.create(self.config,self.base/'run')
@@ -37,6 +41,11 @@ class AutorunTests(unittest.TestCase):
         elif action=='match':ps.update(status='needs_scientific_review',graph_matching={'status':self.match_status,'hydrogen_stage':'auto_graph_H'})
         elif action in {'autofinish','deliver'}:ps.update(status=('ready_for_official_delivery' if action=='autofinish' and '--deliver' not in cmd and self.finish_status=='complete' else self.finish_status),official_counts={'A':0,'B':0},delivery='synthetic_delivery',zip={'path':'synthetic.zip'})
         else:raise AssertionError(action)
+        if ps.get('status')=='complete':
+            finish=folder/'synthetic_finish';dr=finish/'delivery_run';dr.mkdir(parents=True,exist_ok=True)
+            receipt={'directory':'synthetic_delivery','files':{}}
+            write_json(dr/'result.json',{'customer_delivery':receipt,'customer_notice':'Synthetic test delivery only','official_counts':{'A':0,'B':0},'zip':{'path':'synthetic.zip'}})
+            write_json(dr/'customer_delivery.json',receipt);ps['finish_root']=str(finish)
         write_json(p,ps);return 0
     def drive(self,runner=None):
         with contextlib.redirect_stdout(io.StringIO()):return ar.drive(self.root,self.state,runner or self.runner)

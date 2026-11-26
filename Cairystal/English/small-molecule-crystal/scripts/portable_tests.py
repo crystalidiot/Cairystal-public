@@ -9,6 +9,8 @@ import time
 import unittest
 
 MODULES = [
+    'test_coordinator_completion',
+    'test_native_continuation',
     'test_chemistry_handoff',
     'test_fast_mode',
     'test_twin_quick',

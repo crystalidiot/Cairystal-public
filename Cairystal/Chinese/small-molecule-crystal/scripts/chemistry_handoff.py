@@ -46,6 +46,12 @@ def propose_changes(atoms, near, view, allowed, mode):
     measured = {a['label'].upper(): a for a in view['atoms']}
     proposals = []
     anchored = set()
+    from model_strategy import classify
+    context = classify({'all_atoms':[dict(a,label=a['label'].upper()) for a in atoms], 'regions':[
+        dict(a,label=a['label'].upper(),neighbors=[{'label':n,'element':by[n]['element'],'part_compatible':True,
+                          'within_covalent_radius_screen':True} for n in near[a['label'].upper()]])
+        for a in atoms]}, [e.capitalize() for e in allowed])
+    cage_sites = {x.upper() for x in context['possible_cage_sites']}
     # Tetrahedral terminal short-bond oxoanion hypotheses, never auto adopted.
     # This deliberately does not treat all tetrahedral P-C groups as oxygen.
     for center, a in by.items():
@@ -66,7 +72,7 @@ def propose_changes(atoms, near, view, allowed, mode):
     if mode in {'light', 'all'}:
         for a in atoms:
             label=a['label'].upper(); e=a['element'].upper()
-            if e not in {'C','N','O'} or label in anchored:
+            if e not in {'C','N','O'} or label in anchored or label in cage_sites:
                 continue
             for alternative in sorted(allowed & {'C','N','O'} - {e}):
                 proposals.append(dict(id=label+'_'+alternative, element_changes={label:alternative},
@@ -208,7 +214,10 @@ def main():
             return 0 if result['status'] in {'ready_for_model_review','needs_chemical_selection','no_candidates'} else 2
         except Exception as exc:
             state.update(status='needs_attention',last_command_error={'action':a.cmd,'error':str(exc),'at':utc_now()});cp.save(root,state)
-            print(json.dumps({'status':'needs_attention','error':str(exc)},ensure_ascii=False));return 1
+            print(json.dumps({'status':'needs_attention','error':str(exc),
+                'next_action_owner':'assistant',
+                'continuation':'If this helper is outside its supported chemistry, retain the model and use model-strategy, native stage, then complete with a current-model review. Do not fabricate a graph or discard B/metal sites to fit this helper.',
+                'reference':'references/adaptive-science.md'},ensure_ascii=False));return 1
 
 
 if __name__=='__main__':raise SystemExit(main())

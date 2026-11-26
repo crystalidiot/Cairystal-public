@@ -1,11 +1,9 @@
 # 验证范围 / Validation scope
 
-本次是入口、版本与文档结构整理。中英文科学脚本均与本次封存源逐字节一致；求解、精修、官网及报表生成算法保留。
+本次修改是交付状态同步，不改写晶体学计算、官方验证或报表生成算法。中英文各执行完整离线回归，精确数量与结果见仓库 docs/validation.json；测试数不等于晶体数。
 
-每种语言 1,263 项离线测试通过，包含新增 8 项入口/模式/版本/路径及错误传播测试。原始测试中 5 项本机 HTTP 测试受沙箱 WinError 10013 限制，获得回环权限后逐项补测通过，保留初始失败记录。这是软件测试数，不是晶体数。
+实际测试使用一份本次比较实验中刚交付的真实数据包：原顶层 needs_attention / chemical_graph_required，子流程及四类交付已完成。执行 sync-delivery → resume → status → resume，均返回 complete；774 个子流程文件与17个交付文件逐字节不变，包括最终 CIF、3页 IUCr 官网 PDF、各6页中英文 Word。状态修复期间禁止启动外部程序和网络；没有重新解结构、精修、上传或渲染。
 
-另从原始数据重新执行一个以前使用过的简单晶体：SHELXT、元素候选对照、新建化学图及加氢、SHELXL 权重精修、本地 PLATON、同一份新 CIF 的 IUCr 官网 PDF、两种 Word 和自动交付。R1=0.0481，wR2=0.1300，GoF=1.087，官网0A/0B/3C/10G。无旧坐标或旧加氢方案输入；已有对话背景，不称完全独立盲测。保留原 HKL 与各候选。两份 Word 各6页、官网PDF3页随后查看渲染预览。
+新增负面测试覆盖缺失 PDF、Word 被改动、错误样本 HKL、交付未复核、运行锁、错误导出回执等；重复导出到 Cairystal/运行_时间 的目录同样支持。科学质量判断并未因任务完成而被自动改为已确认。
 
-开始到自动交付 204.07 秒；开发、回归及随后人工查看页面不计入。不能把这一例推断为复杂结构准确率或受控提速比例，无真实 Token 计数。
-
-The public package is checked by source hashes, archive round-trip, extracted CLI tests, dependency/license and content scans. Original experimental data, models, official reports and Word documents are retained locally, not published. WorkBuddy/Feishu cross-host end-to-end execution remains unverified. Chemistry and present diffraction evidence precede alert counts.
+Earlier native-continuation changes retain the tested same-specimen route from a reviewed native candidate without replaying solution or graph matching. The previously completed real package is evidence of delivery/state consistency, not a new independent blind solve, structural-accuracy benchmark, token measurement or cross-agent/host certification. Experimental data, structures and reports are retained locally, not published. Old versions remain available.

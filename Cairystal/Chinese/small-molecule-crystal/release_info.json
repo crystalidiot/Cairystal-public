@@ -1,16 +1,16 @@
 {
   "schema": 1,
-  "release_id": "unified_entry_20261126_01",
-  "previous_release": "chemistry_handoff_20261125_01",
-  "tools": 66,
-  "status": "tested_preview",
+  "release_id": "delivery_state_sync_20261126_01",
+  "previous_release": "native_continuation_20261126_01",
+  "tools": 67,
+  "status": "delivery_sync_verified_preview",
   "default_skill_route": "autorun",
   "standard_mode_preserved": true,
   "scientific_acceptance": "not_automatic",
   "changes": [
-    "One portable CLI and shared deployment adapter; legacy commands retained",
-    "CLI and console use the same mainline/tool route map",
-    "Consolidated bilingual SOP and removed stale version claims"
+    "Synchronize completed helper delivery into coordinator state and page",
+    "Verify same-specimen official PDF, bilingual Word and exported hashes before adoption",
+    "Idempotent resume and state-only repair for previously completed fixed-version jobs"
   ],
   "available_modes": [
     "standard",
@@ -19,15 +19,14 @@
   "version_source": "release_info.json",
   "workflow_source": "assets/console/workflow-data.json",
   "verification": {
-    "regression_tests_per_language": 1263,
-    "wall_seconds": 204.072803,
-    "official_AB": [
-      0,
-      0
-    ],
-    "delivery_four_files_verified": true,
-    "single_case_not_general_accuracy_validation": true
+    "offline_tests": 1319,
+    "new_tests": 21,
+    "state_recovery_real_delivery": true,
+    "new_solve_this_change": false,
+    "new_official_submission_this_change": false,
+    "previous_stable_preserved": true,
+    "scope": "State recovery of a previously completed real delivery; scientific files unchanged. See release validation."
   },
-  "distribution_version": "0.3.4-preview",
-  "distribution_note": "Public preview; specimen identifiers excluded. Runtime Python code matches the tested source."
+  "distribution_version": "0.3.5-preview",
+  "distribution_note": "Public academic preview. No specimen data included."
 }

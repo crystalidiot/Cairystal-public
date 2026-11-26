@@ -15,6 +15,7 @@ import gemmi
 from structure_diagnostics import analyse, structure
 
 LIGHT = {'C', 'N', 'O'}
+SCREENED = LIGHT | {'B'}
 
 def canonical_elements(values):
     result = []
@@ -32,6 +33,9 @@ def build_review(packet, allowed_elements):
     """Pure evidence triage; screening thresholds are explicitly not IUCr limits."""
     allowed = canonical_elements(allowed_elements)
     atoms = packet['all_atoms']
+    from model_strategy import classify, close_contacts
+    strategy = classify(packet, allowed)
+    cage_sites = set(strategy['possible_cage_sites'])
     sites = []
     findings = []
     for atom in atoms:
@@ -43,14 +47,14 @@ def build_review(packet, allowed_elements):
         if atom.get('non_positive_definite'):
             findings.append({'code': 'non_positive_ADP', 'atom': atom['label'], 'route': 'adp_shape'})
     for atom in packet['regions']:
-        if atom['element'] not in LIGHT:
+        if atom['element'] not in SCREENED:
             continue
         candidates = [n for n in atom['neighbors'] if n['part_compatible'] is True
                       and n['within_covalent_radius_screen'] and n['element'] not in {'H', 'D'}
                       and not gemmi.Element(n['element']).is_metal]
         # Separate alternatives/partial sites; never treat nearby PARTs as bonds.
         neighbors = list({(n['label'], n['symmetry'], tuple(n['translation'])): n for n in candidates}.values())
-        comparable = [n for n in neighbors if n['element'] in LIGHT and n.get('Ueq') is not None
+        comparable = [n for n in neighbors if n['element'] in (SCREENED if atom['label'] in cage_sites else LIGHT) and n.get('Ueq') is not None
                       and n['Ueq'] > 0 and n.get('occupancy') is not None
                       and atom.get('occupancy') is not None
                       and abs(n['occupancy'] - atom['occupancy']) <= .05]
@@ -70,9 +74,10 @@ def build_review(packet, allowed_elements):
             flags.append('elongated_ADP')
         if atom.get('non_positive_definite'):
             flags.append('non_positive_ADP')
-        if not neighbors:
+        coordination = [n for n in close_contacts(atom) if gemmi.Element(n['element']).is_metal]
+        if not neighbors and not coordination:
             flags.append('isolated_site_check_symmetry_coordination_or_solvent')
-        if len(neighbors) > {'C': 4, 'N': 4, 'O': 2}[atom['element']]:
+        if atom['label'] not in cage_sites and atom['element'] in LIGHT and len(neighbors) > {'C': 4, 'N': 4, 'O': 2}[atom['element']]:
             flags.append('too_many_close_nonmetal_contacts_review_connectivity')
         short = [n for n in neighbors if n['element'] in LIGHT and n['distance'] <
                  .72 * (gemmi.Element(atom['element']).covalent_r + gemmi.Element(n['element']).covalent_r)]
@@ -87,7 +92,9 @@ def build_review(packet, allowed_elements):
                       'comparable_neighbor_count': len(comparable),
                       'geometric_contacts': neighbors, 'flags': flags,
                       'nearby_reported_Q_peaks': atom.get('nearby_reported_Q_peaks', []),
-                      'candidate_elements_to_review': [e for e in allowed if e in LIGHT] if flags else [],
+                      'candidate_elements_to_review': [e for e in allowed if e in ({'B','C'} if atom['label'] in cage_sites else LIGHT)] if flags else [],
+                      'coordination_contacts': coordination,
+                      'chemical_context': 'possible_multicenter_cage' if atom['label'] in cage_sites else ('coordination' if coordination else 'ordinary_or_unclassified'),
                       'assigned_bond_orders': None, 'assigned_charge': None,
                       'element_replacement_decided': False})
     accounting = packet.get('occupancy_audit') or {}
@@ -96,7 +103,7 @@ def build_review(packet, allowed_elements):
             'source_directory': packet['source_directory'], 'space_group': packet['space_group'],
             'metrics': packet.get('gate', {}).get('metrics', {}),
             'difference_density_global_only': packet.get('difference_density'),
-            'local_negative_density': None, 'sites': sites, 'findings': findings,
+            'local_negative_density': None, 'sites': sites, 'findings': findings, 'model_strategy': strategy,
             'occupancy_warnings': accounting.get('warnings', []),
             'AB_alerts': packet.get('AB_alerts', []),
             'screening_thresholds': {'relative_Ueq_low': .5, 'relative_Ueq_high': 2.5,
@@ -123,7 +130,7 @@ def review(directory, stem, allowed_elements):
             raise ValueError('Initial review needs the current candidate CIF and RES; first run a short SHELXL baseline to produce paired files. Missing ' + suffix)
     parsed = structure(directory / (stem + '.cif'), directory / (stem + '.res'))
     _, cell, ops, atoms, _ = parsed
-    focus = [a['label'] for a in atoms if a['element'] in LIGHT]
+    focus = [a['label'] for a in atoms if a['element'] in SCREENED]
     packet = analyse(directory, stem, focus, 'provisional_initial_model', _parsed=parsed)
     result = build_review(packet, allowed_elements)
     # Useful geometry, still no automatic hybridization/element inference.

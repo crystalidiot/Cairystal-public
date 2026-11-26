@@ -1,55 +1,71 @@
 {
   "date": "2026-11-26",
-  "release": "0.3.4-preview",
-  "engine": "unified_entry_20261126_01",
+  "release": "0.3.5-preview",
+  "engine": "delivery_state_sync_20261126_01",
   "distribution_tests": {
     "Chinese": {
-      "tests": 1263,
+      "tests": 1319,
       "failures": 0,
       "errors": 0,
-      "skipped": 0,
-      "seconds": 142.19899999999998,
-      "initial_loopback_restrictions": 5,
-      "loopback_retested": true,
       "success": true,
-      "scope": "Full offline suite executed on identical upstream Python code; distribution byte equality separately verified."
+      "failure_tests": [],
+      "error_tests": [],
+      "seconds": 102.3876736999955
     },
     "English": {
-      "tests": 1263,
+      "tests": 1319,
       "failures": 0,
       "errors": 0,
-      "skipped": 0,
-      "seconds": 129.198,
-      "initial_loopback_restrictions": 5,
-      "loopback_retested": true,
       "success": true,
-      "scope": "Full offline suite executed on identical upstream Python code; distribution byte equality separately verified."
+      "failure_tests": [],
+      "error_tests": [],
+      "seconds": 99.60733860000619
     }
   },
-  "source_files": {
-    "Chinese": 408,
-    "English": 408
-  },
-  "python_source_matches_upstream": true,
-  "licence_1_1_unchanged": true,
-  "third_party_assets_and_licences_unchanged": true,
-  "official_submission_this_validation": true,
-  "native_crystal_calculation_this_validation": true,
-  "fresh_case": {
-    "R1": 0.0481,
-    "wR2": 0.13,
-    "GoF": 1.087,
+  "runtime_python_matches_tested_source": true,
+  "license_and_third_party_assets_unchanged": true,
+  "new_regressions": 21,
+  "real_delivery_state_repair": {
+    "status": "passed",
+    "before": "needs_attention",
+    "before_category": "chemical_graph_required",
+    "after": "complete",
+    "commands": [
+      {
+        "command": "sync-delivery",
+        "seconds": 3.5449,
+        "status": "complete"
+      },
+      {
+        "command": "resume",
+        "seconds": 2.9802,
+        "status": "complete"
+      },
+      {
+        "command": "status",
+        "seconds": 3.1647,
+        "status": "complete"
+      },
+      {
+        "command": "resume",
+        "seconds": 3.0853,
+        "status": "complete"
+      }
+    ],
+    "pipeline_files_unchanged": 774,
+    "export_files_unchanged": 17,
     "official_counts": {
       "A": 0,
       "B": 0,
       "C": 3,
       "G": 10
     },
-    "wall_seconds": 204.072803,
-    "CIF_and_official_PDF_and_bilingual_Word_verified": true,
-    "raw_inputs_unchanged": true,
-    "prior_conversation_exposure": true,
-    "not_independent_structure_accuracy_test": true
+    "new_solution_calls": 0,
+    "new_refinement_calls": 0,
+    "new_upload_calls": 0,
+    "new_report_generation_calls": 0,
+    "subprocess_and_network_disabled_during_recovery": true,
+    "original_execution_version_retained": true
   },
-  "scope": "Offline software tests, one known-simple-case fresh workflow and public-package checks; not general structure accuracy, token measurement or cross-agent certification."
+  "scope": "Software regressions and real completed-package state recovery, not a new solve or accuracy benchmark. No specimen data published."
 }

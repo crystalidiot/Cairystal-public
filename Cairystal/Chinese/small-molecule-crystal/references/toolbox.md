@@ -80,3 +80,5 @@ deliver run 核对配对原生文件，进行官网验证并生成两版 Word，
 - [耗时诊断](speed-diagnostics.md)
 
 - `twin-quick`: [快速孪晶检查与对照精修](quick-twin.md)。
+
+[model-strategy: graph/native applicability and continuation](adaptive-science.md)

@@ -448,12 +448,12 @@
       "script": "crystal_autorun.py",
       "prefix": [],
       "title": {
-        "zh-CN": "正常步骤自动调度",
-        "en": "Dispatch routine workflow"
+        "zh-CN": "自动调度与原生候选续接",
+        "en": "Dispatch workflow and continue native candidates"
       },
       "inputs": {
-        "zh-CN": "run --config JOB.json --output NEW_RUN",
-        "en": "run --config JOB.json --output NEW_RUN"
+        "zh-CN": "run --config JOB.json --output NEW_RUN | continue-native --run RUN --candidate CANDIDATE --review REVIEW.json --name BRANCH",
+        "en": "run --config JOB.json --output NEW_RUN | continue-native --run RUN --candidate CANDIDATE --review REVIEW.json --name BRANCH"
       },
       "outputs": {
         "zh-CN": "运行状态、复核包或交付 / state, review packet or delivery",
@@ -2312,6 +2312,40 @@
         "references/chemistry-handoff.md"
       ],
       "example": "--run PIPELINE --source STAGE --name NEW"
+    },
+    {
+      "id": "model-strategy",
+      "group": "model",
+      "script": "model_strategy.py",
+      "prefix": [],
+      "title": {
+        "zh-CN": "识别工具适用范围并续接原生建模",
+        "en": "Route current chemistry to graph or native modelling"
+      },
+      "inputs": {
+        "zh-CN": "--directory CURRENT --stem model --elements B C N O Ti H --output NEW.json",
+        "en": "--directory CURRENT --stem model --elements B C N O Ti H --output NEW.json"
+      },
+      "outputs": {
+        "zh-CN": "当前 B/C 簇与配位环境提示、原生工具衔接；不确认身份",
+        "en": "Current B/C cluster and coordination hints, native continuation; no identity acceptance"
+      },
+      "effects": {
+        "zh-CN": "只读当前模型并写新诊断；不改坐标、不运行掩膜、不上传",
+        "en": "Read the current model, write a new diagnostic; no coordinate edits, masking or upload"
+      },
+      "requires": {
+        "zh-CN": "Configured Python and Gemmi; paired current CIF/RES",
+        "en": "Configured Python and Gemmi; paired current CIF/RES"
+      },
+      "boundary": {
+        "zh-CN": "几何分流不等于识别化合物。native stage/complete 仍需本次证据和模型复核。",
+        "en": "Geometric routing is not compound recognition. Native stage/complete retains current-data and model-review requirements."
+      },
+      "references": [
+        "references/adaptive-science.md"
+      ],
+      "example": "--directory CURRENT --elements B C N O Ti H --output NEW.json"
     }
   ]
 }
